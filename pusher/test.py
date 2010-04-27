@@ -1,4 +1,4 @@
-import unittest, re, httplib, time
+import unittest, re, httplib, time, cgi
 from nose.tools import *
 import mox
 import pusher
@@ -71,8 +71,20 @@ class ChannelTest(unittest.TestCase):
         channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
         self.mox.VerifyAll()
 
-def query_assertion(query):
-    # '/apps/test-app-id/channels/test-channel/events?auth_version=1.0&auth_key=test-key&auth_timestamp=1272382015&auth_signature=0c9c750a1526e2c2a1f78aa56b758518c8261ffed0d8e3c6f5349e319610715c&body_md5=e7613e047876a84761546daf5fd9c3b6&name=test-event'
+def query_assertion(path_and_query):
+    path, query_string = path_and_query.split('?')
+    ok_(re.search('^/apps/test-app-id/channels/test-channel/events', path))
+    expected_query = {
+        'auth_version': '1.0',
+        'auth_key': 'test-key',
+        'auth_timestamp': '1272382015',
+        'auth_signature': '0c9c750a1526e2c2a1f78aa56b758518c8261ffed0d8e3c6f5349e319610715c',
+        'body_md5': 'e7613e047876a84761546daf5fd9c3b6',
+        'name': 'test-event',
+    }
+
+    for name, value in cgi.parse_qsl(query_string):
+        eq_(value, expected_query[name])
     return True
 
 # http = httplib.HTTPConnection(self.api_host, self.api_port)

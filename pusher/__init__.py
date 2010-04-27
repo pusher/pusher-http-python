@@ -34,7 +34,7 @@ class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
         self.name = name
-        self.path = '/app/%s/channel/%s' % (self.pusher.key, self.name)
+        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
 
     def trigger(self, event, data={}):
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
