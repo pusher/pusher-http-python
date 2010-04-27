@@ -1,19 +1,24 @@
-import httplib
+import httplib, md5, time, hashlib, hmac, base64
 
-host    = 'staging.api.pusherapp.com'
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+host    = 'api.pusherapp.com'
 port    = 80
 app_id  = None
 key     = None
 secret  = None
 
 class Pusher(object):
-    def __init__(self, app_id=None, key=None, secret=None):
+    def __init__(self, app_id=None, key=None, secret=None, host=None, port=None):
         _globals = globals()
         self.app_id = app_id or _globals['app_id']
         self.key = key or _globals['key']
         self.secret = secret or _globals['secret']
         self.host = host or _globals['host']
-        self.port = host or _globals['port']
+        self.port = port or _globals['port']
         self._channels = {}
 
     def __getitem__(self, key):
@@ -29,9 +34,20 @@ class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
         self.name = name
-        self.url = 'http://%s/app/%s/channel/%s' % (self.pusher.host, self.pusher.key, self.name)
+        self.path = '/app/%s/channel/%s' % (self.pusher.key, self.name)
 
-    def trigger(self):
+    def trigger(self, event, data={}):
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
-        http.request('POST', self.url)
+        signed_path = '%s?%s' % (self.path, self.signed_query(event, data))
+        http.request('POST', signed_path, data)
         return http.getresponse().read()
+
+    def signed_query(self, event, data):
+        query_string = self.compose_querystring(event, data)
+        string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
+        binary_signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).digest()
+        signature = base64.b64encode(binary_signature).strip()
+        return "%s&auth_signature=%s" % (query_string, signature)
+
+    def compose_querystring(self, event, data):
+        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), md5.new(json.dumps(data)).hexdigest(), event)
