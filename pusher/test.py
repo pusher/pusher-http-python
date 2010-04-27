@@ -1,5 +1,6 @@
-import unittest, re
+import unittest, re, httplib
 from nose.tools import *
+import mox
 import pusher
 
 class PropertiesTest(unittest.TestCase):
@@ -45,11 +46,29 @@ class PropertiesTest(unittest.TestCase):
         eq_(self._instance().secret, 'test-instance-secret')
 
 
-class ChannelAccessTest(unittest.TestCase):
+class ChannelTest(unittest.TestCase):
+    def setUp(self):
+        self.mox = mox.Mox()
+
+    def tearDown(self):
+        self.mox.UnsetStubs()
+
     def test_access_to_channels(self):
         channel = p()['test-channel']
         eq_(channel.__class__, pusher.Channel)
         eq_(channel.name, 'test-channel')
+
+    def test_trigger(self):
+        channel = p()['test-channel']
+        mock_response = self.mox.CreateMock(httplib.HTTPResponse)
+        mock_response.read()
+        self.mox.StubOutWithMock(httplib.HTTPConnection, 'request')
+        httplib.HTTPConnection.request('POST', 'http://staging.api.pusherapp.com/app/None/channel/test-channel')
+        self.mox.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
+        httplib.HTTPConnection.getresponse().AndReturn(mock_response)
+        self.mox.ReplayAll()
+        channel.trigger()
+        self.mox.VerifyAll()
 
 def p(*args):
     return pusher.Pusher(*args)
