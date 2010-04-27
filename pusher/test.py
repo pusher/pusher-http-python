@@ -13,21 +13,19 @@ class PropertiesTest(unittest.TestCase):
         pusher.key = None
         pusher.secret = None
 
+
     #
     # Using globals
     #
 
-    def _default_instance(self):
-        return pusher.Pusher()
-
     def test_global_app_id(self, *args):
-        eq_(self._default_instance(*args).app_id, 'test-global-app-id')
+        eq_(p().app_id, 'test-global-app-id')
 
     def test_global_key(self):
-        eq_(self._default_instance().key, 'test-global-key')
+        eq_(p().key, 'test-global-key')
 
     def test_global_secret(self):
-        eq_(self._default_instance().secret, 'test-global-secret')
+        eq_(p().secret, 'test-global-secret')
 
 
     #
@@ -46,3 +44,12 @@ class PropertiesTest(unittest.TestCase):
     def test_instance_secret(self):
         eq_(self._instance().secret, 'test-instance-secret')
 
+
+class ChannelAccessTest(unittest.TestCase):
+    def test_access_to_channels(self):
+        channel = p()['test-channel']
+        eq_(channel.__class__, pusher.Channel)
+        eq_(channel.name, 'test-channel')
+
+def p(*args):
+    return pusher.Pusher(*args)
