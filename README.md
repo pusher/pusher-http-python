@@ -4,6 +4,8 @@ Pusher Python module
 Installation
 ------------
 
+This module has been tested with Python 2.5 and 2.6.
+
 You can install this module using your package management method or choice, normally `easy_install` or `pip`. For example:
 
     pip install pusher
