@@ -54,7 +54,7 @@ TODO
 Special thanks
 --------------
 
-Special thanks go to [Steve Winton](http://www.nixonmcinnes.co.uk/people/steve/), who implemented a pusher in Python for the first time, with focus on AppEngine. This module borrows from his contribution at <http://github.com/swinton/gae-pusherapp>
+Special thanks go to [Steve Winton](http://www.nixonmcinnes.co.uk/people/steve/), who implemented a Pusher module in Python for the first time, with focus on AppEngine. This module borrows from his contribution at <http://github.com/swinton/gae-pusherapp>
 
 Copyright
 ---------
