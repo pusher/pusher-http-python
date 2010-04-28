@@ -49,52 +49,20 @@ class ChannelTest(unittest.TestCase):
         eq_(channel.__class__, pusher.Channel)
         eq_(channel.name, 'test-channel')
 
-class MessagingTest(unittest.TestCase):
+class RequestTest(unittest.TestCase):
     def setUp(self):
         self.mox = mox.Mox()
-        self.channel = p()['test-channel']
-        self.mox.StubOutWithMock(httplib.HTTPConnection, '__init__')
-        httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
-        self.mox.StubOutWithMock(httplib.HTTPConnection, 'request')
-        httplib.HTTPConnection.request('POST', mox.Func(query_assertion), '{"param2": "value2", "param1": "value1"}')
-        self.mox.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
-        self.mock_response = self.mox.CreateMock(httplib.HTTPResponse)
-        httplib.HTTPConnection.getresponse().AndReturn(self.mock_response)
-        self.mox.StubOutWithMock(time, 'time')
-        time.time().AndReturn(1272382015)
 
     def tearDown(self):
         self.mox.UnsetStubs()
 
-    def test_trigger_gets_202_response(self):
-        self.mock_response.status = 202
+    def test_it(self):
+        request_args = ('POST', mox.Func(query_assertion), '{"param2": "value2", "param1": "value1"}')
+        stub_connection(self.mox, request_args=request_args)
         self.mox.ReplayAll()
-        ret = self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
-        eq_(ret, True)
+        channel = p()['test-channel']
+        channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
         self.mox.VerifyAll()
-
-    def test_trigger_gets_401_response(self):
-        self.mock_response.status = 401
-        self.mox.ReplayAll()
-        try:
-            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
-        except pusher.AuthenticationError:
-            ok_(True)
-        else:
-            ok_(False, "Expected an AuthenticationError")
-        self.mox.VerifyAll()
-
-    def test_trigger_gets_404_response(self):
-        self.mock_response.status = 404
-        self.mox.ReplayAll()
-        try:
-            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
-        except pusher.NotFoundError:
-            ok_(True)
-        else:
-            ok_(False, "Expected a NotFoundError")
-        self.mox.VerifyAll()
-        
 
 def query_assertion(path_and_query):
     path, query_string = path_and_query.split('?')
@@ -111,6 +79,61 @@ def query_assertion(path_and_query):
     for name, value in cgi.parse_qsl(query_string):
         eq_(value, expected_query[name])
     return True
+
+class ResponsesTest(unittest.TestCase):
+    def setUp(self):
+        self.mox = mox.Mox()
+        self.channel = p()['test-channel']
+
+    def tearDown(self):
+        self.mox.UnsetStubs()
+
+    def test_trigger_gets_202_response(self):
+        stub_connection(self.mox, response_status=202)
+        self.mox.ReplayAll()
+        ret = self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        eq_(ret, True)
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_401_response(self):
+        stub_connection(self.mox, response_status=401)
+        self.mox.ReplayAll()
+        try:
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        except pusher.AuthenticationError:
+            ok_(True)
+        else:
+            ok_(False, "Expected an AuthenticationError")
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_404_response(self):
+        stub_connection(self.mox, response_status=404)
+        self.mox.ReplayAll()
+        try:
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        except pusher.NotFoundError:
+            ok_(True)
+        else:
+            ok_(False, "Expected a NotFoundError")
+        self.mox.VerifyAll()
+
+def stub_connection(moxer, request_args=None, response_status=202):
+    moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
+    httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
+
+    moxer.StubOutWithMock(httplib.HTTPConnection, 'request')
+    method_to_stub = httplib.HTTPConnection.request
+    if request_args:
+        method_to_stub(*request_args)
+    else:
+        method_to_stub(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
+
+    moxer.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
+    mock_response = moxer.CreateMock(httplib.HTTPResponse)
+    httplib.HTTPConnection.getresponse().AndReturn(mock_response)
+    mock_response.status = response_status
+    moxer.StubOutWithMock(time, 'time')
+    time.time().AndReturn(1272382015)
 
 def p(*args):
     return pusher.Pusher(app_id='test-app-id', key='test-key', secret='test-secret')
