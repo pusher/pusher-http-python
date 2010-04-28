@@ -48,7 +48,6 @@ I haven't been able to test this though. Can somebody confirm it works? Thanks! 
 TODO
 ----
 
-* Google AppEngine support
 * Specify `socket_id`
 
 Special thanks
