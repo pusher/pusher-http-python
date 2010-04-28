@@ -62,7 +62,7 @@ class ChannelTest(unittest.TestCase):
         self.mox.StubOutWithMock(httplib.HTTPConnection, '__init__')
         httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
         self.mox.StubOutWithMock(httplib.HTTPConnection, 'request')
-        httplib.HTTPConnection.request('POST', mox.Func(query_assertion), {'param2': 'value2', 'param1': 'value1'})
+        httplib.HTTPConnection.request('POST', mox.Func(query_assertion), '{"param2": "value2", "param1": "value1"}')
         self.mox.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
         httplib.HTTPConnection.getresponse().AndReturn(mock_response)
         self.mox.StubOutWithMock(time, 'time')
@@ -78,19 +78,14 @@ def query_assertion(path_and_query):
         'auth_version': '1.0',
         'auth_key': 'test-key',
         'auth_timestamp': '1272382015',
-        'auth_signature': '0c9c750a1526e2c2a1f78aa56b758518c8261ffed0d8e3c6f5349e319610715c',
-        'body_md5': 'e7613e047876a84761546daf5fd9c3b6',
+        'auth_signature': 'cf0b2a9890c2f0e2300f34d1c68efc8faad86b9d8ae35de1917d3b21176e5793',
+        'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
         'name': 'test-event',
     }
 
     for name, value in cgi.parse_qsl(query_string):
         eq_(value, expected_query[name])
     return True
-
-# http = httplib.HTTPConnection(self.api_host, self.api_port)
-# http.request(verb, url, signed_data, headers)
-# return http.getresponse().read()
-
 
 def p(*args):
     return pusher.Pusher(app_id='test-app-id', key='test-key', secret='test-secret')

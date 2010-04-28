@@ -37,17 +37,17 @@ class Channel(object):
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
 
     def trigger(self, event, data={}):
+        json_data = json.dumps(data)
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
-        signed_path = '%s?%s' % (self.path, self.signed_query(event, data))
-        http.request('POST', signed_path, data)
+        signed_path = '%s?%s' % (self.path, self.signed_query(event, json_data))
+        http.request('POST', signed_path, json_data)
         return http.getresponse().read()
 
-    def signed_query(self, event, data):
-        query_string = self.compose_querystring(event, data)
+    def signed_query(self, event, json_data):
+        query_string = self.compose_querystring(event, json_data)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
-        binary_signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).digest()
-        signature = base64.b64encode(binary_signature).strip()
+        signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
         return "%s&auth_signature=%s" % (query_string, signature)
 
-    def compose_querystring(self, event, data):
-        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), md5.new(json.dumps(data)).hexdigest(), event)
+    def compose_querystring(self, event, json_data):
+        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), md5.new(json_data).hexdigest(), event)
