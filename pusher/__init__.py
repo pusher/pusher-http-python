@@ -38,10 +38,7 @@ class Channel(object):
 
     def trigger(self, event, data={}):
         json_data = json.dumps(data)
-        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
-        signed_path = '%s?%s' % (self.path, self.signed_query(event, json_data))
-        http.request('POST', signed_path, json_data)
-        status = http.getresponse().status
+        status = self.send_request(self.signed_query(event, json_data), json_data)
         if status == 202:
             return True
         elif status == 401:
@@ -62,6 +59,12 @@ class Channel(object):
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
         return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
+
+    def send_request(self, query_string, data_string):
+        signed_path = '%s?%s' % (self.path, query_string)
+        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
+        http.request('POST', signed_path, data_string)
+        return http.getresponse().status
 
 class AuthenticationError(Exception):
     pass
