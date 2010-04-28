@@ -56,29 +56,54 @@ class RequestTest(unittest.TestCase):
     def tearDown(self):
         self.mox.UnsetStubs()
 
-    def test_it(self):
-        request_args = ('POST', mox.Func(query_assertion), '{"param2": "value2", "param1": "value1"}')
+    def assert_request_is_correct(self, trigger_args, expected_query):
+        request_args = ('POST', mox.Func(create_query_assertion(expected_query)), '{"param2": "value2", "param1": "value1"}')
         stub_connection(self.mox, request_args=request_args)
         self.mox.ReplayAll()
         channel = p()['test-channel']
-        channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        channel.trigger(*trigger_args)
         self.mox.VerifyAll()
 
-def query_assertion(path_and_query):
-    path, query_string = path_and_query.split('?')
-    ok_(re.search('^/apps/test-app-id/channels/test-channel/events', path))
-    expected_query = {
-        'auth_version': '1.0',
-        'auth_key': 'test-key',
-        'auth_timestamp': '1272382015',
-        'auth_signature': 'cf0b2a9890c2f0e2300f34d1c68efc8faad86b9d8ae35de1917d3b21176e5793',
-        'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
-        'name': 'test-event',
-    }
+    def test_without_socket_id(self):
+        trigger_args = (
+            'test-event',
+            {'param1': 'value1', 'param2': 'value2'},
+        )
+        expected_query = {
+            'auth_version': '1.0',
+            'auth_key': 'test-key',
+            'auth_timestamp': '1272382015',
+            'auth_signature': 'cf0b2a9890c2f0e2300f34d1c68efc8faad86b9d8ae35de1917d3b21176e5793',
+            'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
+            'name': 'test-event',
+        }
+        self.assert_request_is_correct(trigger_args, expected_query)
 
-    for name, value in cgi.parse_qsl(query_string):
-        eq_(value, expected_query[name])
-    return True
+    def test_with_socket_id(self):
+        trigger_args = (
+            'test-event',
+            {'param1': 'value1', 'param2': 'value2'},
+            'test-socket-id'
+        )
+        expected_query = {
+            'auth_version': '1.0',
+            'auth_key': 'test-key',
+            'auth_timestamp': '1272382015',
+            'auth_signature': 'be8985b730755f983224f23bcbe3be0876937b3bfe408014c19588435a8caffb',
+            'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
+            'name': 'test-event',
+            'socket_id': 'test-socket-id'
+        }
+        self.assert_request_is_correct(trigger_args, expected_query)
+
+def create_query_assertion(expectation):
+    def query_assertion(path_and_query):
+        path, query_string = path_and_query.split('?')
+        ok_(re.search('^/apps/test-app-id/channels/test-channel/events', path))
+        for name, value in cgi.parse_qsl(query_string):
+            eq_(value, expectation[name])
+        return True
+    return query_assertion
 
 class ResponsesTest(unittest.TestCase):
     def setUp(self):

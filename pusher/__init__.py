@@ -36,9 +36,9 @@ class Channel(object):
         self.name = name
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
 
-    def trigger(self, event, data={}):
+    def trigger(self, event, data={}, socket_id=None):
         json_data = json.dumps(data)
-        status = self.send_request(self.signed_query(event, json_data), json_data)
+        status = self.send_request(self.signed_query(event, json_data, socket_id), json_data)
         if status == 202:
             return True
         elif status == 401:
@@ -48,17 +48,20 @@ class Channel(object):
         else:
             raise Exception("Unexpected return status %s" % status)
 
-    def signed_query(self, event, json_data):
-        query_string = self.compose_querystring(event, json_data)
+    def signed_query(self, event, json_data, socket_id):
+        query_string = self.compose_querystring(event, json_data, socket_id)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
         signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
         return "%s&auth_signature=%s" % (query_string, signature)
 
-    def compose_querystring(self, event, json_data):
+    def compose_querystring(self, event, json_data, socket_id):
         hasher = hashlib.md5()
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
-        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
+        ret = "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
+        if socket_id:
+            ret += "&socket_id=" + unicode(socket_id)
+        return ret
 
     def send_request(self, query_string, data_string):
         signed_path = '%s?%s' % (self.path, query_string)
