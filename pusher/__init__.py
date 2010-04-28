@@ -1,4 +1,4 @@
-import httplib, md5, time, hashlib, hmac, base64
+import httplib, time, hashlib, hmac, base64
 
 try:
     import json
@@ -58,7 +58,10 @@ class Channel(object):
         return "%s&auth_signature=%s" % (query_string, signature)
 
     def compose_querystring(self, event, json_data):
-        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), md5.new(json_data).hexdigest(), event)
+        hasher = hashlib.md5()
+        hasher.update(json_data)
+        hash_str = hasher.hexdigest()
+        return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
 
 class AuthenticationError(Exception):
     pass
