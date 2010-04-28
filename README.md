@@ -28,6 +28,10 @@ Trigger an event. Channel and event names may only contain alphanumeric characte
     p['a_channel'].trigger('an_event', {'some': 'data'})
 
 
+You can also specify `socket_id` as a separate argument, as described in <http://pusherapp.com/docs/duplicates>:
+
+    p['a_channel'].trigger('an_event', {'some': 'data'}, socket_id)
+
 Advanced usage
 --------------
 
@@ -45,10 +49,6 @@ To force the module to use AppEngine's urlfetch, do the following on setup:
 
 I haven't been able to test this though. Can somebody confirm it works? Thanks! `:-)`
 
-TODO
-----
-
-* Specify `socket_id`
 
 Special thanks
 --------------
