@@ -41,7 +41,15 @@ class Channel(object):
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
         signed_path = '%s?%s' % (self.path, self.signed_query(event, json_data))
         http.request('POST', signed_path, json_data)
-        return http.getresponse().read()
+        status = http.getresponse().status
+        if status == 202:
+            return True
+        elif status == 401:
+            raise AuthenticationError
+        elif status == 404:
+            raise NotFoundError
+        else:
+            raise Exception("Unexpected return status %s" % status)
 
     def signed_query(self, event, json_data):
         query_string = self.compose_querystring(event, json_data)
@@ -51,3 +59,9 @@ class Channel(object):
 
     def compose_querystring(self, event, json_data):
         return "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), md5.new(json_data).hexdigest(), event)
+
+class AuthenticationError(Exception):
+    pass
+
+class NotFoundError(Exception):
+    pass

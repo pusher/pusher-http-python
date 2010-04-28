@@ -44,32 +44,57 @@ class PropertiesTest(unittest.TestCase):
 
 
 class ChannelTest(unittest.TestCase):
-    def setUp(self):
-        self.mox = mox.Mox()
-
-    def tearDown(self):
-        self.mox.UnsetStubs()
-
     def test_access_to_channels(self):
         channel = p()['test-channel']
         eq_(channel.__class__, pusher.Channel)
         eq_(channel.name, 'test-channel')
 
-    def test_trigger(self):
-        channel = p()['test-channel']
-        mock_response = self.mox.CreateMock(httplib.HTTPResponse)
-        mock_response.read()
+class MessagingTest(unittest.TestCase):
+    def setUp(self):
+        self.mox = mox.Mox()
+        self.channel = p()['test-channel']
         self.mox.StubOutWithMock(httplib.HTTPConnection, '__init__')
         httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
         self.mox.StubOutWithMock(httplib.HTTPConnection, 'request')
         httplib.HTTPConnection.request('POST', mox.Func(query_assertion), '{"param2": "value2", "param1": "value1"}')
         self.mox.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
-        httplib.HTTPConnection.getresponse().AndReturn(mock_response)
+        self.mock_response = self.mox.CreateMock(httplib.HTTPResponse)
+        httplib.HTTPConnection.getresponse().AndReturn(self.mock_response)
         self.mox.StubOutWithMock(time, 'time')
         time.time().AndReturn(1272382015)
+
+    def tearDown(self):
+        self.mox.UnsetStubs()
+
+    def test_trigger_gets_202_response(self):
+        self.mock_response.status = 202
         self.mox.ReplayAll()
-        channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        ret = self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        eq_(ret, True)
         self.mox.VerifyAll()
+
+    def test_trigger_gets_401_response(self):
+        self.mock_response.status = 401
+        self.mox.ReplayAll()
+        try:
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        except pusher.AuthenticationError:
+            ok_(True)
+        else:
+            ok_(False, "Expected an AuthenticationError")
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_404_response(self):
+        self.mock_response.status = 404
+        self.mox.ReplayAll()
+        try:
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        except pusher.NotFoundError:
+            ok_(True)
+        else:
+            ok_(False, "Expected a NotFoundError")
+        self.mox.VerifyAll()
+        
 
 def query_assertion(path_and_query):
     path, query_string = path_and_query.split('?')
