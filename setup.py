@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pusher',
-    version='0.2',
+    version='0.3',
     description='A Python library for sending messages to Pusher',
     author='New Bamboo',
     author_email='info@new-bamboo.co.uk',
