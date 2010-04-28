@@ -35,11 +35,26 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+
+Google AppEngine
+----------------
+
+To force the module to use AppEngine's urlfetch, do the following on setup:
+
+    pusher.channel_type = pusher.GoogleAppEngineChannel
+
+I haven't been able to test this though. Can somebody confirm it works? Thanks! `:-)`
+
 TODO
 ----
 
 * Google AppEngine support
 * Specify `socket_id`
+
+Special thanks
+--------------
+
+Special thanks go to [Steve Winton](http://www.nixonmcinnes.co.uk/people/steve/), who implemented a pusher in Python for the first time, with focus on AppEngine. This module borrows from his contribution at <http://github.com/swinton/gae-pusherapp>
 
 Copyright
 ---------

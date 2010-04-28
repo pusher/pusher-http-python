@@ -27,7 +27,7 @@ class Pusher(object):
         return self._channels[key]
 
     def _make_channel(self, name):
-        self._channels[name] = Channel(name, self)
+        self._channels[name] = channel_type(name, self)
         return self._channels[name]
 
 class Channel(object):
@@ -66,8 +66,22 @@ class Channel(object):
         http.request('POST', signed_path, data_string)
         return http.getresponse().status
 
+class GoogleAppEngineChannel(Channel):
+    def send_request(self, query_string, data_string):
+        from google.appengine.api import urlfetch
+        absolute_url = 'http://%s/%s?%s' % (self.pusher.host, self.path, query_string)
+        response = urlfetch.fetch(
+            url=absolute_url,
+            payload=data_string,
+            method=urlfetch.POST,
+            headers={'Content-Type': 'application/json'}
+        )
+        return response.status_code
+
 class AuthenticationError(Exception):
     pass
 
 class NotFoundError(Exception):
     pass
+
+channel_type = Channel
