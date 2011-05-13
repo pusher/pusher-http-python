@@ -80,6 +80,20 @@ class GoogleAppEngineChannel(Channel):
             headers={'Content-Type': 'application/json'}
         )
         return response.status_code
+        
+class TornadoChannel(Channel):
+    def trigger(self, event, data={}, socket_id=None, callback=None):
+        self.callback = callback
+        return super(TornadoChannel, self).trigger(event, data, socket_id)
+        
+    def send_request(self, query_string, data_string):
+        import tornado.httpclient
+        signed_path = '%s?%s' % (self.path, query_string)
+        absolute_url = 'http://%s/%s?%s' % (self.pusher.host, self.path, query_string)
+        request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
+        client = tornado.httpclient.AsyncHTTPClient()
+        client.fetch(request, callback=self.callback)
+        return 202 # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
 
 class AuthenticationError(Exception):
     pass
