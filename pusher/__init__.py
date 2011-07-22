@@ -69,6 +69,31 @@ class Channel(object):
         http.request('POST', signed_path, data_string)
         return http.getresponse().status
 
+    def authenticate(self, socket_id, custom_data=None):
+        if custom_data:
+            custom_data = json.dumps(custom_data)
+
+        auth = self.authentication_string(socket_id, custom_data)
+        r = {'auth': auth}
+
+        if custom_data:
+            r['channel_data'] = custom_data
+
+        return r
+
+    def authentication_string(self, socket_id, custom_string=None):
+      if not socket_id:
+          raise Exception("Invalid socket_id")
+
+      string_to_sign = "%s:%s" % (socket_id, self.name)
+
+      if custom_string:
+        string_to_sign += ":%s" % custom_string
+
+      signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
+
+      return "%s:%s" % (self.pusher.key,signature)
+
 class GoogleAppEngineChannel(Channel):
     def send_request(self, query_string, data_string):
         from google.appengine.api import urlfetch
