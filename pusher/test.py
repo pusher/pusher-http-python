@@ -142,6 +142,22 @@ class ResponsesTest(unittest.TestCase):
             ok_(False, "Expected a NotFoundError")
         self.mox.VerifyAll()
 
+    def test_authenticate_socket(self):
+        data = {'uid': 123, 'info': {'name': 'Foo'}}
+        auth = self.channel.authenticate('socket_id', data)
+
+        expected_auth = {'auth': 'test-key:3e976eef54ba057389c6530ac5a0c95d55043f4cf8013e47b99d20d9ce5144b4',
+                         'channel_data': '{"info": {"name": "Foo"}, "uid": 123}'}
+        eq_(auth, expected_auth)
+
+    def test_authenticate_socket_with_no_data(self):
+        data = {'uid': 123, 'info': {'name': 'Foo'}}
+        auth = self.channel.authenticate('socket_id')
+
+        expected_auth = {'auth': 'test-key:8ca017edcf179c9e6a5ff9708f630773bb0a367428c671cdf08972380400498e'}
+        eq_(auth, expected_auth)
+
+
 def stub_connection(moxer, request_args=None, response_status=202):
     moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
     httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
