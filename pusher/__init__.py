@@ -12,13 +12,14 @@ key     = None
 secret  = None
 
 class Pusher(object):
-    def __init__(self, app_id=None, key=None, secret=None, host=None, port=None):
+    def __init__(self, app_id=None, key=None, secret=None, host=None, port=None, encoder=json):
         _globals = globals()
         self.app_id = app_id or _globals['app_id']
         self.key = key or _globals['key']
         self.secret = secret or _globals['secret']
         self.host = host or _globals['host']
         self.port = port or _globals['port']
+        self.encoder = encoder
         self._channels = {}
 
     def __getitem__(self, key):
@@ -37,7 +38,7 @@ class Channel(object):
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
 
     def trigger(self, event, data={}, socket_id=None):
-        json_data = json.dumps(data)
+        json_data = json.dumps(data, cls=self.pusher.encoder)
         status = self.send_request(self.signed_query(event, json_data, socket_id), json_data)
         if status == 202:
             return True
@@ -71,7 +72,7 @@ class Channel(object):
 
     def authenticate(self, socket_id, custom_data=None):
         if custom_data:
-            custom_data = json.dumps(custom_data)
+            custom_data = json.dumps(custom_data, cls=self.pusher.encoder)
 
         auth = self.authentication_string(socket_id, custom_data)
         r = {'auth': auth}
