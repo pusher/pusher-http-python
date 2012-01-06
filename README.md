@@ -39,6 +39,14 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+Tornado
+-------
+
+To use the Tornado web server to trigger events, set `channel_type`:
+
+    pusher.channel_type = pusher.TornadoChannel
+
+To see this functionality in action, look at `examples/tornado_channel.py`.
 
 Google AppEngine
 ----------------
