@@ -4,8 +4,8 @@ setup(
     name='pusher',
     version='0.5',
     description='A Python library for sending messages to Pusher',
-    author='New Bamboo',
-    author_email='info@new-bamboo.co.uk',
+    author='Pusher',
+    author_email='support@pusher.com',
     url='http://pusherapp.com',
     packages=['pusher'],
     classifiers=[

@@ -66,4 +66,4 @@ Special thanks go to [Steve Winton](http://www.nixonmcinnes.co.uk/people/steve/)
 Copyright
 ---------
 
-Copyright (c) 2010 New Bamboo. See LICENSE for details.
+Copyright (c) 2012 Pusher Ltd. See LICENSE for details.
