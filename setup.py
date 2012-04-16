@@ -2,11 +2,11 @@ from setuptools import setup
 
 setup(
     name='pusher',
-    version='0.5',
+    version='0.6',
     description='A Python library for sending messages to Pusher',
     author='Pusher',
     author_email='support@pusher.com',
-    url='http://pusherapp.com',
+    url='http://pusher.com',
     packages=['pusher'],
     classifiers=[
         "License :: OSI Approved :: MIT License",

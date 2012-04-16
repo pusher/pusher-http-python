@@ -1,6 +1,10 @@
 import unittest, re, httplib, time, cgi
 from nose.tools import *
 import mox
+
+import sys
+sys.path.append("../")
+
 import pusher
 
 class PropertiesTest(unittest.TestCase):
@@ -57,7 +61,7 @@ class RequestTest(unittest.TestCase):
         self.mox.UnsetStubs()
 
     def assert_request_is_correct(self, trigger_args, expected_query):
-        request_args = ('POST', mox.Func(create_query_assertion(expected_query)), '{"param2": "value2", "param1": "value1"}')
+        request_args = ('POST', mox.Func(create_query_assertion(expected_query)), '{"param2": "value2", "param1": "value1"}', {'Content-Type': 'application/json'})
         stub_connection(self.mox, request_args=request_args)
         self.mox.ReplayAll()
         channel = p()['test-channel']
@@ -167,7 +171,7 @@ def stub_connection(moxer, request_args=None, response_status=202):
     if request_args:
         method_to_stub(*request_args)
     else:
-        method_to_stub(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
+        method_to_stub(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
 
     moxer.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
     mock_response = moxer.CreateMock(httplib.HTTPResponse)
