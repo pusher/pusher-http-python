@@ -35,6 +35,12 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+## Heroku
+
+If you're using Pusher as a Heroku add-on, you can just get the config informat
+
+    p = pusher.pusher_from_url()
+
 ## Tornado
 
 To use the Tornado web server to trigger events, set `channel_type`:

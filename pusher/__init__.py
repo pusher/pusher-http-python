@@ -32,6 +32,19 @@ app_id  = None
 key     = None
 secret  = None
 
+def url2options(url):
+    assert url.startswith('http://'), "invalid URL"
+    url = url[7:]
+    key, url = url.split(':', 1)
+    secret, url = url.split('@', 1)
+    host, url = url.split('/', 1)
+    url, app_id = url.split('/', 1)
+    return {'key': key, 'secret': secret, 'host': host, 'app_id': app_id}
+
+def pusher_from_url(url=None):
+    url = url or os.environ['PUSHER_URL']
+    return Pusher(**url2options(url))
+
 class Pusher(object):
     def __init__(self, app_id=None, key=None, secret=None, host=None, port=None):
         _globals = globals()
