@@ -10,6 +10,7 @@ except ImportError:
 
 # 2.4 hashlib implementation: http://code.krypto.org/python/hashlib/
 import hashlib
+import os
 
 sha_constructor = hashlib.sha256
 
