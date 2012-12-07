@@ -100,7 +100,10 @@ class Channel(object):
 
     def send_request(self, query_string, data_string):
         signed_path = '%s?%s' % (self.path, query_string)
-        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
+        conn_class = httplib.HTTPConnection
+        if self.pusher.port == 443:
+            conn_class = httplib.HTTPSConnection
+        http = conn_class(self.pusher.host, self.pusher.port)
         http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
         return http.getresponse().status
 
