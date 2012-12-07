@@ -35,6 +35,10 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+To connect to Pusher via HTTPS, just specify port 443:
+
+    pusher.port = 443
+
 ## Heroku
 
 If you're using Pusher as a Heroku add-on, you can just get the config informat
