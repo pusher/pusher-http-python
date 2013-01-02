@@ -35,6 +35,22 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+## Custom JSON
+
+If you need custom JSON serialization for handling dates or custom data types, configure pusher to use your own json module. Pusher expects the module to contain a `dumps` function. In the example, the custom JSON module is named `custom_json_module`:
+
+    pusher.json = custom_json_module
+
+If you're using a custom encoder class, create a stub class with `dumps` method masquerading as a json module, locking the cls input argument using partial:
+
+    from functools import partial
+    pusher.json = type('CustomJson', (object,), dict(dumps=staticmethod(partial(json.dumps, cls=json.JSONEncoder))))
+
+Or following the same pattern, setting a default encode method named `default_encode_func`:
+
+    from functools import partial
+    pusher.json = type('CustomJson', (object,), dict(dumps=staticmethod(partial(json.dumps, default=default_encode_func))))
+
 ## Heroku
 
 If you're using Pusher as a Heroku add-on, you can just get the config informat
