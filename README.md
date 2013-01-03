@@ -71,7 +71,11 @@ To force the module to use AppEngine's urlfetch, do the following on setup:
 
     pusher.channel_type = pusher.GoogleAppEngineChannel
 
-I haven't been able to test this though. Can somebody confirm it works? Thanks! `:-)`
+## Google AppEngine NDB
+
+A channel that uses the GAE NDB (introduced in GAE 1.6.3) and provides async methods that return a future, `trigger_async` and `send_request_async`.
+
+    pusher.channel_type = pusher.GaeNdbChannel
 
 ## Running the tests
 

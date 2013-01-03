@@ -132,7 +132,7 @@ class Channel(object):
 class GoogleAppEngineChannel(Channel):
     def send_request(self, query_string, data_string):
         from google.appengine.api import urlfetch
-        absolute_url = 'http://%s/%s?%s' % (self.pusher.host, self.path, query_string)
+        absolute_url = 'http://%s%s?%s' % (self.pusher.host, self.path, query_string)
         response = urlfetch.fetch(
             url=absolute_url,
             payload=data_string,
@@ -140,7 +140,43 @@ class GoogleAppEngineChannel(Channel):
             headers={'Content-Type': 'application/json'}
         )
         return response.status_code
-        
+
+# App Engine NDB channel, outer try import/except as it uses decorator
+try:
+    from google.appengine.ext import ndb
+
+    class GaeNdbChannel(GoogleAppEngineChannel):
+        @ndb.tasklet
+        def trigger_async(self, event, data={}, socket_id=None):
+            """Async trigger that in turn calls send_request_async"""
+            json_data = json.dumps(data)
+            status = yield self.send_request_async(self.signed_query(event, json_data, socket_id), json_data)
+            if status == 202:
+                raise ndb.Return(True)
+            elif status == 401:
+                raise AuthenticationError
+            elif status == 404:
+                raise NotFoundError
+            else:
+                raise Exception("Unexpected return status %s" % status)
+
+        @ndb.tasklet
+        def send_request_async(self, query_string, data_string):
+            """Send request and yield while waiting for future result"""
+            ctx = ndb.get_context()
+            secure = 's' if self.pusher.port == 443 else ''
+            absolute_url = 'http%s://%s%s?%s' % (secure, self.pusher.host, self.path, query_string)
+            result = yield ctx.urlfetch(
+                url=absolute_url,
+                payload=data_string,
+                method='POST',
+                headers={'Content-Type': 'application/json'},
+                validate_certificate=bool(secure),
+                )
+            raise ndb.Return(result.status_code)
+except ImportError:
+    pass
+
 class TornadoChannel(Channel):
     def trigger(self, event, data={}, socket_id=None, callback=None):
         self.callback = callback
