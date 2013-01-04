@@ -12,22 +12,25 @@ import sys
 sys.path.append("../")
 
 import pusher
+from pusher.ext.tornado import TornadoChannel
 
 import tornado.ioloop
 import tornado.web
 
-pusher.app_id = 'app_id'
-pusher.key = 'key'
-pusher.secret = 'secret'
+p = pusher.Pusher(
+    app_id='app_id',
+    key='key',
+    secret='secret',
+    channel_factory=TornadoChannel,
+    keep_channels=False,
+    )
 
-pusher.channel_type = pusher.TornadoChannel
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         def callback(response):
             print "Callback run."
 
-        p = pusher.Pusher()
         p['a_channel'].trigger('an_event', {'some': 'data'}, callback=callback)
 
         self.write("Hello, world")

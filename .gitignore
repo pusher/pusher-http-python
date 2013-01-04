@@ -1,8 +1,14 @@
 *.pyc
+*.egg
+*.egg-info
+.coverage
+.tox/
+coverage.xml
+nosetests.xml
+*.tar.gz
 .Python
 bin/
 include/
 lib/
 man/
 pusher/test_config.py
-

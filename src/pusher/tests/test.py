@@ -1,59 +1,70 @@
-import unittest, re, httplib, time, cgi
-from nose.tools import *
+import cgi
+import httplib
 import mox
-
-import sys
-sys.path.append("../")
-
+import re
+import time
+import unittest
+from nose.tools import eq_
+from nose.tools import ok_
 import pusher
 
-class PropertiesTest(unittest.TestCase):
-    def setUp(self):
-        pusher.app_id = 'test-global-app-id'
-        pusher.key = 'test-global-key'
-        pusher.secret = 'test-global-secret'
 
-    def tearDown(self):
-        pusher.app_id = 'api.pusherapp.com'
-        pusher.key = None
-        pusher.secret = None
+class PusherTestCase(unittest.TestCase):
+    """
+    Base class with utilities that can be overridden, enabling reuse of tests
+    for channel tests
+    """
+    @staticmethod
+    def p(*args):
+        return pusher.Pusher(app_id='test-app-id', key='test-key', secret='test-secret')
+
+    @staticmethod
+    def stub_connection(moxer, request_args=None, response_status=202):
+        moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
+        httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
+
+        moxer.StubOutWithMock(httplib.HTTPConnection, 'request')
+        method_to_stub = httplib.HTTPConnection.request
+        if request_args:
+            method_to_stub(*request_args)
+        else:
+            method_to_stub(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
+
+        moxer.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
+        mock_response = moxer.CreateMock(httplib.HTTPResponse)
+        httplib.HTTPConnection.getresponse().AndReturn(mock_response)
+        mock_response.status = response_status
+        moxer.StubOutWithMock(time, 'time')
+        time.time().AndReturn(1272382015)
 
 
+class PropertiesTest(PusherTestCase):
     #
-    # Using globals
+    # Using instance-specific parameters, no globals support
     #
-    
-    def test_global_app_id(self, *args):
-        eq_(pusher.Pusher().app_id, 'test-global-app-id')
-
-    def test_global_key(self):
-        eq_(pusher.Pusher().key, 'test-global-key')
-
-    def test_global_secret(self):
-        eq_(pusher.Pusher().secret, 'test-global-secret')
-
-
-    #
-    # Using instance-specific parameters
-    #
-
     def test_instance_app_id(self):
-        eq_(p().app_id, 'test-app-id')
+        eq_(self.p().app_id, 'test-app-id')
 
     def test_instance_key(self):
-        eq_(p().key, 'test-key')
+        eq_(self.p().key, 'test-key')
 
     def test_instance_secret(self):
-        eq_(p().secret, 'test-secret')
+        eq_(self.p().secret, 'test-secret')
 
 
-class ChannelTest(unittest.TestCase):
+class ChannelTest(PusherTestCase):
     def test_access_to_channels(self):
-        channel = p()['test-channel']
+        channel = self.p()['test-channel']
         eq_(channel.__class__, pusher.Channel)
         eq_(channel.name, 'test-channel')
 
-class RequestTest(unittest.TestCase):
+    def test_channel_name_verification(self):
+        with self.assertRaises(ValueError) as cm:
+            self.p()['di$@ll0w&d']
+        eq_(cm.exception.message, 'Invalid chars: $&')
+
+
+class RequestTest(PusherTestCase):
     def setUp(self):
         self.mox = mox.Mox()
 
@@ -62,11 +73,21 @@ class RequestTest(unittest.TestCase):
 
     def assert_request_is_correct(self, trigger_args, expected_query):
         request_args = ('POST', mox.Func(create_query_assertion(expected_query)), '{"param2": "value2", "param1": "value1"}', {'Content-Type': 'application/json'})
-        stub_connection(self.mox, request_args=request_args)
+        self.stub_connection(self.mox, request_args=request_args)
         self.mox.ReplayAll()
-        channel = p()['test-channel']
+        channel = self.p()['test-channel']
         channel.trigger(*trigger_args)
         self.mox.VerifyAll()
+
+    def test_invalid_event_name(self):
+        trigger_args = (
+            '@vnt$',
+            {'param1': 'value1', 'param2': 'value2'},
+        )
+        channel = self.p()['test-channel']
+        with self.assertRaises(ValueError) as cm:
+            channel.trigger(*trigger_args)
+        eq_(cm.exception.message, 'Invalid chars: @$')
 
     def test_without_socket_id(self):
         trigger_args = (
@@ -100,6 +121,7 @@ class RequestTest(unittest.TestCase):
         }
         self.assert_request_is_correct(trigger_args, expected_query)
 
+
 def create_query_assertion(expectation):
     def query_assertion(path_and_query):
         path, query_string = path_and_query.split('?')
@@ -109,41 +131,55 @@ def create_query_assertion(expectation):
         return True
     return query_assertion
 
-class ResponsesTest(unittest.TestCase):
+
+class ResponsesTest(PusherTestCase):
     def setUp(self):
         self.mox = mox.Mox()
-        self.channel = p()['test-channel']
+        self.channel = self.p()['test-channel']
 
     def tearDown(self):
         self.mox.UnsetStubs()
 
     def test_trigger_gets_202_response(self):
-        stub_connection(self.mox, response_status=202)
+        self.stub_connection(self.mox, response_status=202)
         self.mox.ReplayAll()
         ret = self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
         eq_(ret, True)
         self.mox.VerifyAll()
 
-    def test_trigger_gets_401_response(self):
-        stub_connection(self.mox, response_status=401)
+    def test_trigger_gets_400_response(self):
+        self.stub_connection(self.mox, response_status=400)
         self.mox.ReplayAll()
-        try:
+        with self.assertRaises(pusher.BadRequestError):
             self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
-        except pusher.AuthenticationError:
-            ok_(True)
-        else:
-            ok_(False, "Expected an AuthenticationError")
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_401_response(self):
+        self.stub_connection(self.mox, response_status=401)
+        self.mox.ReplayAll()
+        with self.assertRaises(pusher.AuthenticationError):
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_403_response(self):
+        self.stub_connection(self.mox, response_status=403)
+        self.mox.ReplayAll()
+        with self.assertRaises(pusher.ForbiddenError):
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
         self.mox.VerifyAll()
 
     def test_trigger_gets_404_response(self):
-        stub_connection(self.mox, response_status=404)
+        self.stub_connection(self.mox, response_status=404)
         self.mox.ReplayAll()
-        try:
+        with self.assertRaises(pusher.NotFoundError):
             self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
-        except pusher.NotFoundError:
-            ok_(True)
-        else:
-            ok_(False, "Expected a NotFoundError")
+        self.mox.VerifyAll()
+
+    def test_trigger_gets_413_response(self):
+        self.stub_connection(self.mox, response_status=413)
+        self.mox.ReplayAll()
+        with self.assertRaises(pusher.TooLargeError):
+            self.channel.trigger('test-event', {'param1': 'value1', 'param2': 'value2'})
         self.mox.VerifyAll()
 
     def test_authenticate_socket(self):
@@ -155,30 +191,7 @@ class ResponsesTest(unittest.TestCase):
         eq_(auth, expected_auth)
 
     def test_authenticate_socket_with_no_data(self):
-        data = {'uid': 123, 'info': {'name': 'Foo'}}
         auth = self.channel.authenticate('socket_id')
 
         expected_auth = {'auth': 'test-key:8ca017edcf179c9e6a5ff9708f630773bb0a367428c671cdf08972380400498e'}
         eq_(auth, expected_auth)
-
-
-def stub_connection(moxer, request_args=None, response_status=202):
-    moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
-    httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
-
-    moxer.StubOutWithMock(httplib.HTTPConnection, 'request')
-    method_to_stub = httplib.HTTPConnection.request
-    if request_args:
-        method_to_stub(*request_args)
-    else:
-        method_to_stub(mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg(), mox.IgnoreArg())
-
-    moxer.StubOutWithMock(httplib.HTTPConnection, 'getresponse')
-    mock_response = moxer.CreateMock(httplib.HTTPResponse)
-    httplib.HTTPConnection.getresponse().AndReturn(mock_response)
-    mock_response.status = response_status
-    moxer.StubOutWithMock(time, 'time')
-    time.time().AndReturn(1272382015)
-
-def p(*args):
-    return pusher.Pusher(app_id='test-app-id', key='test-key', secret='test-secret')
