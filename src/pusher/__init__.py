@@ -25,7 +25,7 @@ TRANS_TABLE = string.maketrans('', '')
 
 def verify_chars(chars, allowed_chars):
     """Verify chars against allowed_chars, using translate (which is fast)"""
-    invalid_chars = chars.translate(TRANS_TABLE, allowed_chars)
+    invalid_chars = str(chars).translate(TRANS_TABLE, allowed_chars)
     if invalid_chars:
         raise ValueError('Invalid chars: %s' % invalid_chars)
     return True
