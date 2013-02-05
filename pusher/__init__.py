@@ -132,7 +132,7 @@ class Channel(object):
 class GoogleAppEngineChannel(Channel):
     def send_request(self, query_string, data_string):
         from google.appengine.api import urlfetch
-        absolute_url = 'http://%s/%s?%s' % (self.pusher.host, self.path, query_string)
+        absolute_url = 'http://%s%s?%s' % (self.pusher.host, self.path, query_string)
         response = urlfetch.fetch(
             url=absolute_url,
             payload=data_string,
@@ -148,7 +148,7 @@ class TornadoChannel(Channel):
         
     def send_request(self, query_string, data_string):
         import tornado.httpclient
-        absolute_url = 'http://%s/%s?%s' % (self.pusher.host, self.path, query_string)
+        absolute_url = 'http://%s%s?%s' % (self.pusher.host, self.path, query_string)
         request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
