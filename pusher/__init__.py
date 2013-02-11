@@ -73,7 +73,9 @@ class Channel(object):
 
     def trigger(self, event, data={}, socket_id=None):
         json_data = json.dumps(data)
-        status = self.send_request(self.signed_query(event, json_data, socket_id), json_data)
+        query_string = self.signed_query(event, json_data, socket_id)
+        signed_path = "%s?%s" % (self.path, query_string)
+        status = self.send_request(signed_path, json_data)
         if status == 202:
             return True
         elif status == 401:
@@ -98,8 +100,7 @@ class Channel(object):
             ret += "&socket_id=" + unicode(socket_id)
         return ret
 
-    def send_request(self, query_string, data_string):
-        signed_path = '%s?%s' % (self.path, query_string)
+    def send_request(self, signed_path, data_string):
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
         http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
         return http.getresponse().status
@@ -129,26 +130,28 @@ class Channel(object):
 
       return "%s:%s" % (self.pusher.key,signature)
 
+    def __get_absolute_path(self, signed_path):
+        return 'http://%s%s' % (self.pusher.host, signed_path)
+
 class GoogleAppEngineChannel(Channel):
-    def send_request(self, query_string, data_string):
+    def send_request(self, signed_path, data_string):
         from google.appengine.api import urlfetch
-        absolute_url = 'http://%s%s?%s' % (self.pusher.host, self.path, query_string)
         response = urlfetch.fetch(
-            url=absolute_url,
+            url=self.__get_absolute_path(signed_path),
             payload=data_string,
             method=urlfetch.POST,
             headers={'Content-Type': 'application/json'}
         )
         return response.status_code
-        
+
 class TornadoChannel(Channel):
     def trigger(self, event, data={}, socket_id=None, callback=None):
         self.callback = callback
         return super(TornadoChannel, self).trigger(event, data, socket_id)
-        
-    def send_request(self, query_string, data_string):
+
+    def send_request(self, signed_path, data_string):
         import tornado.httpclient
-        absolute_url = 'http://%s%s?%s' % (self.pusher.host, self.path, query_string)
+        absolute_url = self.__get_absolute_path(signed_path)
         request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
