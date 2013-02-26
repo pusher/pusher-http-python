@@ -130,14 +130,14 @@ class Channel(object):
 
       return "%s:%s" % (self.pusher.key,signature)
 
-    def __get_absolute_path(self, signed_path):
+    def get_absolute_path(self, signed_path):
         return 'http://%s%s' % (self.pusher.host, signed_path)
 
 class GoogleAppEngineChannel(Channel):
     def send_request(self, signed_path, data_string):
         from google.appengine.api import urlfetch
         response = urlfetch.fetch(
-            url=self.__get_absolute_path(signed_path),
+            url=self.get_absolute_path(signed_path),
             payload=data_string,
             method=urlfetch.POST,
             headers={'Content-Type': 'application/json'}
@@ -151,7 +151,7 @@ class TornadoChannel(Channel):
 
     def send_request(self, signed_path, data_string):
         import tornado.httpclient
-        absolute_url = self.__get_absolute_path(signed_path)
+        absolute_url = self.get_absolute_path(signed_path)
         request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
