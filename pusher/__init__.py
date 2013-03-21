@@ -76,7 +76,7 @@ class Channel(object):
         query_string = self.signed_query(event, json_data, socket_id)
         signed_path = "%s?%s" % (self.path, query_string)
         status = self.send_request(signed_path, json_data)
-        if status == 202:
+        if status == 200:
             return True
         elif status == 401:
             raise AuthenticationError
@@ -155,7 +155,7 @@ class TornadoChannel(Channel):
         request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
-        return 202 # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
+        return 200 # Returning 200 to avoid Channel errors. Actual error handling takes place in callback.
 
 class AuthenticationError(Exception):
     pass
