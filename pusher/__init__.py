@@ -72,7 +72,7 @@ class Channel(object):
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
 
     def trigger(self, event, data={}, socket_id=None):
-        json_data = json.dumps(data)
+        json_data = json.dumps(data, bigint_as_string = True)
         query_string = self.signed_query(event, json_data, socket_id)
         signed_path = "%s?%s" % (self.path, query_string)
         status = self.send_request(signed_path, json_data)
@@ -107,7 +107,7 @@ class Channel(object):
 
     def authenticate(self, socket_id, custom_data=None):
         if custom_data:
-            custom_data = json.dumps(custom_data)
+            custom_data = json.dumps(custom_data, bigint_as_string = True)
 
         auth = self.authentication_string(socket_id, custom_data)
         r = {'auth': auth}
