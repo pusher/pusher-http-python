@@ -11,6 +11,8 @@ except ImportError:
 # 2.4 hashlib implementation: http://code.krypto.org/python/hashlib/
 import hashlib
 import os
+import urllib
+import re
 
 sha_constructor = hashlib.sha256
 
@@ -33,6 +35,9 @@ app_id  = None
 key     = None
 secret  = None
 
+channel_name_re = re.compile('^[-a-z0-9_=@,.;]+$')
+app_id_re       = re.compile('^[0-9]+$')
+
 def url2options(url):
     assert url.startswith('http://'), "invalid URL"
     url = url[7:]
@@ -50,6 +55,8 @@ class Pusher(object):
     def __init__(self, app_id=None, key=None, secret=None, host=None, port=None):
         _globals = globals()
         self.app_id = app_id or _globals['app_id']
+        if None == app_id_re.match( str( self.app_id ) ):
+            raise NameError("Invalid app id")
         self.key = key or _globals['key']
         self.secret = secret or _globals['secret']
         self.host = host or _globals['host']
@@ -69,7 +76,9 @@ class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
         self.name = name
-        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, self.name)
+        if None == channel_name_re.match( str ( self.name ) ):
+            raise NameError("Invalid channel id")
+        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote( self.name ) )
 
     def trigger(self, event, data={}, socket_id=None):
         json_data = json.dumps(data)
