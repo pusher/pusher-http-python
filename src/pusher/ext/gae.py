@@ -42,9 +42,9 @@ class GoogleAppEngineChannel(Channel):
             method='POST',
             headers={'Content-Type': 'application/json'},
             validate_certificate=bool(secure),
-            )
+        )
         if result.status_code // 100 != 2:
-            logging.debug('Code: %s\nBody\n%s' % (result.status_code, result.body))
+            logging.debug('Code: %s\nBody\n%s' % (result.status_code, result.content))
 
         raise ndb.Return(result.status_code)
 
