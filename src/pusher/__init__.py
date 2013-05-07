@@ -77,7 +77,7 @@ class Pusher(object):
         keep_channels: Whether to keep channels around for reuse, default True
     """
     def __init__(self, app_id=None, key=None, secret=None, host='api.pusherapp.com', port=80,
-            channel_factory=None, json_dumps=json.dumps, keep_channels=True):
+                 channel_factory=None, json_dumps=json.dumps, keep_channels=True):
         self.app_id = app_id
         self.key = key
         self.secret = secret
@@ -170,7 +170,7 @@ class Channel(object):
         elif status == 413:
             raise TooLargeError
         else:
-            raise Exception("Unexpected return status %s" % status)
+            raise PusherError("Unexpected return status %s" % status)
 
     def signed_query(self, event, json_data, socket_id):
         """
@@ -194,7 +194,8 @@ class Channel(object):
         hasher = hashlib.md5()
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
-        ret = "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
+        ret = "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (
+            self.pusher.key, int(time.time()), hash_str, event)
         if socket_id:
             ret += "&socket_id=" + unicode(socket_id)
         return ret
