@@ -54,8 +54,8 @@ def pusher_from_url(url=None):
 class Pusher(object):
     def __init__(self, app_id=None, key=None, secret=None, host=None, port=None, encoder=None):
         _globals = globals()
-        self.app_id = str( app_id or _globals['app_id'] )
-        if None == app_id_re.match( self.app_id ):
+        self.app_id = str(app_id or _globals['app_id'])
+        if not app_id_re.match(self.app_id):
             raise NameError("Invalid app id")
         self.key = key or _globals['key']
         self.secret = secret or _globals['secret']
@@ -76,10 +76,10 @@ class Pusher(object):
 class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
-        self.name = str ( name )
-        if None == channel_name_re.match( self.name ):
+        self.name = str(name)
+        if not channel_name_re.match(self.name):
             raise NameError("Invalid channel id")
-        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote( self.name ) )
+        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
     def trigger(self, event, data={}, socket_id=None):
         json_data = json.dumps(data, cls=self.pusher.encoder)
