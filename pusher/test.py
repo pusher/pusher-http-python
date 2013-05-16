@@ -9,12 +9,12 @@ import pusher
 
 class PropertiesTest(unittest.TestCase):
     def setUp(self):
-        pusher.app_id = 'test-global-app-id'
+        pusher.app_id = '123'
         pusher.key = 'test-global-key'
         pusher.secret = 'test-global-secret'
 
     def tearDown(self):
-        pusher.app_id = 'api.pusherapp.com'
+        pusher.app_id = None
         pusher.key = None
         pusher.secret = None
 
@@ -24,7 +24,7 @@ class PropertiesTest(unittest.TestCase):
     #
     
     def test_global_app_id(self, *args):
-        eq_(pusher.Pusher().app_id, 'test-global-app-id')
+        eq_(pusher.Pusher().app_id, '123')
 
     def test_global_key(self):
         eq_(pusher.Pusher().key, 'test-global-key')
@@ -38,7 +38,7 @@ class PropertiesTest(unittest.TestCase):
     #
 
     def test_instance_app_id(self):
-        eq_(p().app_id, 'test-app-id')
+        eq_(p().app_id, '456')
 
     def test_instance_key(self):
         eq_(p().key, 'test-key')
@@ -77,7 +77,7 @@ class RequestTest(unittest.TestCase):
             'auth_version': '1.0',
             'auth_key': 'test-key',
             'auth_timestamp': '1272382015',
-            'auth_signature': 'cf0b2a9890c2f0e2300f34d1c68efc8faad86b9d8ae35de1917d3b21176e5793',
+            'auth_signature': 'd34f60af4b4aeb17e018bec900e5395eb52ea2cb8b4272ce73e5003fc15ac353',
             'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
             'name': 'test-event',
         }
@@ -93,7 +93,7 @@ class RequestTest(unittest.TestCase):
             'auth_version': '1.0',
             'auth_key': 'test-key',
             'auth_timestamp': '1272382015',
-            'auth_signature': 'be8985b730755f983224f23bcbe3be0876937b3bfe408014c19588435a8caffb',
+            'auth_signature': 'a6751f6b09752da2aaf055910c600e0b7aeabf0f796b9b6cb4cd42ef30789675',
             'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
             'name': 'test-event',
             'socket_id': 'test-socket-id'
@@ -103,7 +103,7 @@ class RequestTest(unittest.TestCase):
 def create_query_assertion(expectation):
     def query_assertion(path_and_query):
         path, query_string = path_and_query.split('?')
-        ok_(re.search('^/apps/test-app-id/channels/test-channel/events', path))
+        ok_(re.search('^/apps/456/channels/test-channel/events', path))
         for name, value in cgi.parse_qsl(query_string):
             eq_(value, expectation[name])
         return True
@@ -181,4 +181,4 @@ def stub_connection(moxer, request_args=None, response_status=202):
     time.time().AndReturn(1272382015)
 
 def p(*args):
-    return pusher.Pusher(app_id='test-app-id', key='test-key', secret='test-secret')
+    return pusher.Pusher(app_id='456', key='test-key', secret='test-secret')
