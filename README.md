@@ -10,17 +10,11 @@ You can install this module using your package management method or choice, norm
 
 ## Getting started
 
-After registering at <http://pusherapp.com>, configure your app with the security credentials:
+After registering at <http://pusherapp.com>, create an instance, specifying your security credentials:
 
-    pusher.app_id = 'your-pusher-app-id'
-    pusher.key = 'your-pusher-key'
-    pusher.secret = 'your-pusher-secret'
+    p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
-Then create an instance:
-
-    p = pusher.Pusher()
-
-Trigger an event. Channel and event names may only contain alphanumeric characters, '-' and '_':
+You can then create channels and trigger events. Channel and event names may only contain alphanumeric characters, '-' and '_':
 
     p['a_channel'].trigger('an_event', {'some': 'data'})
 
@@ -31,10 +25,6 @@ You can also specify `socket_id` as a separate argument, as described in <http:/
 
 ## Advanced usage
 
-Credentials can also be set in a per-instance basis:
-
-    p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
-
 A custom json encoder class, such as the one provided by Django may also be specified:
 
     from django.core.serializers.json import DjangoJSONEncoder
@@ -42,7 +32,7 @@ A custom json encoder class, such as the one provided by Django may also be spec
 
 ## Heroku
 
-If you're using Pusher as a Heroku add-on, you can just get the config informat
+If you're using Pusher as a Heroku add-on, you can just get the config information like this:
 
     p = pusher.pusher_from_url()
 
