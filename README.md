@@ -35,6 +35,11 @@ Credentials can also be set in a per-instance basis:
 
     p = pusher.Pusher(app_id='your-pusher-app-id', key='your-pusher-key', secret='your-pusher-secret')
 
+A custom json encoder class, such as the one provided by Django may also be specified:
+
+    from django.core.serializers.json import DjangoJSONEncoder
+    p = pusher.Pusher(app_id=..., encoder=DjangoJSONEncoder)
+
 ## Heroku
 
 If you're using Pusher as a Heroku add-on, you can just get the config informat
