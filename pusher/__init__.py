@@ -78,7 +78,7 @@ class Channel(object):
         self.pusher = pusher
         self.name = str(name)
         if not channel_name_re.match(self.name):
-            raise NameError("Invalid channel id")
+            raise NameError("Invalid channel id: %s" % self.name)
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
     def trigger(self, event, data={}, socket_id=None):
