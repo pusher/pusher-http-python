@@ -78,22 +78,24 @@ class Channel(object):
         self.pusher = pusher
         self.name = str(name)
         if not channel_name_re.match(self.name):
-            raise NameError("Invalid channel id")
+            raise NameError("Invalid channel id: %s" % self.name)
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
     def trigger(self, event, data={}, socket_id=None):
         json_data = json.dumps(data, cls=self.pusher.encoder)
         query_string = self.signed_query(event, json_data, socket_id)
         signed_path = "%s?%s" % (self.path, query_string)
-        status = self.send_request(signed_path, json_data)
+        status, resp_content = self.send_request(signed_path, json_data)
         if status == 202:
             return True
         elif status == 401:
-            raise AuthenticationError
+            raise AuthenticationError("Status: 401; Message: %s" % resp_content)
         elif status == 404:
-            raise NotFoundError
+            raise NotFoundError("Status: 404; Message: %s" % resp_content)
+        elif status == 403:
+            raise AppDisabledOrMessageQuotaError("Status: 403; Message: %s" % resp_content)
         else:
-            raise Exception("Unexpected return status %s" % status)
+            raise UnexpectedReturnStatusError("Status: %s; Message: %s" % (status, resp_content))
 
     def signed_query(self, event, json_data, socket_id):
         query_string = self.compose_querystring(event, json_data, socket_id)
@@ -113,7 +115,8 @@ class Channel(object):
     def send_request(self, signed_path, data_string):
         http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
         http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
-        return http.getresponse().status
+        resp = http.getresponse()
+        return resp.status, resp.read()
 
     def authenticate(self, socket_id, custom_data=None):
         if custom_data:
@@ -152,7 +155,7 @@ class GoogleAppEngineChannel(Channel):
             method=urlfetch.POST,
             headers={'Content-Type': 'application/json'}
         )
-        return response.status_code
+        return response.status_code, response.content
 
 class TornadoChannel(Channel):
     def trigger(self, event, data={}, socket_id=None, callback=None):
@@ -165,12 +168,19 @@ class TornadoChannel(Channel):
         request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
-        return 202 # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
+        # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
+        return 202, ""
 
 class AuthenticationError(Exception):
     pass
 
 class NotFoundError(Exception):
+    pass
+
+class AppDisabledOrMessageQuotaError(Exception):
+    pass
+
+class UnexpectedReturnStatusError(Exception):
     pass
 
 channel_type = Channel
