@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pusher',
-    version='0.7',
+    version='0.8',
     description='A Python library for sending messages to Pusher',
     author='Pusher',
     author_email='support@pusher.com',

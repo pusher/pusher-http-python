@@ -13,6 +13,7 @@ import hashlib
 import os
 import urllib
 import re
+import socket
 
 sha_constructor = hashlib.sha256
 
@@ -81,11 +82,11 @@ class Channel(object):
             raise NameError("Invalid channel id")
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
-    def trigger(self, event, data={}, socket_id=None):
+    def trigger(self, event, data={}, socket_id=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         json_data = json.dumps(data, cls=self.pusher.encoder)
         query_string = self.signed_query(event, json_data, socket_id)
         signed_path = "%s?%s" % (self.path, query_string)
-        status = self.send_request(signed_path, json_data)
+        status = self.send_request(signed_path, json_data, timeout=timeout)
         if status == 202:
             return True
         elif status == 401:
@@ -110,8 +111,8 @@ class Channel(object):
             ret += "&socket_id=" + unicode(socket_id)
         return ret
 
-    def send_request(self, signed_path, data_string):
-        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port)
+    def send_request(self, signed_path, data_string, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
         http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
         return http.getresponse().status
 
