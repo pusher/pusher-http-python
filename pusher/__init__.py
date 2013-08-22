@@ -1,34 +1,13 @@
-import httplib, time, sys, hmac
-
-try:
-    import json
-    # some old versions of json lib don't implement dumps()
-    if not hasattr(json, "dumps"):
-        raise ImportError
-except ImportError:
-    import simplejson as json
-
-# 2.4 hashlib implementation: http://code.krypto.org/python/hashlib/
-import hashlib
 import os
+import sys
+import time
+import httplib
+import hmac
+import json
+import hashlib
 import urllib
 import re
 import socket
-
-sha_constructor = hashlib.sha256
-
-# But 2.4 hmac isn't compatible with hashlib.sha256 so use this wrapper
-# http://www.schwarz.eu/opensource/projects/trac_captcha/browser/trac_captcha/cryptobox.py?rev=79%3Aed771e5252dc#L34
-class AlgorithmWrapper(object):
-    def __init__(self, algorithm):
-        self.algorithm = algorithm
-        self.digest_size = self.algorithm().digest_size
-
-    def new(self, *args, **kwargs):
-        return self.algorithm(*args, **kwargs)
-
-if sys.version_info < (2, 5):
-    sha_constructor = AlgorithmWrapper(hashlib.sha256)
 
 host    = 'api.pusherapp.com'
 port    = 80
@@ -99,7 +78,7 @@ class Channel(object):
     def signed_query(self, event, json_data, socket_id):
         query_string = self.compose_querystring(event, json_data, socket_id)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
-        signature = hmac.new(self.pusher.secret, string_to_sign, sha_constructor).hexdigest()
+        signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
         return "%s&auth_signature=%s" % (query_string, signature)
 
     def compose_querystring(self, event, json_data, socket_id):
@@ -137,7 +116,7 @@ class Channel(object):
       if custom_string:
         string_to_sign += ":%s" % custom_string
 
-      signature = hmac.new(self.pusher.secret, string_to_sign, sha_constructor).hexdigest()
+      signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
 
       return "%s:%s" % (self.pusher.key,signature)
 
