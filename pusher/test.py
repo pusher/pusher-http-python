@@ -5,6 +5,7 @@ import mox
 import sys
 sys.path.append("../")
 
+import socket
 import pusher
 
 class PropertiesTest(unittest.TestCase):
@@ -164,7 +165,7 @@ class ResponsesTest(unittest.TestCase):
 
 def stub_connection(moxer, request_args=None, response_status=202):
     moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
-    httplib.HTTPConnection.__init__('api.pusherapp.com', 80)
+    httplib.HTTPConnection.__init__('api.pusherapp.com', 80, timeout=socket._GLOBAL_DEFAULT_TIMEOUT)
 
     moxer.StubOutWithMock(httplib.HTTPConnection, 'request')
     method_to_stub = httplib.HTTPConnection.request
