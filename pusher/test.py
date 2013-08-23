@@ -163,7 +163,7 @@ class ResponsesTest(unittest.TestCase):
         eq_(auth, expected_auth)
 
 
-def stub_connection(moxer, request_args=None, response_status=202):
+def stub_connection(moxer, request_args=None, response_status=202, body=''):
     moxer.StubOutWithMock(httplib.HTTPConnection, '__init__')
     httplib.HTTPConnection.__init__('api.pusherapp.com', 80, timeout=socket._GLOBAL_DEFAULT_TIMEOUT)
 
@@ -178,6 +178,7 @@ def stub_connection(moxer, request_args=None, response_status=202):
     mock_response = moxer.CreateMock(httplib.HTTPResponse)
     httplib.HTTPConnection.getresponse().AndReturn(mock_response)
     mock_response.status = response_status
+    mock_response.read().AndReturn(body)
     moxer.StubOutWithMock(time, 'time')
     time.time().AndReturn(1272382015)
 
