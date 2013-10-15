@@ -17,7 +17,4 @@ setup(
     ],
     keywords='pusher rest realtime websockets service',
     license='MIT',
-    install_requires=[
-        'setuptools',
-    ],
 )
