@@ -174,14 +174,15 @@ except ImportError:
     pass
 
 class TornadoChannel(Channel):
-    def trigger(self, event, data={}, socket_id=None, callback=None):
+    def trigger(self, event, data={}, socket_id=None, callback=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         self.callback = callback
-        return super(TornadoChannel, self).trigger(event, data, socket_id)
+        return super(TornadoChannel, self).trigger(event, data, socket_id, timeout=timeout)
 
-    def send_request(self, signed_path, data_string):
+    def send_request(self, signed_path, data_string, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+        timeout = None if timeout == socket._GLOBAL_DEFAULT_TIMEOUT else timeout
         import tornado.httpclient
         absolute_url = self.get_absolute_path(signed_path)
-        request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string)
+        request = tornado.httpclient.HTTPRequest(absolute_url, method='POST', body=data_string, request_timeout=timeout)
         client = tornado.httpclient.AsyncHTTPClient()
         client.fetch(request, callback=self.callback)
         # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
