@@ -53,6 +53,12 @@ class Pusher(object):
         self._channels[name] = channel_type(name, self)
         return self._channels[name]
 
+    def webhook(self, request_body, header_key, header_signature):
+        return WebHook(self, request_body, header_key, header_signature)
+
+    def django_webhook(self, request):
+        return DjangoWebHook(self, request)
+
 class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
@@ -187,6 +193,33 @@ class TornadoChannel(Channel):
         client.fetch(request, callback=self.callback)
         # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
         return 202, ""
+
+class WebHook(object):
+    def __init__(self, pusher, request_body, header_key, header_signature):
+        self.pusher = pusher
+        self.request_body = request_body
+        self.data = json.loads(request_body)
+        self.header_key = header_key
+        self.header_signature = header_signature
+
+    def valid(self):
+        if self.header_key != self.pusher.key:
+            return False
+        signature = hmac.new(self.pusher.secret, self.request_body, hashlib.sha256).hexdigest()
+        return self.header_signature == signature
+
+    def events(self):
+        return self.data['events']
+
+    def time(self):
+        # TODO: convert this to a native datetime
+        return self.data['time_ms']
+
+class DjangoWebHook(WebHook):
+    def __init__(self, pusher, request):
+        header_key = request.META.get('HTTP_X_PUSHER_KEY')
+        header_signature = request.META.get('HTTP_X_PUSHER_SIGNATURE')
+        super(DjangoWebHook, self).__init__(pusher, request.body, header_key, header_signature)
 
 class AuthenticationError(Exception):
     pass
