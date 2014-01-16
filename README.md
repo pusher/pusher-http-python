@@ -23,6 +23,41 @@ You can also specify `socket_id` as a separate argument, as described in <http:/
 
     p['a_channel'].trigger('an_event', {'some': 'data'}, socket_id)
 
+## Webhooks
+
+To handle incoming webhooks, such as `channel_occupied`, `channel_vacated`, etc., you can do this:
+
+    request_body = "a variable containing the body of the request"
+    header_key = "the request's HTTP_X_PUSHER_KEY header"
+    header_signature = "the request's HTTP_X_PUSHER_SIGNATURE header"
+
+    # Build the webhook
+    webhook = p.webhook(request_body, header_key, header_signature)
+
+    # Validate the webhook
+    if not webhook.valid():
+        # return 401 Unauthorized
+        pass
+
+    # Handle the incoming webhook's events
+    for event in webhook.events():
+        if event['name'] == 'channel_occupied':
+            print "Channel %s has been occupied" % event['channel']
+        elif event['name'] == 'channel_vacated':
+            print "Channel %s has been vacated" % event['channel']
+
+There is also a shortcut for handling Django requests:
+
+    def webhook_controller(request):
+        """Assume this is a normal Django controller in views.py"""
+        webhook = p.django_webhook(request)
+
+        # And then you can use this just like above
+        if webhook.valid():
+            print "webhook is valid :)"
+        else:
+            print "webhook ain't valid! :\"
+
 ## Advanced usage
 
 A custom json encoder class, such as the one provided by Django may also be specified:
