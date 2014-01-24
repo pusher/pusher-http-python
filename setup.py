@@ -1,8 +1,10 @@
 from setuptools import setup
 
+from pusher import __version__
+
 setup(
     name='pusher',
-    version='0.10',
+    version=__version__,
     description='A Python library for sending messages to Pusher',
     author='Pusher',
     author_email='support@pusher.com',

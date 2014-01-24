@@ -7,6 +7,8 @@ import urllib
 import re
 import requests
 
+__version__ = '0.10.1'
+
 HOST    = 'api.pusherapp.com'
 PORT    = 80
 APP_ID  = None
@@ -83,7 +85,9 @@ class Channel(object):
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
     def _compose_querystring(self, event, json_data, socket_id):
-        hash_str = hashlib.md5().update(json_data).hexdigest()
+        hasher = hashlib.md5()
+        hasher.update(json_data)
+        hash_str = hasher.hexdigest()
         params = {
             'auth_key': self.pusher.key,
             'auth_timestamp': int(time.time()),
