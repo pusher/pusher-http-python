@@ -19,5 +19,6 @@ setup(
     license='MIT',
     install_requires=[
         'setuptools',
+        'requests',
     ],
 )
