@@ -60,14 +60,53 @@ class Pusher(object):
         self.encoder = encoder
         self._channels = {}
 
+    def _make_channel(self, name):
+        self._channels[name] = channel_type(name, self)
+        return self._channels[name]
+
     def __getitem__(self, key):
         if not self._channels.has_key(key):
             return self._make_channel(key)
         return self._channels[key]
 
-    def _make_channel(self, name):
-        self._channels[name] = channel_type(name, self)
-        return self._channels[name]
+    def _get_auth_signature(self, path, params):
+        """Get an auth_signature to add to the params
+
+        A hash of the string made up of the lowercased, alphabetized, keys and
+        their corresponding values
+        via http://pusher.com/docs/rest_api#auth-signature
+        """
+        sorted_qs_items = [("%s=%s" % (key.lower(), params[key])) for key in sorted(params.keys())]
+        query_string = "&".join(sorted_qs_items)
+        string_to_sign = "POST\n%s\n%s" % (path, query_string)
+        return hmac.new(self.secret, string_to_sign, hashlib.sha256).hexdigest()
+
+    def _compose_querystring(self, path, json_data, socket_id=None, **params):
+        hasher = hashlib.md5()
+        hasher.update(json_data)
+        hash_str = hasher.hexdigest()
+        params.update({
+            'auth_key': self.key,
+            'auth_timestamp': int(time.time()),
+            'auth_version': '1.0',
+            'body_md5': hash_str,
+        })
+        if socket_id:
+            params['socket_id'] = unicode(socket_id)
+        params['auth_signature'] = self._get_auth_signature(path, params)
+        return urllib.urlencode(params)
+
+    def _get_url(self, path, json_data, socket_id, **params):
+        query_string = self._compose_querystring(path, json_data, socket_id, **params)
+        return "%s://%s%s?%s" % (self.protocol,
+                                 self.host,
+                                 path,
+                                 query_string)
+
+    def send_request(self, url, data_string, timeout=None):
+        headers = {'content-type': 'application/json'}
+        response = requests.post(url, data=data_string, headers=headers, timeout=timeout)
+        return response.status_code, response.content
 
     def webhook(self, request_body, header_key, header_signature):
         return WebHook(self, request_body, header_key, header_signature)
@@ -82,53 +121,12 @@ class Channel(object):
         self.name = str(name)
         if not CHANNEL_NAME_RE.match(self.name):
             raise NameError("Invalid channel id: %s" % self.name)
-        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
-
-    def _get_auth_signature(self, path, params):
-        """Get an auth_signature to add to the params
-
-        A hash of the string made up of the lowercased, alphabetized, keys and
-        their corresponding values
-        via http://pusher.com/docs/rest_api#auth-signature
-        """
-        print params
-        sorted_qs_items = [("%s=%s" % (key.lower(), params[key])) for key in sorted(params.keys())]
-        print sorted_qs_items
-        query_string = "&".join(sorted_qs_items)
-        string_to_sign = "POST\n%s\n%s" % (path, query_string)
-        return hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
-
-    def _compose_querystring(self, json_data, socket_id, **params):
-        hasher = hashlib.md5()
-        hasher.update(json_data)
-        hash_str = hasher.hexdigest()
-        params.update({
-            'auth_key': self.pusher.key,
-            'auth_timestamp': int(time.time()),
-            'auth_version': '1.0',
-            'body_md5': hash_str,
-        })
-        if socket_id:
-            params['socket_id'] = unicode(socket_id)
-        params['auth_signature'] = self._get_auth_signature(self.path, params)
-        return urllib.urlencode(params)
-
-    def _get_url(self, json_data, socket_id, **extra_params):
-        query_string = self._compose_querystring(json_data, socket_id, **extra_params)
-        return "%s://%s%s?%s" % (self.pusher.protocol,
-                                 self.pusher.host,
-                                 self.path,
-                                 query_string)
-
-    def _send_request(self, url, data_string, timeout=None):
-        headers = {'content-type': 'application/json'}
-        response = requests.post(url, data=data_string, headers=headers, timeout=timeout)
-        return response.status_code, response.content
 
     def trigger(self, event_name, data={}, socket_id=None, timeout=None):
         json_data = json.dumps(data, cls=self.pusher.encoder)
-        url = self._get_url(json_data, socket_id, name=event_name)
-        status, resp_content = self._send_request(url, json_data, timeout=timeout)
+        path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
+        url = self.pusher._get_url(path, json_data, socket_id, name=event_name)
+        status, resp_content = self.pusher.send_request(url, json_data, timeout=timeout)
         if status == 202:
             return True
         elif status == 401:
@@ -159,16 +157,26 @@ class Channel(object):
         return r
 
 
-class GoogleAppEngineChannel(Channel):
-    def _send_request(self, url, data_string):
-        from google.appengine.api import urlfetch
-        response = urlfetch.fetch(
-            url=url,
-            payload=data_string,
-            method=urlfetch.POST,
-            headers={'Content-Type': 'application/json'}
-        )
-        return response.status_code, response.content
+# App Engine Channel, only if we can import the lib
+try:
+    from google.appengine.api import urlfetch
+
+    class GoogleAppEngineChannel(Channel):
+        def __init__(self, *args, **kwargs):
+            super(GoogleAppEngineChannel, self, *args, **kwargs)
+
+            # Patch pusher's send_request()
+            def send_request(pusher, url, data_string):
+                response = urlfetch.fetch(
+                    url=url,
+                    payload=data_string,
+                    method=urlfetch.POST,
+                    headers={'Content-Type': 'application/json'}
+                )
+                return response.status_code, response.content
+            self.pusher.send_request = send_request
+except ImportError:
+    pass
 
 
 # App Engine NDB channel, outer try import/except as it uses decorator
@@ -178,12 +186,12 @@ try:
     class GaeNdbChannel(GoogleAppEngineChannel):
         @ndb.tasklet
         def trigger_async(self, event_name, data=None, socket_id=None):
-            """Async trigger that in turn calls _send_request_async"""
+            """Async trigger that in turn calls send_request_async"""
             if data is None:
                 data = {}
             json_data = json.dumps(data)
-            url = self._get_url(json_data, socket_id, name=event_name)
-            status = yield self._send_request_async(url, json_data)
+            url = self.pusher._get_url(json_data, socket_id, name=event_name)
+            status = yield self.send_request_async(url, json_data)
             if status == 202:
                 raise ndb.Return(True)
             elif status == 401:
@@ -194,7 +202,7 @@ try:
                 raise Exception("Unexpected return status %s" % status)
 
         @ndb.tasklet
-        def _send_request_async(self, url, data_string):
+        def send_request_async(self, url, data_string):
             """Send request and yield while waiting for future result"""
             ctx = ndb.get_context()
             secure = (self.pusher.protocol == 'https')
@@ -212,19 +220,19 @@ except ImportError:
 
 class TornadoChannel(Channel):
     def trigger(self, event, data={}, socket_id=None, callback=None, timeout=None):
-        self.callback = callback
+        # Patch pusher's send_request()
+        def send_request(pusher, url, data_string, timeout=None):
+            import tornado.httpclient
+            request = tornado.httpclient.HTTPRequest(url,
+                                                     method='POST',
+                                                     body=data_string,
+                                                     request_timeout=timeout)
+            client = tornado.httpclient.AsyncHTTPClient()
+            client.fetch(request, callback=callback)
+            # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
+            return 202, ""
+        self.pusher.send_request = send_request
         return super(TornadoChannel, self).trigger(event, data, socket_id, timeout=timeout)
-
-    def _send_request(self, url, data_string, timeout=None):
-        import tornado.httpclient
-        request = tornado.httpclient.HTTPRequest(url,
-                                                 method='POST',
-                                                 body=data_string,
-                                                 request_timeout=timeout)
-        client = tornado.httpclient.AsyncHTTPClient()
-        client.fetch(request, callback=self.callback)
-        # Returning 202 to avoid Channel errors. Actual error handling takes place in callback.
-        return 202, ""
 
 
 class WebHook(object):
