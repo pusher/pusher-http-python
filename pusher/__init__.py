@@ -111,10 +111,20 @@ class Pusher(object):
         return response.status_code, response.content
 
     def get_channels(self, filter_by_prefix=None, info=None):
-        """TODO: implement this
+        """TODO: implement this, returning stub data for now
 
         http://pusher.com/docs/rest_api
         """
+        return {
+            'channels': {
+                'presence-foobar': {
+                    'user_count': 42
+                },
+                'presence-another': {
+                    'user_count': 123
+                }
+            }
+        }
 
     def webhook(self, request_body, header_key, header_signature):
         return WebHook(self, request_body, header_key, header_signature)
@@ -178,10 +188,17 @@ class Channel(object):
             info_properties.append('subscription_count')
         info = ",".join(info_properties)
         url = self.pusher._get_url(path, info=info)
-        print url
+        # print url
         status, resp_content = self.pusher.send_request(url)
-        print status
-        print resp_content
+        # print status
+        # print resp_content
+
+        # Getting 500 errors, so temporarily just returning stub data
+        return {
+            'occupied': True,
+            'user_count': 42,
+            'subscription_count': 42
+        }
 
     def get_users(self):
         """
@@ -189,10 +206,18 @@ class Channel(object):
         """
         path = '/apps/%s/channels/%s/users' % (self.pusher.app_id, urllib.quote(self.name))
         url = self.pusher._get_url(path)
-        print url
+        # print url
         status, resp_content = self.pusher.send_request(url)
-        print status
-        print resp_content
+        # print status
+        # print resp_content
+
+        # Getting 500 errors, so temporarily just returning stub data
+        return {
+            'users': [
+                { 'id': 1 },
+                { 'id': 2 },
+            ]
+        }
 
 
 # App Engine Channel, only if we can import the lib
