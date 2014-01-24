@@ -105,7 +105,8 @@ class Pusher(object):
                                  path,
                                  query_string)
 
-    def send_request(self, url, data=None, headers=None, timeout=None):
+    def send_request(self, url, data=None, timeout=None):
+        headers = {'Content-Type': 'application/json'}
         response = requests.post(url, data=data, headers=headers, timeout=timeout)
         return response.status_code, response.content
 
@@ -133,10 +134,8 @@ class Channel(object):
         json_data = json.dumps(data, cls=self.pusher.encoder)
         path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
         url = self.pusher._get_url(path, json_data, socket_id, name=event_name)
-        headers = {'content-type': 'application/json'}
         status, resp_content = self.pusher.send_request(url,
                                                         json_data,
-                                                        headers=headers,
                                                         timeout=timeout)
         if status == 202:
             return True
