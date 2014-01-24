@@ -7,7 +7,7 @@ import urllib
 import re
 import requests
 
-__version__ = '0.10.1'
+__version__ = '0.10'
 
 HOST    = 'api.pusherapp.com'
 PORT    = 80
@@ -85,23 +85,21 @@ class Channel(object):
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
     def _compose_querystring(self, event, json_data, socket_id):
+        query_string = ""
+        query_string += "auth_key=%s" % self.pusher.key
+        query_string += "&auth_timestamp=%s" % int(time.time())
+        query_string += "&auth_version=1.0"
         hasher = hashlib.md5()
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
-        params = {
-            'auth_key': self.pusher.key,
-            'auth_timestamp': int(time.time()),
-            'auth_version': '1.0',
-            'body_md5': hash_str,
-            'name': event,
-        }
+        query_string += "&body_md5=%s" % hash_str
+        query_string += "&name=%s" % event
         if socket_id:
-            params['socket_id'] = unicode(socket_id)
-        query_string = urllib.urlencode(params)
+            query_string += "&socket_id=%s" % unicode(socket_id)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
         signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
-        params['auth_signature'] = signature
-        return urllib.urlencode(params)
+        query_string += "&auth_signature=%s" % signature
+        return query_string
 
     def _get_url(self, event, json_data, socket_id):
         query_string = self._compose_querystring(event, json_data, socket_id)
