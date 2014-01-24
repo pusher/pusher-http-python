@@ -84,25 +84,37 @@ class Channel(object):
             raise NameError("Invalid channel id: %s" % self.name)
         self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
 
-    def _compose_querystring(self, event, json_data, socket_id):
-        query_string = ""
-        query_string += "auth_key=%s" % self.pusher.key
-        query_string += "&auth_timestamp=%s" % int(time.time())
-        query_string += "&auth_version=1.0"
+    def _get_auth_signature(self, path, params):
+        """Get an auth_signature to add to the params
+
+        A hash of the string made up of the lowercased, alphabetized, keys and
+        their corresponding values
+        via http://pusher.com/docs/rest_api#auth-signature
+        """
+        print params
+        sorted_qs_items = [("%s=%s" % (key.lower(), params[key])) for key in sorted(params.keys())]
+        print sorted_qs_items
+        query_string = "&".join(sorted_qs_items)
+        string_to_sign = "POST\n%s\n%s" % (path, query_string)
+        return hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
+
+    def _compose_querystring(self, json_data, socket_id, **params):
         hasher = hashlib.md5()
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
-        query_string += "&body_md5=%s" % hash_str
-        query_string += "&name=%s" % event
+        params.update({
+            'auth_key': self.pusher.key,
+            'auth_timestamp': int(time.time()),
+            'auth_version': '1.0',
+            'body_md5': hash_str,
+        })
         if socket_id:
-            query_string += "&socket_id=%s" % unicode(socket_id)
-        string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
-        signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
-        query_string += "&auth_signature=%s" % signature
-        return query_string
+            params['socket_id'] = unicode(socket_id)
+        params['auth_signature'] = self._get_auth_signature(self.path, params)
+        return urllib.urlencode(params)
 
-    def _get_url(self, event, json_data, socket_id):
-        query_string = self._compose_querystring(event, json_data, socket_id)
+    def _get_url(self, json_data, socket_id, **extra_params):
+        query_string = self._compose_querystring(json_data, socket_id, **extra_params)
         return "%s://%s%s?%s" % (self.pusher.protocol,
                                  self.pusher.host,
                                  self.path,
@@ -113,9 +125,9 @@ class Channel(object):
         response = requests.post(url, data=data_string, headers=headers, timeout=timeout)
         return response.status_code, response.content
 
-    def trigger(self, event, data={}, socket_id=None, timeout=None):
+    def trigger(self, event_name, data={}, socket_id=None, timeout=None):
         json_data = json.dumps(data, cls=self.pusher.encoder)
-        url = self._get_url(event, json_data, socket_id)
+        url = self._get_url(json_data, socket_id, name=event_name)
         status, resp_content = self._send_request(url, json_data, timeout=timeout)
         if status == 202:
             return True
@@ -165,12 +177,12 @@ try:
 
     class GaeNdbChannel(GoogleAppEngineChannel):
         @ndb.tasklet
-        def trigger_async(self, event, data=None, socket_id=None):
+        def trigger_async(self, event_name, data=None, socket_id=None):
             """Async trigger that in turn calls _send_request_async"""
             if data is None:
                 data = {}
             json_data = json.dumps(data)
-            url = self._get_url(event, json_data, socket_id)
+            url = self._get_url(json_data, socket_id, name=event_name)
             status = yield self._send_request_async(url, json_data)
             if status == 202:
                 raise ndb.Return(True)
