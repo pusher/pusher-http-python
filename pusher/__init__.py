@@ -81,7 +81,9 @@ class Pusher(object):
         string_to_sign = "POST\n%s\n%s" % (path, query_string)
         return hmac.new(self.secret, string_to_sign, hashlib.sha256).hexdigest()
 
-    def _compose_querystring(self, path, json_data, socket_id=None, **params):
+    def _compose_querystring(self, path, json_data=None, socket_id=None, **params):
+        if json_data is None:
+            json_data = ""
         hasher = hashlib.md5()
         hasher.update(json_data)
         hash_str = hasher.hexdigest()
@@ -96,17 +98,22 @@ class Pusher(object):
         params['auth_signature'] = self._get_auth_signature(path, params)
         return urllib.urlencode(params)
 
-    def _get_url(self, path, json_data, socket_id, **params):
+    def _get_url(self, path, json_data=None, socket_id=None, **params):
         query_string = self._compose_querystring(path, json_data, socket_id, **params)
         return "%s://%s%s?%s" % (self.protocol,
                                  self.host,
                                  path,
                                  query_string)
 
-    def send_request(self, url, data_string, timeout=None):
-        headers = {'content-type': 'application/json'}
-        response = requests.post(url, data=data_string, headers=headers, timeout=timeout)
+    def send_request(self, url, data=None, headers=None, timeout=None):
+        response = requests.post(url, data=data, headers=headers, timeout=timeout)
         return response.status_code, response.content
+
+    def get_channels(self, filter_by_prefix=None, info=None):
+        """TODO: implement this
+
+        http://pusher.com/docs/rest_api
+        """
 
     def webhook(self, request_body, header_key, header_signature):
         return WebHook(self, request_body, header_key, header_signature)
@@ -126,7 +133,11 @@ class Channel(object):
         json_data = json.dumps(data, cls=self.pusher.encoder)
         path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
         url = self.pusher._get_url(path, json_data, socket_id, name=event_name)
-        status, resp_content = self.pusher.send_request(url, json_data, timeout=timeout)
+        headers = {'content-type': 'application/json'}
+        status, resp_content = self.pusher.send_request(url,
+                                                        json_data,
+                                                        headers=headers,
+                                                        timeout=timeout)
         if status == 202:
             return True
         elif status == 401:
@@ -155,6 +166,34 @@ class Channel(object):
         if custom_data:
             r['channel_data'] = custom_data
         return r
+
+    def get_info(self, get_user_count=False, get_subscription_count=False):
+        """TODO: implement this
+        http://pusher.com/docs/rest_api
+        """
+        path = '/apps/%s/channels/%s' % (self.pusher.app_id, urllib.quote(self.name))
+        info_properties = []
+        if get_user_count:
+            info_properties.append('user_count')
+        if get_subscription_count:
+            info_properties.append('subscription_count')
+        info = ",".join(info_properties)
+        url = self.pusher._get_url(path, info=info)
+        print url
+        status, resp_content = self.pusher.send_request(url)
+        print status
+        print resp_content
+
+    def get_users(self):
+        """
+        http://pusher.com/docs/rest_api
+        """
+        path = '/apps/%s/channels/%s/users' % (self.pusher.app_id, urllib.quote(self.name))
+        url = self.pusher._get_url(path)
+        print url
+        status, resp_content = self.pusher.send_request(url)
+        print status
+        print resp_content
 
 
 # App Engine Channel, only if we can import the lib
