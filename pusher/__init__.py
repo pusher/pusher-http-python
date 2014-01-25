@@ -69,7 +69,7 @@ class Pusher(object):
             return self._make_channel(key)
         return self._channels[key]
 
-    def _get_auth_signature(self, path, params):
+    def _get_auth_signature(self, request_type, path, params):
         """Get an auth_signature to add to the params
 
         A hash of the string made up of the lowercased, alphabetized, keys and
@@ -78,36 +78,36 @@ class Pusher(object):
         """
         sorted_qs_items = [("%s=%s" % (key.lower(), params[key])) for key in sorted(params.keys())]
         query_string = "&".join(sorted_qs_items)
-        string_to_sign = "POST\n%s\n%s" % (path, query_string)
+        string_to_sign = "%s\n%s\n%s" % (request_type, path, query_string)
         return hmac.new(self.secret, string_to_sign, hashlib.sha256).hexdigest()
 
-    def _compose_querystring(self, path, json_data=None, socket_id=None, **params):
-        if json_data is None:
-            json_data = ""
-        hasher = hashlib.md5()
-        hasher.update(json_data)
-        hash_str = hasher.hexdigest()
+    def _compose_querystring(self, path, request_type, json_data=None, socket_id=None, **params):
         params.update({
             'auth_key': self.key,
             'auth_timestamp': int(time.time()),
             'auth_version': '1.0',
-            'body_md5': hash_str,
         })
+        if json_data is not None:
+            hasher = hashlib.md5()
+            hasher.update(json_data)
+            hash_str = hasher.hexdigest()
+            params['body_md5'] = hash_str
         if socket_id:
             params['socket_id'] = unicode(socket_id)
-        params['auth_signature'] = self._get_auth_signature(path, params)
+        params['auth_signature'] = self._get_auth_signature(request_type, path, params)
         return urllib.urlencode(params)
 
-    def _get_url(self, path, json_data=None, socket_id=None, **params):
-        query_string = self._compose_querystring(path, json_data, socket_id, **params)
+    def _get_url(self, path, request_type, json_data=None, socket_id=None, **params):
+        query_string = self._compose_querystring(path, request_type, json_data, socket_id, **params)
         return "%s://%s%s?%s" % (self.protocol,
                                  self.host,
                                  path,
                                  query_string)
 
-    def send_request(self, url, data=None, timeout=None):
+    def send_request(self, url, request_type, data=None, timeout=None):
         headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, data=data, headers=headers, timeout=timeout)
+        func = getattr(requests, request_type.lower())
+        response = func(url, data=data, headers=headers, timeout=timeout)
         return response.status_code, response.content
 
     def get_channels(self, filter_by_prefix=None, info=None):
@@ -143,8 +143,9 @@ class Channel(object):
     def trigger(self, event_name, data={}, socket_id=None, timeout=None):
         json_data = json.dumps(data, cls=self.pusher.encoder)
         path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
-        url = self.pusher._get_url(path, json_data, socket_id, name=event_name)
+        url = self.pusher._get_url(path, 'POST', json_data, socket_id, name=event_name)
         status, resp_content = self.pusher.send_request(url,
+                                                        'POST',
                                                         json_data,
                                                         timeout=timeout)
         if status == 202:
@@ -187,37 +188,18 @@ class Channel(object):
         if get_subscription_count:
             info_properties.append('subscription_count')
         info = ",".join(info_properties)
-        url = self.pusher._get_url(path, info=info)
-        # print url
-        status, resp_content = self.pusher.send_request(url)
-        # print status
-        # print resp_content
-
-        # Getting 500 errors, so temporarily just returning stub data
-        return {
-            'occupied': True,
-            'user_count': 42,
-            'subscription_count': 42
-        }
+        url = self.pusher._get_url(path, 'GET', info=info)
+        status, resp_content = self.pusher.send_request(url, 'GET')
+        return json.loads(resp_content)
 
     def get_users(self):
         """
         http://pusher.com/docs/rest_api
         """
         path = '/apps/%s/channels/%s/users' % (self.pusher.app_id, urllib.quote(self.name))
-        url = self.pusher._get_url(path)
-        # print url
-        status, resp_content = self.pusher.send_request(url)
-        # print status
-        # print resp_content
-
-        # Getting 500 errors, so temporarily just returning stub data
-        return {
-            'users': [
-                { 'id': 1 },
-                { 'id': 2 },
-            ]
-        }
+        url = self.pusher._get_url(path, 'GET')
+        status, resp_content = self.pusher.send_request(url, 'GET')
+        return json.loads(resp_content)
 
 
 # App Engine Channel, only if we can import the lib
@@ -229,11 +211,12 @@ try:
             super(GoogleAppEngineChannel, self, *args, **kwargs)
 
             # Patch pusher's send_request()
-            def send_request(pusher, url, data_string):
+            def send_request(pusher, url, request_type, data_string):
+                method = getattr(urlfetch, request_type)
                 response = urlfetch.fetch(
                     url=url,
                     payload=data_string,
-                    method=urlfetch.POST,
+                    method=method,
                     headers={'Content-Type': 'application/json'}
                 )
                 return response.status_code, response.content
@@ -248,13 +231,13 @@ try:
 
     class GaeNdbChannel(GoogleAppEngineChannel):
         @ndb.tasklet
-        def trigger_async(self, event_name, data=None, socket_id=None):
+        def trigger_async(self, event_name, request_type, data=None, socket_id=None):
             """Async trigger that in turn calls send_request_async"""
             if data is None:
                 data = {}
             json_data = json.dumps(data)
-            url = self.pusher._get_url(json_data, socket_id, name=event_name)
-            status = yield self.send_request_async(url, json_data)
+            url = self.pusher._get_url(json_data, request_type, socket_id, name=event_name)
+            status = yield self.send_request_async(url, request_type, json_data)
             if status == 202:
                 raise ndb.Return(True)
             elif status == 401:
@@ -265,14 +248,14 @@ try:
                 raise Exception("Unexpected return status %s" % status)
 
         @ndb.tasklet
-        def send_request_async(self, url, data_string):
+        def send_request_async(self, url, request_type, data_string):
             """Send request and yield while waiting for future result"""
             ctx = ndb.get_context()
             secure = (self.pusher.protocol == 'https')
             result = yield ctx.urlfetch(
                 url=url,
                 payload=data_string,
-                method='POST',
+                method=request_type,
                 headers={'Content-Type': 'application/json'},
                 validate_certificate=secure,
             )
@@ -284,10 +267,10 @@ except ImportError:
 class TornadoChannel(Channel):
     def trigger(self, event, data={}, socket_id=None, callback=None, timeout=None):
         # Patch pusher's send_request()
-        def send_request(pusher, url, data_string, timeout=None):
+        def send_request(pusher, url, request_type, data_string, timeout=None):
             import tornado.httpclient
             request = tornado.httpclient.HTTPRequest(url,
-                                                     method='POST',
+                                                     method=request_type,
                                                      body=data_string,
                                                      request_timeout=timeout)
             client = tornado.httpclient.AsyncHTTPClient()
