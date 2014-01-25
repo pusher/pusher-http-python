@@ -5,3 +5,5 @@ include/
 lib/
 man/
 pusher/test_config.py
+dist
+pusher.egg-info
