@@ -7,7 +7,7 @@ import urllib
 import re
 import requests
 
-__version__ = '0.10'
+__version__ = '0.10.1'
 
 HOST    = 'api.pusherapp.com'
 PORT    = 80
