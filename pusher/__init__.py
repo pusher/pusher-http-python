@@ -296,6 +296,13 @@ class WebHook(object):
         return self.header_signature == signature
 
     def events(self):
+        """Should return a list of dicts of the format:
+        {
+            'channel': 'presence-something-something', # The name of your channel
+            'name': 'member-added', # The name of the event
+            'user_id': '12345', # Whatever you assigned your user_id to be in your authenticate() call
+        }
+        """
         return self.data['events']
 
     def time(self):
