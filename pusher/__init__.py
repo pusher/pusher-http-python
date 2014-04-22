@@ -145,7 +145,7 @@ try:
         @ndb.tasklet
         def trigger_async(self, event, data={}, socket_id=None):
             """Async trigger that in turn calls send_request_async"""
-            json_data = json.dumps(data)
+            json_data = json.dumps(data, cls=self.pusher.encoder)
             status = yield self.send_request_async(self.signed_query(event, json_data, socket_id), json_data)
             if status == 202:
                 raise ndb.Return(True)
