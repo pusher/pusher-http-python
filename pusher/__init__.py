@@ -34,10 +34,10 @@ def join_attributes(attributes):
   return u','.join(attributes)
 
 class Pusher(object):
-  def __init__(self, config, backend_class=SynchronousBackend):
+  def __init__(self, config, backend=None):
     if not isinstance(config, Config):
       raise TypeError("config should be a pusher.Config object")
-    self.backend = backend_class(config)
+    self.backend = backend or SynchronousBackend(config)
     self.config = config
 
   @request_method
