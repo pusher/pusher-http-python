@@ -20,8 +20,15 @@ class RequestMethod(object):
   def make_request(self, *args, **kwargs):
     return self.f(self.pusher, *args, **kwargs)
 
+def doc_string(doc):
+  def decorator(f):
+    f.__doc__ = doc
+    return f
+  return decorator
+
 def request_method(f):
   @property
+  @doc_string(f.__doc__)
   def wrapped(self):
     return RequestMethod(self, f)
   return wrapped
@@ -42,6 +49,11 @@ class Pusher(object):
 
   @request_method
   def trigger(self, channels, event_name, data, socket_id=None):
+    '''
+    Trigger an event on one or more channels, see:
+
+    http://pusher.com/docs/rest_api#method-post-event
+    '''
     if isinstance(channels, six.string_types) or not isinstance(channels, (collections.Sized, collections.Iterable)):
       raise TypeError("Expected a collection of channels (each channel should be %s)" % text)
 
@@ -76,6 +88,11 @@ class Pusher(object):
 
   @request_method
   def channels_info(self, prefix_filter=None, attributes=[]):
+    '''
+    Get information on multiple channels, see:
+
+    http://pusher.com/docs/rest_api#method-get-channels
+    '''
     params = {}
     if attributes:
       params['info'] = join_attributes(attributes)
@@ -85,6 +102,11 @@ class Pusher(object):
 
   @request_method
   def channel_info(self, channel, attributes=[]):
+    '''
+    Get information on a specific channel, see:
+
+    http://pusher.com/docs/rest_api#method-get-channel
+    '''
     validate_channel(channel)
 
     params = {}
@@ -94,6 +116,11 @@ class Pusher(object):
 
   @request_method
   def users_info(self, channel):
+    '''
+    Fetch user ids currently subscribed to a presence channel
+
+    http://pusher.com/docs/rest_api#method-get-users
+    '''
     validate_channel(channel)
 
     return Request(self.config, GET, "/apps/%s/channels/%s/users" % (self.config.app_id, channel))
