@@ -15,9 +15,7 @@ class TornadoBackend(object):
 
     def send_request(self, request):
         method = request.method
-        scheme = self.config.scheme
         url = "http://%s:%s%s?%s" % (self.config.host, self.config.port, request.path, request.query_string)
-        params = request.query_params
         data = request.body
         headers = {'Content-Type': 'application/json'}
 
