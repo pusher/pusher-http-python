@@ -7,16 +7,16 @@ from pusher.util import process_response
 import requests
 
 class RequestsBackend(object):
-  def __init__(self, config, **options):
-    self.options = {'verify': True}
-    self.options.update(options)
+    def __init__(self, config, **options):
+        self.options = {'verify': True}
+        self.options.update(options)
 
-  def send_request(self, request):
-    resp = requests.request(
-      request.method,
-      request.url,
-      headers=request.headers,
-      data=request.body,
-      **self.options
-    )
-    return process_response(resp.status_code, resp.text)
+    def send_request(self, request):
+        resp = requests.request(
+            request.method,
+            request.url,
+            headers=request.headers,
+            data=request.body,
+            **self.options
+        )
+        return process_response(resp.status_code, resp.text)
