@@ -28,9 +28,9 @@ class Request(object):
             self.query_params = params
         else:
             raise NotImplementedError("Only GET and POST supported")
-        self.generate_auth()
+        self._generate_auth()
 
-    def generate_auth(self):
+    def _generate_auth(self):
         self.body_md5 = hashlib.md5(self.body).hexdigest()
         self.query_params.update({
             'auth_key': self.config.key,
