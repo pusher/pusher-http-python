@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pusher
 import aiohttp
+import pusher
 
 class AsyncIOBackend:
   def __init__(self, config):

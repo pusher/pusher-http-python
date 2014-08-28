@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
 
+import json
+import re
 import six
 import sys
-import re
-import json
 
 channel_name_re = re.compile('^[-a-zA-Z0-9_=@,.;]+$')
 app_id_re       = re.compile('^[0-9]+$')

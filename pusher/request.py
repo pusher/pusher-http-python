@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
+from pusher.util import GET, POST
 
-import six
-import json
-import hashlib
-import time
-import hmac
 import copy
-
-from pusher.util import *
+import hashlib
+import hmac
+import json
+import six
+import time
 
 def make_query_string(params):
   return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))

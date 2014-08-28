@@ -2,12 +2,11 @@
 
 from __future__ import print_function, absolute_import, division
 
-import unittest
+import hashlib
+import hmac
 import os
 import six
-import time
-import hmac
-import hashlib
+import unittest
 
 from pusher import Config
 

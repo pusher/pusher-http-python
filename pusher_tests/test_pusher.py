@@ -2,12 +2,10 @@
 
 from __future__ import print_function, absolute_import, division
 
-import sys
 import unittest
-import json
 
 from pusher import Config, Pusher
-from pusher.util import *
+from pusher.util import GET
 
 try:
   import unittest.mock as mock

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
+from pusher.util import process_response
 
 import requests
-
-from pusher.util import *
 
 class RequestsBackend(object):
   def __init__(self, config, **options):

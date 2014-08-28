@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
+from pusher.util import app_id_re, channel_name_re, text
 
-import os
-import sys
-import time
-import json
 import hashlib
 import hmac
+import json
+import os
 import re
-import socket
-import ssl
-import collections
 import six
-import six.moves.http_client as http_client
-
-from pusher.util import *
+import time
 
 try:
   compare_digest = hmac.compare_digest

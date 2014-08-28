@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
-
-import json
-import collections
-import six
-
-from pusher.request import Request
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
 from pusher.config import Config
+from pusher.request import Request
 from pusher.sync import SynchronousBackend
-from pusher.util import *
+from pusher.util import GET, POST, text, validate_channel
+
+import collections
+import json
+import six
 
 class RequestMethod(object):
   def __init__(self, pusher, f):

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, unicode_literals, absolute_import, division
+from __future__ import (print_function, unicode_literals, absolute_import,
+                        division)
+from pusher.util import PusherError, process_response
+from six.moves import http_client
 
 import socket
-import six
-import six.moves.http_client as http_client
 import ssl
-
-from pusher.util import *
+import sys
 
 class SynchronousBackend(object):
   def __init__(self, config, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
