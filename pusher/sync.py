@@ -10,6 +10,11 @@ import ssl
 import sys
 
 class SynchronousBackend(object):
+    """Adapter for the standard-library http client.
+
+    :param config: an instance of pusher.Config
+    :param timeout: configurable timeout for the TCP connection
+    """
     def __init__(self, config, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         self.config = config
         self.timeout = timeout

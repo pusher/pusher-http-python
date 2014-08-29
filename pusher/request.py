@@ -15,6 +15,16 @@ def make_query_string(params):
     return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))
 
 class Request(object):
+    """Represents the request to be made to the Pusher API.
+
+    An instance of that object is passed to the backend's send_request method
+    for each request.
+
+    :param config: an instance of pusher.Config
+    :param method: HTTP method as a string
+    :param path: The target path on the destination host
+    :param params: Query params or body depending on the method
+    """
     def __init__(self, config, method, path, params={}):
         self.config = config
         self.method = method

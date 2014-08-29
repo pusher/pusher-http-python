@@ -43,6 +43,16 @@ def join_attributes(attributes):
     return u','.join(attributes)
 
 class Pusher(object):
+    """Client for the Pusher HTTP API.
+
+    This client supports various backend adapters to support various http
+    libraries available in the python ecosystem. 
+
+    :param config: a pusher.Config instance
+    :param backend: an object that responds to the send_request(request)
+                    method. If none is provided, a
+                    python.sync.SynchronousBackend instance is created.
+    """
     def __init__(self, config, backend=None):
         if not isinstance(config, Config):
             raise TypeError("config should be a pusher.Config object")

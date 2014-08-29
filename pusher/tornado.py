@@ -7,6 +7,11 @@ import tornado
 import tornado.httpclient
 
 class TornadoBackend(object):
+    """Adapter for the tornado.httpclient module.
+
+    :param config: a pusher.Config instance
+    :param timeout: configurable timeout for the connection
+    """
     def __init__(self, config, timeout=None):
         self.config = config
         self.timeout = timeout

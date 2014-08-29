@@ -4,6 +4,12 @@ import aiohttp
 import pusher
 
 class AsyncIOBackend:
+    """Adapter for the aiohttp module.
+
+    This backend is only availble for python 3 users and doesn't support SSL.
+
+    :param config: pusher.Config instance
+    """
     def __init__(self, config):
         self.config = config
         if config.ssl:

@@ -7,6 +7,11 @@ from pusher.util import process_response
 import requests
 
 class RequestsBackend(object):
+    """Adapter for the requests module.
+
+    :param config: an instance of pusher.Config
+    :param options: key-value passed into the requests.request constructor
+    """
     def __init__(self, config, **options):
         self.options = {'verify': True}
         self.options.update(options)
