@@ -22,7 +22,24 @@ except AttributeError:
         return reduce(lambda x, y: x | y, [ord(x) ^ ord(y) for x, y in zip(a, b)]) == 0
 
 class Config(object):
-    def __init__(self, app_id, key, secret, ssl, host=None, port=None, cluster=None):
+    """The Config class holds the pusher credentials and other connection
+    infos to the HTTP API.
+
+    :param app_id: The Pusher application ID
+    :param key: The Pusher application key
+    :param secret: The Pusher application secret
+    :param ssl: Whenever to use SSL or plain HTTP 
+    :param host: Used for custom host destination
+    :param port: Used for custom port destination
+    :param cluster: Convention for other clusters than the main Pusher-one.
+      Eg: 'eu' will resolve to the api-eu.pusherapp.com host
+
+    Usage::
+
+      >> from pusher import Config
+      >> c = Config('455', 'mykey', 'mysecret')
+    """
+    def __init__(self, app_id, key, secret, ssl=False, host=None, port=None, cluster=None):
         if not isinstance(app_id, six.text_type):
             raise TypeError("App ID should be %s" % text)
 
@@ -63,6 +80,15 @@ class Config(object):
 
     @classmethod
     def from_url(cls, url):
+        """Alternate constructor that extracts the information from a URL.
+
+        :param url: String containing a URL
+
+        Usage::
+
+          >> from pusher import Config
+          >> c = Config.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
+        """
         m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", url)
         if not m:
             raise Exception("Unparsable url: %s" % url)
@@ -71,6 +97,17 @@ class Config(object):
 
     @classmethod
     def from_env(cls, env='PUSHER_URL'):
+        """Alternate constructor that extracts the information from an URL
+        stored in an environment variable. The pusher heroku addon will set
+        the PUSHER_URL automatically when installed for example.
+
+        :param env: Name of the environment variable
+
+        Usage::
+
+          >> from pusher import Config
+          >> c = Config.from_env("PUSHER_URL")
+        """
         val = os.environ.get(env)
         if not val:
             raise Exception("Environment variable %s not found" % env)
@@ -78,9 +115,16 @@ class Config(object):
 
     @property
     def scheme(self):
+        """Returns "http" or "https" scheme depending on the ssl setting."""
         return 'https' if self.ssl else 'http'
 
     def authenticate_subscription(self, channel, socket_id, custom_data=None):
+        """Used to generate delegated client subscription token.
+
+        :param channel: name of the channel to authorize subscription to
+        :param socket_id: id of the socket that requires authorization
+        :param custom_data: used on presence channels to provide user info
+        """
         if not isinstance(channel, six.text_type):
             raise TypeError('Channel should be %s' % text)
 
@@ -109,6 +153,13 @@ class Config(object):
         return result
 
     def validate_webhook(self, key, signature, body):
+        """Used to validate incoming webhook messages. When used it guarantees
+        that the sender is Pusher and not someone else impersonating it.
+
+        :param key: key used to sign the body
+        :param signature: signature that was given with the body
+        :param body: content that needs to be verified
+        """
         if not isinstance(key, six.text_type):
             raise TypeError('key should be %s' % text)
 
