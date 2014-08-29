@@ -128,8 +128,17 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(conf.host, u'host')
         self.assertEqual(conf.app_id, u'4')
 
+    def test_initialize_from_env(self):
         with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
-            conf = Config.from_url()
+            conf = Config.from_env()
+            self.assertEqual(conf.ssl, True)
+            self.assertEqual(conf.key, u'plah')
+            self.assertEqual(conf.secret, u'bob')
+            self.assertEqual(conf.host, u'somehost')
+            self.assertEqual(conf.app_id, u'42')
+
+        with mock.patch.object(os, 'environ', new={'PUSHER_DSN':'https://plah:bob@somehost/apps/42'}):
+            conf = Config.from_env('PUSHER_DSN')
             self.assertEqual(conf.ssl, True)
             self.assertEqual(conf.key, u'plah')
             self.assertEqual(conf.secret, u'bob')

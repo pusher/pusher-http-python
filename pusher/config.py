@@ -62,13 +62,19 @@ class Config(object):
         self.ssl = ssl
 
     @classmethod
-    def from_url(cls, url=None):
-        url = url or six.text_type(os.environ['PUSHER_URL'])
+    def from_url(cls, url):
         m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", url)
         if not m:
             raise Exception("Unparsable url: %s" % url)
         ssl = m.group(1) == 'https'
         return cls(key=m.group(2), secret=m.group(3), host=m.group(4), app_id=m.group(5), ssl=ssl)
+
+    @classmethod
+    def from_env(cls, env='PUSHER_URL'):
+        val = os.environ.get(env)
+        if not val:
+            raise Exception("Environment variable %s not found" % env)
+        return cls.from_url(six.text_type(val))
 
     @property
     def scheme(self):
