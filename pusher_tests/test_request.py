@@ -4,7 +4,8 @@ from __future__ import print_function, absolute_import, division
 
 import unittest
 
-from pusher import Config, Request
+from pusher import Config
+from pusher.request import Request
 
 try:
     import unittest.mock as mock
