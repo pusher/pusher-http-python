@@ -15,7 +15,7 @@ credentials for your app.
 Features
 --------
 
-* Python 2 and 3 support
+* Python 2.6, 2.7 and 3.3 support
 * Adapters for various http libraries like requests, aiohttp and tornado
 * WebHook validation
 * Signature generation for socket subscriptions
@@ -23,11 +23,15 @@ Features
 Installation
 ------------
 
-The pusher-rest-python library will be availabe on PyPi:
-`pip install python-rest`
+You can install this module using your package management method or choice,
+normally `easy_install` or `pip`. For example:
 
-Configuration
--------------
+```bash
+pip install pusher-rest
+```
+
+Getting started
+---------------
 
 The minimum configuration required to use the Pusher object are the three
 constructor arguments which identify your Pusher app. You can find them by
@@ -38,20 +42,18 @@ from pusher import Config, Pusher
 pusher = Pusher(config=Config(app_id=u'4', key=u'key', secret=u'secret'))
 ```
 
-### From URL
+You can then trigger events to channels. Channel and event names may only
+contain alphanumeric characters, `-` and `_`:
 
 ```python
-from pusher import Config, Pusher
-pusher = Pusher(config=Config.from_url(u'http://key:secret@somehost/apps/4'))
+pusher.trigger('a_channel', 'an_event', {'some': 'data'})
 ```
 
-### From ENV
-
-On Heroku the addon sets the PUSHER_URL environment variable with the url.
+You can also specify `socket_id` as a separate argument, as described in
+<http://pusher.com/docs/duplicates>:
 
 ```python
-from pusher import Config, Pusher
-pusher = Pusher(config=Config.from_env())
+pusher.trigger('a_channel', 'an_event', {'some': 'data'}, socket_id)
 ```
 
 ### Additional options
@@ -61,13 +63,13 @@ documentation to get all the details.
 
 TODO: Add link to code docs here
 
-Test
-----
+Running the tests
+-----------------
 
 To run the tests run `python setup.py test`
 
 License
 -------
 
-This code is free to use under the terms of the MIT license.
+Copyright (c) 2014 Pusher Ltd. See LICENSE for details.
 
