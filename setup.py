@@ -2,7 +2,7 @@
 from setuptools import setup
 setup(
     name='pusher-rest',
-    version='0.1',
+    version='0.1.0',
     description='A Python library to interract with the Pusher API',
     url='http://github.com/pusher/pusher-rest-python',
     author='Pusher',
