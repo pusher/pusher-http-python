@@ -36,12 +36,12 @@ class TestPusher(unittest.TestCase):
         json_dumps_mock.assert_called_once({u'message': u'hello world'})
 
     def test_trigger_disallow_single_channel(self):
-        with self.assertRaises(TypeError):
-            self.pusher.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello world'})
+        self.assertRaises(TypeError, lambda:
+            self.pusher.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello world'}))
 
     def test_trigger_disallow_invalid_channels(self):
-        with self.assertRaises(ValueError):
-            self.pusher.trigger.make_request([u'some_channel!'], u'some_event', {u'message': u'hello world'})
+        self.assertRaises(ValueError, lambda:
+            self.pusher.trigger.make_request([u'some_channel!'], u'some_event', {u'message': u'hello world'}))
 
     def test_channels_info_default_success_case(self):
         request = self.pusher.channels_info.make_request()
