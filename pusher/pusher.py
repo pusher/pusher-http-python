@@ -40,7 +40,7 @@ def join_attributes(attributes):
         if not isinstance(attr, six.text_type):
             raise TypeError('Each attr should be %s' % text)
 
-    return u','.join(attributes)
+    return six.text_type(',').join(attributes)
 
 class Pusher(object):
     """Client for the Pusher HTTP API.
