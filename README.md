@@ -1,6 +1,8 @@
 Pusher REST Python library
 ==========================
 
+![Travis-CI](https://travis-ci.org/pusher/pusher-rest-python.svg)
+
 *status: Alpha*
 
 This is the new python library that will replace the "pusher" module once it
