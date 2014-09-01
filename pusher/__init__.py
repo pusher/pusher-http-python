@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pusher.config import Config
-from pusher.pusher import Pusher
+from .config import Config
+from .pusher import Pusher
 
 __all__ = [
     'Config',
