@@ -1,13 +1,24 @@
 import os
 import sys
 import time
-import httplib
+try:
+    import http.client as httplib
+except ImportError:
+    import httplib
 import hmac
 import json
 import hashlib
-import urllib
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 import re
 import socket
+
+if sys.version < '3':
+    text_type = unicode
+else:
+    text_type = str
 
 host    = 'api.pusherapp.com'
 port    = 80
@@ -52,7 +63,7 @@ class Pusher(object):
         self._channels = {}
 
     def __getitem__(self, key):
-        if not self._channels.has_key(key):
+        if key not in self._channels:
             return self._make_channel(key)
         return self._channels[key]
 
@@ -66,7 +77,7 @@ class Channel(object):
         self.name = str(name)
         if not channel_name_re.match(self.name):
             raise NameError("Invalid channel id: %s" % self.name)
-        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, urllib.quote(self.name))
+        self.path = '/apps/%s/channels/%s/events' % (self.pusher.app_id, quote(self.name))
 
     def trigger(self, event, data={}, socket_id=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         json_data = json.dumps(data, cls=self.pusher.encoder)
@@ -87,25 +98,25 @@ class Channel(object):
     def signed_query(self, event, json_data, socket_id):
         query_string = self.compose_querystring(event, json_data, socket_id)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
-        signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
+        signature = hmac.new(self.pusher.secret.encode('utf-8'), string_to_sign.encode('utf-8'), hashlib.sha256).hexdigest()
         return "%s&auth_signature=%s" % (query_string, signature)
 
     def compose_querystring(self, event, json_data, socket_id):
         hasher = hashlib.md5()
-        hasher.update(json_data)
+        hasher.update(json_data.encode('UTF-8'))
         hash_str = hasher.hexdigest()
         ret = "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (self.pusher.key, int(time.time()), hash_str, event)
         if socket_id:
-            ret += "&socket_id=" + unicode(socket_id)
+            ret += "&socket_id=" + text_type(socket_id)
         return ret
 
     def send_request(self, signed_path, data_string, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         if self.pusher.port == 443:
-            http = httplib.HTTPSConnection(self.pusher.host, self.pusher.port, timeout=timeout)
+            client = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
         else:
-            http = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
-        http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
-        resp = http.getresponse()
+            client = httplib.HTTPSConnection(self.pusher.host, self.pusher.port, timeout=timeout)
+        client.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
+        resp = client.getresponse()
         return resp.status, resp.read()
 
     def authenticate(self, socket_id, custom_data=None):
