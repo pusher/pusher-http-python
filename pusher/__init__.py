@@ -19,17 +19,20 @@ channel_name_re = re.compile('^[-a-zA-Z0-9_=@,.;]+$')
 app_id_re       = re.compile('^[0-9]+$')
 
 def url2options(url):
+    port = None
     if url.startswith('http://'):
         url = url[7:]
+        port = 80
     elif url.startswith('https://'):
         url = url[8:]
+        port = 443
     else:
         assert False, "invalid URL"
     key, url = url.split(':', 1)
     secret, url = url.split('@', 1)
     host, url = url.split('/', 1)
     url, app_id = url.split('/', 1)
-    return {'key': key, 'secret': secret, 'host': host, 'app_id': app_id}
+    return {'key': key, 'secret': secret, 'host': host, 'app_id': app_id, 'port': port }
 
 def pusher_from_url(url=None):
     url = url or os.environ['PUSHER_URL']
@@ -97,7 +100,10 @@ class Channel(object):
         return ret
 
     def send_request(self, signed_path, data_string, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
-        http = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
+        if self.pusher.port == 443:
+            http = httplib.HTTPSConnection(self.pusher.host, self.pusher.port, timeout=timeout)
+        else:
+            http = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
         http.request('POST', signed_path, data_string, {'Content-Type': 'application/json'})
         resp = http.getresponse()
         return resp.status, resp.read()
