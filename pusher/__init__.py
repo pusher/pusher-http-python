@@ -14,6 +14,7 @@ except ImportError:
     from urllib import quote
 import re
 import socket
+import urlparse
 
 if sys.version < '3':
     text_type = unicode
@@ -21,7 +22,6 @@ else:
     text_type = str
 
 host    = 'api.pusherapp.com'
-port    = 80
 app_id  = None
 key     = None
 secret  = None
@@ -30,27 +30,24 @@ channel_name_re = re.compile('^[-a-zA-Z0-9_=@,.;]+$')
 app_id_re       = re.compile('^[0-9]+$')
 
 def url2options(url):
-    port = None
-    if url.startswith('http://'):
-        url = url[7:]
-        port = 80
-    elif url.startswith('https://'):
-        url = url[8:]
-        port = 443
-    else:
-        assert False, "invalid URL"
-    key, url = url.split(':', 1)
-    secret, url = url.split('@', 1)
-    host, url = url.split('/', 1)
-    url, app_id = url.split('/', 1)
-    return {'key': key, 'secret': secret, 'host': host, 'app_id': app_id, 'port': port }
+    p = urlparse.urlsplit(url)
+    if not p.path.startswith("/apps/"):
+        raise ValueError("invalid URL path")
+    return {
+        'key': p.username,
+        'secret': p.password,
+        'host': p.hostname,
+        'app_id': p.path[6:],
+        'port': p.port,
+        'secure': p.scheme == 'https',
+    }
 
 def pusher_from_url(url=None):
     url = url or os.environ['PUSHER_URL']
     return Pusher(**url2options(url))
 
 class Pusher(object):
-    def __init__(self, app_id=None, key=None, secret=None, host=None, port=None, encoder=None):
+    def __init__(self, app_id=None, key=None, secret=None, host=None, port=None, encoder=None, secure=False):
         _globals = globals()
         self.app_id = str(app_id or _globals['app_id'])
         if not app_id_re.match(self.app_id):
@@ -58,7 +55,8 @@ class Pusher(object):
         self.key = key or _globals['key']
         self.secret = secret or _globals['secret']
         self.host = host or _globals['host']
-        self.port = port or _globals['port']
+        self.port = port or (443 if secure else 80)
+        self.secure = secure
         self.encoder = encoder
         self._channels = {}
 
@@ -111,7 +109,7 @@ class Channel(object):
         return ret
 
     def send_request(self, signed_path, data_string, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
-        if self.pusher.port == 443:
+        if not self.pusher.secure:
             client = httplib.HTTPConnection(self.pusher.host, self.pusher.port, timeout=timeout)
         else:
             client = httplib.HTTPSConnection(self.pusher.host, self.pusher.port, timeout=timeout)
