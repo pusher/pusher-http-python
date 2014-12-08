@@ -69,6 +69,10 @@ class Pusher(object):
         self._channels[name] = channel_type(name, self)
         return self._channels[name]
 
+    def sign(self, message):
+        return hmac.new(self.secret.encode('utf-8'),
+                        message, hashlib.sha256).hexdigest()
+
 class Channel(object):
     def __init__(self, name, pusher):
         self.pusher = pusher
@@ -96,7 +100,7 @@ class Channel(object):
     def signed_query(self, event, json_data, socket_id):
         query_string = self.compose_querystring(event, json_data, socket_id)
         string_to_sign = "POST\n%s\n%s" % (self.path, query_string)
-        signature = hmac.new(self.pusher.secret.encode('utf-8'), string_to_sign.encode('utf-8'), hashlib.sha256).hexdigest()
+        signature = self.pusher.sign(string_to_sign.encode('utf-8'))
         return "%s&auth_signature=%s" % (query_string, signature)
 
     def compose_querystring(self, event, json_data, socket_id):
@@ -138,7 +142,7 @@ class Channel(object):
       if custom_string:
         string_to_sign += ":%s" % custom_string
 
-      signature = hmac.new(self.pusher.secret, string_to_sign, hashlib.sha256).hexdigest()
+      signature = self.pusher.sign(string_to_sign.encode('utf-8'))
 
       return "%s:%s" % (self.pusher.key,signature)
 
