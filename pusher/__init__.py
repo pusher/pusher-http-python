@@ -10,6 +10,7 @@ import json
 import hashlib
 try:
     import urllib.parse as urlparse
+    from urllib.parse import quote
 except ImportError:
     import urlparse
 import re
