@@ -9,12 +9,12 @@ import hmac
 import json
 import hashlib
 try:
+    import urllib.parse as urlparse
     from urllib.parse import quote
 except ImportError:
-    from urllib import quote
+    import urlparse
 import re
 import socket
-import urlparse
 
 if sys.version < '3':
     text_type = unicode
