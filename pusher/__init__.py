@@ -14,7 +14,10 @@ except ImportError:
     from urllib import quote
 import re
 import socket
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 if sys.version < '3':
     text_type = unicode
