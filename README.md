@@ -30,6 +30,8 @@ normally `easy_install` or `pip`. For example:
 pip install pusher-rest
 ```
 
+**Note: When 1.0 is reached `pusher-rest` will no longer be updated. Instead `pusher` should be used**
+
 Getting started
 ---------------
 
