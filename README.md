@@ -1,5 +1,7 @@
 # Pusher Python module
 
+**Version 1.0 of this module is under development in the [1.0.0 branch](https://github.com/pusher/pusher-http-python/tree/1.0.0)**
+
 ## Installation
 
 This module has been tested with Python 2.6 and 2.7.
