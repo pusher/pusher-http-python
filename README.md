@@ -48,22 +48,175 @@ You can then trigger events to channels. Channel and event names may only
 contain alphanumeric characters, `-` and `_`:
 
 ```python
-pusher.trigger('a_channel', 'an_event', {'some': 'data'})
+pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
+```
+
+If you wish to trigger an event on multiple channels, pass in a list as the first parameter:
+
+```python
+pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'})
 ```
 
 You can also specify `socket_id` as a separate argument, as described in
-<http://pusher.com/docs/duplicates>:
+<http://pusher.com/docs/duplicates>. This will excluded the connection with that socket_id from receiving the event:
 
 ```python
-pusher.trigger('a_channel', 'an_event', {'some': 'data'}, socket_id)
+pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'}, socket_id)
 ```
 
-### Additional options
+Querying Application State
+-----------------
 
-The Config and Pusher constructors supports more options. See the code
-documentation to get all the details.
+### Getting Information For All Channels
 
-TODO: Add link to code docs here
+
+#### `Pusher::channels_info`
+
+|Argument   |Description |
+|:-:|:-:|
+|prefix_filter `String`  |**Default: `None`** <br> Filter the channels returned by their prefix   |
+|attributes `Collection` | **Default: `[]`** <br> A collection of attributes which should be returned for each channel. If empty, an empty dictionary of attributes will be returned for each channel. <br> Available attributes: `"user_count"`.
+
+|Return Values   |Description   |
+|:-:|:-:|
+|channels `Dict`   | A parsed response from the HTTP API. See example.   |
+
+##### Example
+
+```python
+channels = pusher.channels_info(u"presence-", [u'user_count'])
+
+#=> {u'channels': {u'presence-chatroom': {u'user_count': 2}, u'presence-notifications': {u'user_count': 1}}}
+```
+
+### Getting Information For A Specific Channel
+
+#### `Pusher::channel_info`
+
+|Argument   |Description   |
+|:-:|:-:|
+|channel `String`  |**Required** <br> The name of the channel you wish to query|
+|attributes `Collection` | **Default: `[]`** <br> A collection of attributes to be returned for the channel. <br><br> Available attributes: <br> `"user_count"` : Number of *distinct* users currently subscribed. **Applicable only to presence channels**. <br> `"subscription_count"`: [BETA]: Number of *connections* currently subscribed to the channel. Please [contact us](http://support.pusher.com) to enable this feature.
+
+|Return Values   |Description   |
+|:-:|:-:|
+|channel `Dict`   |  A parsed response from the HTTP API. See example.  |
+
+##### Example
+
+```python
+channel = pusher.channel_info(u'presence-chatroom', [u"user_count"])
+#=> {u'user_count': 42, u'occupied': True}
+```
+
+### Getting User Information For A Presence Channel
+
+#### `Pusher::users_info`
+
+|Argument   |Description   |
+|:-:|:-:|
+|channel `String`   |**Required** <br> The name of the *presence* channel you wish to query   |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|users `Dict`   | A parsed response from the HTTP API. See example.   |
+
+##### Example
+
+```python
+pusher.users_info(u'presence-chatroom')
+#=> {u'users': [{u'id': u'1035'}, {u'id': u'4821'}]}
+```
+
+Authenticating Channel Subscription
+-----------------
+
+#### `Config::authenticate_subscription`
+
+In order for users to subscribe to a private- or presence-channel, they must be authenticated by your server.
+
+The client will make a POST request to an endpoint (either "/pusher/auth" or any which you specify) with a body consisting of the channel's name and socket_id.
+
+Using your `Config` instance, with which you initialized `Pusher`, you can generate an authentication signature. Having responded to the request with this signature, the subscription will be authenticated.
+
+|Argument   |Description   |
+|:-:|:-:|
+|channel `String`   |**Required**<br> The name of the channel, sent to you in the POST request    |
+|socket_id `String` | **Required**<br> The channel's socket_id, also sent to you in the POST request |
+|custom_data `Dict` |**Required for presence channels** <br> This will be a dictionary containing the data you want associated with a member of a presence channel. A `"user_id"` key is *required*, and you can optionally pass in a `"user_info"` key. See the example below.  |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|response `Dict`   | A dictionary to send as a response to the authentication request.|
+
+##### Example
+
+###### Private Channels
+
+```python
+config = pusher.config
+auth = config.authenticate_subscription(
+
+  channel=u"private-channel",
+
+  socket_id=u"1234.12"
+)
+# return `auth` as a response
+```
+
+###### Presence Channels
+
+```python
+config = pusher.config
+
+auth = config.authenticate_subscription(
+
+  channel=u"presence-channel",
+
+  socket_id=u"1234.12",
+
+  custom_data={
+    u'user_id': u'1',
+    u'user_info': {
+      u'twitter': '@pusher'
+    }
+  }
+)
+# return `auth` as a response
+```
+
+Receiving Webhooks
+-----------------
+
+If you have webhooks set up to POST a payload to a specified endpoint, you may wish to validate that these are actually from Pusher. The `Config` object achieves this by checking the authentication signature in the request body using your application credentials.
+
+#### `Config::validate_webhook`
+
+|Argument   |Description   |
+|:-:|:-:|
+|key `String`   | **Required**<br>Pass in the value sent in the request headers under the key "X-PUSHER-KEY". The method will check this matches your app key.   |
+|signature `String` | **Required**<br>This is the value in the request headers under the key "X-PUSHER-SIGNATURE". The method will verify that this is the result of signing the request body against your app secret.  |
+|body `String` | **Required**<br>The JSON string of the request body received. |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|body_data `Dict`   | If validation was successful, the return value will be the parsed payload. Otherwise, it will be `None`.   |
+
+##### Example
+
+```python
+webhook = pusher.config.validate_webhook(
+
+  key="key_sent_in_header",
+
+  signature="signature_sent_in_header",
+
+  body="{ \"time_ms\": 1327078148132  \"events\": [ { \"name\": \"event_name\", \"some\": \"data\" }  ]}"
+)
+
+print webhook["events"]
+
+```
 
 Running the tests
 -----------------
@@ -74,4 +227,3 @@ License
 -------
 
 Copyright (c) 2014 Pusher Ltd. See LICENSE for details.
-
