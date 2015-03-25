@@ -16,7 +16,7 @@ class TestPusher(unittest.TestCase):
     def setUp(self):
         self.pusher = Pusher(config=Config.from_url(u'http://key:secret@somehost/apps/4'))
 
-    def test_trigger_success_case(self):
+    def test_trigger_with_channels_list_success_case(self):
         json_dumped = u'{"message": "hello world"}'
 
         with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
@@ -35,9 +35,24 @@ class TestPusher(unittest.TestCase):
 
         json_dumps_mock.assert_called_once({u'message': u'hello world'})
 
-    def test_trigger_disallow_single_channel(self):
+    def test_trigger_with_channel_string_success_case(self):
+        json_dumped = u'{"message": "hello world"}'
+
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = self.pusher.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello world'})
+
+            expected_params = {
+                u'channels': [u'some_channel'],
+                u'data': json_dumped,
+                u'name': u'some_event'
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+    def test_trigger_disallow_non_string_or_list_channels(self):
         self.assertRaises(TypeError, lambda:
-            self.pusher.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello world'}))
+            self.pusher.trigger.make_request({u'channels': u'test_channel'}, u'some_event', {u'message': u'hello world'}))
 
     def test_trigger_disallow_invalid_channels(self):
         self.assertRaises(ValueError, lambda:
