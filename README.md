@@ -51,17 +51,32 @@ contain alphanumeric characters, `-` and `_`:
 pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
 ```
 
-If you wish to trigger an event on multiple channels, pass in a list as the first parameter:
+Triggering Events
+-----------------
+
+To trigger an event on one or more channels, use the `trigger` method on the `Pusher` object.
+
+#### `Pusher::trigger`
+
+|Argument   |Description   |
+|:-:|:-:|
+|channels `String` or `Collection`   |**Required** <br> The name or list of names of the channel you wish to trigger events on   |
+|event `String`| **Required** <br> The name of the event you wish to trigger. |
+|data `JSONable data` | **Required** <br> The event's payload |
+|socket_id `String` | **Default:`None`** <br> The socket_id of the connection you wish to exclude from receiving the event. You can read more [here](http://pusher.com/docs/duplicates). |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
+
+##### Example
+
+This call will trigger to `'a_channel'` and `'another_channel'`, and exclude the recipient with socket_id `"1234.12"`.
 
 ```python
-pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'})
-```
+events = pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'}, "1234.12")
 
-You can also specify `socket_id` as a separate argument, as described in
-<http://pusher.com/docs/duplicates>. This will excluded the connection with that socket_id from receiving the event:
-
-```python
-pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'}, socket_id)
+#=> {'event_ids': {'another_channel': 'eudhq17zrhfbwc', 'a_channel': 'eudhq17zrhfbtn'}}
 ```
 
 Querying Application State
@@ -215,8 +230,15 @@ webhook = pusher.config.validate_webhook(
 )
 
 print webhook["events"]
-
 ```
+
+## Event Buffer
+
+Version 1.0.0 of the library introduced support for event buffering. The purpose of this functionality is to ensure that events that are triggered during whilst a client is offline for a short period of time will still be delivered upon reconnection.
+
+Note: this requires your Pusher application to be on a cluster that has the Event Buffer capability.
+
+As part of this the trigger function now returns a set of event_id values for each event triggered on a channel. These can then be used by the client to tell the Pusher service the last event it has received. If additional events have been triggered after that event ID the service has the opportunity to provide the client with those IDs.
 
 Running the tests
 -----------------
