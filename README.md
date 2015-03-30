@@ -1,7 +1,6 @@
-Pusher REST Python library
-==========================
+# Pusher REST Python library
 
-![Travis-CI](https://travis-ci.org/pusher/pusher-rest-python.svg)
+![Travis-CI](https://travis-ci.org/pusher/pusher-http-python.svg)
 
 *status: Alpha*
 
@@ -72,6 +71,20 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 ##### Example
 
 This call will trigger to `'a_channel'` and `'another_channel'`, and exclude the recipient with socket_id `"1234.12"`.
+
+```python
+pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'}, "1234.12")
+```
+
+#### Event Buffer
+
+Version 1.0.0 of the library introduced support for event buffering. The purpose of this functionality is to ensure that events that are triggered during whilst a client is offline for a short period of time will still be delivered upon reconnection.
+
+Note: this requires your Pusher application to be on a cluster that has the Event Buffer capability.
+
+As part of this the trigger function now returns a set of event_id values for each event triggered on a channel. These can then be used by the client to tell the Pusher service the last event it has received. If additional events have been triggered after that event ID the service has the opportunity to provide the client with those IDs.
+
+##### Example
 
 ```python
 events = pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'}, "1234.12")
@@ -231,14 +244,6 @@ webhook = pusher.config.validate_webhook(
 
 print webhook["events"]
 ```
-
-## Event Buffer
-
-Version 1.0.0 of the library introduced support for event buffering. The purpose of this functionality is to ensure that events that are triggered during whilst a client is offline for a short period of time will still be delivered upon reconnection.
-
-Note: this requires your Pusher application to be on a cluster that has the Event Buffer capability.
-
-As part of this the trigger function now returns a set of event_id values for each event triggered on a channel. These can then be used by the client to tell the Pusher service the last event it has received. If additional events have been triggered after that event ID the service has the opportunity to provide the client with those IDs.
 
 Running the tests
 -----------------
