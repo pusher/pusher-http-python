@@ -3,6 +3,9 @@
 from __future__ import print_function, absolute_import, division
 
 import os
+import six
+import hmac
+import hashlib
 import unittest
 
 from pusher import Config, Pusher
@@ -111,6 +114,64 @@ class TestPusher(unittest.TestCase):
 
         self.assertEqual(actual, expected)
         dumps_mock.assert_called_once_with(custom_data)            
+
+    def test_validate_webhook_success_case(self):
+        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
+
+        body = u'{"time_ms": 1000000}'
+        signature = six.text_type(hmac.new(pusher.config.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
+
+        with mock.patch('time.time', return_value=1200):
+            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), {u'time_ms': 1000000})
+
+    def test_validate_webhook_bad_types(self):
+        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
+
+        pusher.validate_webhook(u'key', u'signature', u'body')
+
+        # These things are meant to be human readable, so enforcing being text is
+        # sensible.
+
+        with mock.patch('time.time') as time_mock:
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(4, u'signature', u'body'))
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(b'test', u'signature', u'body'))
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', 4, u'body'))
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', b'signature', u'body'))
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', u'signature', 4))
+            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', u'signature', b'body'))
+
+        time_mock.assert_not_called()
+
+    def test_validate_webhook_bad_key(self):
+        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
+
+        body = u'some body'
+        signature = six.text_type(hmac.new(pusher.config.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
+
+        with mock.patch('time.time') as time_mock:
+            self.assertEqual(pusher.validate_webhook(u'badkey', signature, body), None)
+
+        time_mock.assert_not_called()
+
+    def test_validate_webhook_bad_signature(self):
+        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
+
+        body = u'some body'
+        signature = u'some signature'
+
+        with mock.patch('time.time') as time_mock:
+            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), None)
+
+        time_mock.assert_not_called()
+
+    def test_validate_webhook_bad_time(self):
+        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
+
+        body = u'{"time_ms": 1000000}'
+        signature = six.text_type(hmac.new(pusher.config.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
+
+        with mock.patch('time.time', return_value=1301):
+            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), None)
 
     def test_channels_info_default_success_case(self):
         request = self.pusher.channels_info.make_request()

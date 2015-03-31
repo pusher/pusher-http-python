@@ -4,21 +4,9 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.util import app_id_re, text
 
-import hashlib
-import hmac
 import json
 import re
 import six
-import time
-
-try:
-    compare_digest = hmac.compare_digest
-except AttributeError:
-    # Not secure when the length is supposed to be kept secret
-    def compare_digest(a, b):
-        if len(a) != len(b):
-            return False
-        return reduce(lambda x, y: x | y, [ord(x) ^ ord(y) for x, y in zip(a, b)]) == 0
 
 class Config(object):
     """The Config class holds the pusher credentials and other connection
@@ -103,44 +91,3 @@ class Config(object):
     def scheme(self):
         """Returns "http" or "https" scheme depending on the ssl setting."""
         return 'https' if self.ssl else 'http'
-
-
-    def validate_webhook(self, key, signature, body):
-        """Used to validate incoming webhook messages. When used it guarantees
-        that the sender is Pusher and not someone else impersonating it.
-
-        :param key: key used to sign the body
-        :param signature: signature that was given with the body
-        :param body: content that needs to be verified
-        """
-        if not isinstance(key, six.text_type):
-            raise TypeError('key should be %s' % text)
-
-        if not isinstance(signature, six.text_type):
-            raise TypeError('signature should be %s' % text)
-
-        if not isinstance(body, six.text_type):
-            raise TypeError('body should be %s' % text)
-
-        if key != self.key:
-            return None
-
-        generated_signature = six.text_type(hmac.new(self.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
-
-        if not compare_digest(generated_signature, signature):
-            return None
-
-        try:
-            body_data = json.loads(body)
-        except ValueError:
-            return None
-
-        time_ms = body_data.get('time_ms')
-        if not time_ms:
-            return None
-
-        print(abs(time.time()*1000 - time_ms))
-        if abs(time.time()*1000 - time_ms) > 300000:
-            return None
-
-        return body_data
