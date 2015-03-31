@@ -50,6 +50,32 @@ contain alphanumeric characters, `-` and `_`:
 pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
 ```
 
+## Configuration
+
+```python
+from pusher import Pusher, Config
+pusher = Pusher(app_id, key, secret, config=None, backend=None)
+```
+
+|Argument   |Description   |
+|:-:|:-:|
+|app_id `String`  |**Required** <br> The Pusher application ID |
+|key `String`     |**Required** <br> The Pusher application key |
+|secret `String`  |**Required** <br> The Pusher application secret token |
+|config `Config`  | **Default:`None`** <br> Additional Configuration via a `Config` object |
+|config.ssl `bool` | **Default:`False`** <br> Use HTTPS |
+|config.host `String` | **Default:`None`** <br> The host to connect to |
+|config.port `int` | **Default:`None`** <br>Which port to connect to |
+|config.cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
+|backend `Object`  | an object that responds to the send_request(request) method. If none is provided, a `python.sync.SynchronousBackend` instance is created. |
+
+##### Example
+
+```py
+from pusher import Pusher, Config
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', Config(ssl=True, cluster=u'eu'))
+```
+
 Triggering Events
 -----------------
 
