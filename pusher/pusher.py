@@ -159,7 +159,7 @@ class Pusher(object):
             params['socket_id'] = socket_id
         return Request(self.config, POST, "/apps/%s/events" % self.config.app_id, params)
         
-    def authenticate_subscription(self, channel, socket_id, custom_data=None):
+    def authenticate(self, channel, socket_id, custom_data=None):
         """Used to generate delegated client subscription token.
 
         :param channel: name of the channel to authorize subscription to

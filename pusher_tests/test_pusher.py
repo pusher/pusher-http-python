@@ -75,23 +75,23 @@ class TestPusher(unittest.TestCase):
         self.assertRaises(ValueError, lambda:
             self.pusher.trigger.make_request([u'some_channel!'], u'some_event', {u'message': u'hello world'}))
             
-    def test_authenticate_subscription_types(self):
+    def test_authenticate_types(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
-        self.assertRaises(TypeError, lambda: pusher.authenticate_subscription(b'plah', u'34554'))
-        self.assertRaises(TypeError, lambda: pusher.authenticate_subscription(u'plah', b'324435'))
-        self.assertRaises(ValueError, lambda: pusher.authenticate_subscription(u'::', u'345345'))
+        self.assertRaises(TypeError, lambda: pusher.authenticate(b'plah', u'34554'))
+        self.assertRaises(TypeError, lambda: pusher.authenticate(u'plah', b'324435'))
+        self.assertRaises(ValueError, lambda: pusher.authenticate(u'::', u'345345'))
 
-    def test_authenticate_subscription_for_private_channels(self):
+    def test_authenticate_for_private_channels(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         expected = {
             u'auth': u"foo:076740bd063f0299742a73bc5aac88900e5f35cb0185a1facbf45d326b5b204b"
         }
 
-        self.assertEqual(pusher.authenticate_subscription(u'private-channel', u'34523'), expected)
+        self.assertEqual(pusher.authenticate(u'private-channel', u'34523'), expected)
 
-    def test_authenticate_subscription_for_presence_channels(self):
+    def test_authenticate_for_presence_channels(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         custom_data = {
@@ -107,7 +107,7 @@ class TestPusher(unittest.TestCase):
         }
 
         with mock.patch('json.dumps', return_value=expected[u'channel_data']) as dumps_mock:
-            actual = pusher.authenticate_subscription(u'presence-channel', u'34543245', custom_data)
+            actual = pusher.authenticate(u'presence-channel', u'34543245', custom_data)
 
         self.assertEqual(actual, expected)
         dumps_mock.assert_called_once_with(custom_data)            
