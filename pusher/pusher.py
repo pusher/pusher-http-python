@@ -5,12 +5,14 @@ from __future__ import (print_function, unicode_literals, absolute_import,
 from pusher.config import Config
 from pusher.request import Request
 from pusher.sync import SynchronousBackend
-from pusher.util import GET, POST, text, validate_channel, app_id_re
+from pusher.util import GET, POST, text, validate_channel, app_id_re, channel_name_re
 
 import os
 import collections
 import json
 import six
+import hmac
+import hashlib
 
 class RequestMethod(object):
     def __init__(self, pusher, f):
@@ -156,6 +158,40 @@ class Pusher(object):
                 raise TypeError("Socket ID should be %s" % text)
             params['socket_id'] = socket_id
         return Request(self.config, POST, "/apps/%s/events" % self.config.app_id, params)
+        
+    def authenticate_subscription(self, channel, socket_id, custom_data=None):
+        """Used to generate delegated client subscription token.
+
+        :param channel: name of the channel to authorize subscription to
+        :param socket_id: id of the socket that requires authorization
+        :param custom_data: used on presence channels to provide user info
+        """
+        if not isinstance(channel, six.text_type):
+            raise TypeError('Channel should be %s' % text)
+
+        if not channel_name_re.match(channel):
+            raise ValueError('Channel should be a valid channel, got: %s' % channel)
+
+        if not isinstance(socket_id, six.text_type):
+            raise TypeError('Socket ID should %s' % text)
+
+        if custom_data:
+            custom_data = json.dumps(custom_data)
+
+        string_to_sign = "%s:%s" % (socket_id, channel)
+
+        if custom_data:
+            string_to_sign += ":%s" % custom_data
+
+        signature = hmac.new(self.config.secret.encode('utf8'), string_to_sign.encode('utf8'), hashlib.sha256).hexdigest()
+
+        auth = "%s:%s" % (self.config.key, signature)
+        result = {'auth': auth}
+
+        if custom_data:
+            result['channel_data'] = custom_data
+
+        return result
 
     @request_method
     def channels_info(self, prefix_filter=None, attributes=[]):

@@ -99,43 +99,6 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(conf.host, u'host')
         self.assertEqual(conf.app_id, u'4')
 
-    def test_authenticate_subscription_types(self):
-        conf = Config.from_url(u'http://foo:bar@host/apps/4')
-
-        self.assertRaises(TypeError, lambda: conf.authenticate_subscription(b'plah', u'34554'))
-        self.assertRaises(TypeError, lambda: conf.authenticate_subscription(u'plah', b'324435'))
-        self.assertRaises(ValueError, lambda: conf.authenticate_subscription(u'::', u'345345'))
-
-    def test_authenticate_subscription_for_private_channels(self):
-        conf = Config.from_url(u'http://foo:bar@host/apps/4')
-
-        expected = {
-            u'auth': u"foo:076740bd063f0299742a73bc5aac88900e5f35cb0185a1facbf45d326b5b204b"
-        }
-
-        self.assertEqual(conf.authenticate_subscription(u'private-channel', u'34523'), expected)
-
-    def test_authenticate_subscription_for_presence_channels(self):
-        conf = Config.from_url(u'http://foo:bar@host/apps/4')
-
-        custom_data = {
-            u'user_id': u'fred',
-            u'user_info': {
-                u'key': u'value'
-            }
-        }
-
-        expected = {
-            u'auth': u"foo:fbbc6d8acc85fc807bba060e2df45aba33deb8ad44cbee1633675b3ce73f4817",
-            u'channel_data': u"{\"user_id\":\"fred\",\"user_info\":{\"key\":\"value\"}}"
-        }
-
-        with mock.patch('json.dumps', return_value=expected[u'channel_data']) as dumps_mock:
-            actual = conf.authenticate_subscription(u'presence-channel', u'34543245', custom_data)
-
-        self.assertEqual(actual, expected)
-        dumps_mock.assert_called_once_with(custom_data)
-
     def test_validate_webhook_success_case(self):
         conf = Config.from_url(u'http://foo:bar@host/apps/4')
 

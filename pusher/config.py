@@ -2,7 +2,7 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.util import app_id_re, channel_name_re, text
+from pusher.util import app_id_re, text
 
 import hashlib
 import hmac
@@ -104,39 +104,6 @@ class Config(object):
         """Returns "http" or "https" scheme depending on the ssl setting."""
         return 'https' if self.ssl else 'http'
 
-    def authenticate_subscription(self, channel, socket_id, custom_data=None):
-        """Used to generate delegated client subscription token.
-
-        :param channel: name of the channel to authorize subscription to
-        :param socket_id: id of the socket that requires authorization
-        :param custom_data: used on presence channels to provide user info
-        """
-        if not isinstance(channel, six.text_type):
-            raise TypeError('Channel should be %s' % text)
-
-        if not channel_name_re.match(channel):
-            raise ValueError('Channel should be a valid channel, got: %s' % channel)
-
-        if not isinstance(socket_id, six.text_type):
-            raise TypeError('Socket ID should %s' % text)
-
-        if custom_data:
-            custom_data = json.dumps(custom_data)
-
-        string_to_sign = "%s:%s" % (socket_id, channel)
-
-        if custom_data:
-            string_to_sign += ":%s" % custom_data
-
-        signature = hmac.new(self.secret.encode('utf8'), string_to_sign.encode('utf8'), hashlib.sha256).hexdigest()
-
-        auth = "%s:%s" % (self.key, signature)
-        result = {'auth': auth}
-
-        if custom_data:
-            result['channel_data'] = custom_data
-
-        return result
 
     def validate_webhook(self, key, signature, body):
         """Used to validate incoming webhook messages. When used it guarantees
