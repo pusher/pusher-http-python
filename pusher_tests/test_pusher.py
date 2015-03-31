@@ -37,19 +37,19 @@ class TestPusher(unittest.TestCase):
     def test_initialize_from_env(self):
         with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
             pusher = Pusher.from_env()
-            self.assertEqual(pusher.conf.ssl, True)
-            self.assertEqual(pusher.conf.key, u'plah')
-            self.assertEqual(pusher.conf.secret, u'bob')
-            self.assertEqual(pusher.conf.host, u'somehost')
-            self.assertEqual(pusher.conf.app_id, u'42')
+            self.assertEqual(pusher.config.ssl, True)
+            self.assertEqual(pusher.config.key, u'plah')
+            self.assertEqual(pusher.config.secret, u'bob')
+            self.assertEqual(pusher.config.host, u'somehost')
+            self.assertEqual(pusher.config.app_id, u'42')
 
         with mock.patch.object(os, 'environ', new={'PUSHER_DSN':'https://plah:bob@somehost/apps/42'}):
             pusher = Pusher.from_env('PUSHER_DSN')
-            self.assertEqual(pusher.conf.ssl, True)
-            self.assertEqual(pusher.conf.key, u'plah')
-            self.assertEqual(pusher.conf.secret, u'bob')
-            self.assertEqual(pusher.conf.host, u'somehost')
-            self.assertEqual(pusher.conf.app_id, u'42')
+            self.assertEqual(pusher.config.ssl, True)
+            self.assertEqual(pusher.config.key, u'plah')
+            self.assertEqual(pusher.config.secret, u'bob')
+            self.assertEqual(pusher.config.host, u'somehost')
+            self.assertEqual(pusher.config.app_id, u'42')
 
     def test_trigger_success_case(self):
         json_dumped = u'{"message": "hello world"}'
