@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import, division
 
+import os
 import unittest
 
 from pusher import Config, Pusher
@@ -14,7 +15,38 @@ except ImportError:
 
 class TestPusher(unittest.TestCase):
     def setUp(self):
-        self.pusher = Pusher(config=Config.from_url(u'http://key:secret@somehost/apps/4'))
+        self.pusher = Pusher.from_url(u'http://key:secret@somehost/apps/4')
+        
+    def test_app_id_should_be_text(self):
+        self.assertRaises(TypeError, lambda: Pusher(key=u'key', secret=u'secret', ssl=False))
+        self.assertRaises(TypeError, lambda: Pusher(app_id=4, key=u'key', secret=u'secret'))
+        self.assertRaises(TypeError, lambda: Pusher(app_id=b'4', key=u'key', secret=u'secret'))
+
+    def test_key_should_be_text(self):
+        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', secret=u'secret'))
+        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=4, secret=u'secret'))
+        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=b'key', secret=u'secret'))
+
+    def test_secret_should_be_text(self):
+        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=4))
+        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=b'secret'))
+        
+    def test_initialize_from_env(self):
+        with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
+            pusher = Pusher.from_env()
+            self.assertEqual(pusher.conf.ssl, True)
+            self.assertEqual(pusher.conf.key, u'plah')
+            self.assertEqual(pusher.conf.secret, u'bob')
+            self.assertEqual(pusher.conf.host, u'somehost')
+            self.assertEqual(pusher.conf.app_id, u'42')
+
+        with mock.patch.object(os, 'environ', new={'PUSHER_DSN':'https://plah:bob@somehost/apps/42'}):
+            pusher = Pusher.from_env('PUSHER_DSN')
+            self.assertEqual(pusher.conf.ssl, True)
+            self.assertEqual(pusher.conf.key, u'plah')
+            self.assertEqual(pusher.conf.secret, u'bob')
+            self.assertEqual(pusher.conf.host, u'somehost')
+            self.assertEqual(pusher.conf.app_id, u'42')
 
     def test_trigger_success_case(self):
         json_dumped = u'{"message": "hello world"}'

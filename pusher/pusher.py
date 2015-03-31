@@ -5,8 +5,9 @@ from __future__ import (print_function, unicode_literals, absolute_import,
 from pusher.config import Config
 from pusher.request import Request
 from pusher.sync import SynchronousBackend
-from pusher.util import GET, POST, text, validate_channel
+from pusher.util import GET, POST, text, validate_channel, app_id_re
 
+import os
 import collections
 import json
 import six
@@ -48,16 +49,74 @@ class Pusher(object):
     This client supports various backend adapters to support various http
     libraries available in the python ecosystem. 
 
+    :param app_id: a pusher application identifier
+    :param key:    a pusher application key
+    :param secret: a pusher application secret token
     :param config: a pusher.Config instance
     :param backend: an object that responds to the send_request(request)
                     method. If none is provided, a
                     python.sync.SynchronousBackend instance is created.
     """
-    def __init__(self, config, backend=None):
+    def __init__(self, app_id, key, secret, config=None, backend=None):
+        
+        if not isinstance(app_id, six.text_type):
+            raise TypeError("App ID should be %s" % text)
+        if not app_id_re.match(app_id):
+            raise ValueError("Invalid app id")
+
+        if not isinstance(key, six.text_type):
+            raise TypeError("Key should be %s" % text)
+
+        if not isinstance(secret, six.text_type):
+            raise TypeError("Secret should be %s" % text)
+        
+        if not config:
+            config=Config(app_id=app_id, key=key, secret=secret)
+        else:
+            config.app_id=app_id
+            config.key=key
+            config.secret=secret
+            
         if not isinstance(config, Config):
             raise TypeError("config should be a pusher.Config object")
+            
         self.backend = backend or SynchronousBackend(config)
         self.config = config
+        
+    @classmethod
+    def from_url(cls, url):
+        """Alternate constructor that extracts the information from a URL.
+
+        :param url: String containing a URL
+
+        Usage::
+
+          >> from pusher import Pusher
+          >> p = Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
+        """
+        config=Config.from_url(url)
+        
+        return cls(config.app_id, config.key, config.secret, config)
+        
+    @classmethod
+    def from_env(cls, env='PUSHER_URL'):
+        """Alternate constructor that extracts the information from an URL
+        stored in an environment variable. The pusher heroku addon will set
+        the PUSHER_URL automatically when installed for example.
+
+        :param env: Name of the environment variable
+
+        Usage::
+
+          >> from pusher import Pusher
+          >> c = Pusher.from_env("PUSHER_URL")
+        """
+        val = os.environ.get(env)
+        if not val:
+            raise Exception("Environment variable %s not found" % env)
+        
+        config=Config.from_url(six.text_type(val))
+        return cls(config.app_id, config.key, config.secret, config)
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
