@@ -19,17 +19,15 @@ class TestConfig(unittest.TestCase):
     def test_should_be_constructable(self):
         Config(app_id=u'4', key=u'key', secret=u'secret', ssl=False)
 
-    def test_app_id_should_be_text(self):
-        self.assertRaises(TypeError, lambda: Config(key=u'key', secret=u'secret', ssl=False))
+    def test_app_id_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Config(app_id=4, key=u'key', secret=u'secret', ssl=False))
         self.assertRaises(TypeError, lambda: Config(app_id=b'4', key=u'key', secret=u'secret', ssl=False))
 
-    def test_key_should_be_text(self):
-        self.assertRaises(TypeError, lambda: Config(app_id=u'4', secret=u'secret', ssl=False))
+    def test_key_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Config(app_id=u'4', key=4, secret=u'secret', ssl=False))
         self.assertRaises(TypeError, lambda: Config(app_id=u'4', key=b'key', secret=u'secret', ssl=False))
 
-    def test_secret_should_be_text(self):
+    def test_secret_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Config(app_id=u'4', key=u'key', secret=4, ssl=False))
         self.assertRaises(TypeError, lambda: Config(app_id=u'4', key=u'key', secret=b'secret', ssl=False))
 
@@ -100,23 +98,6 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(conf.secret, u'bar')
         self.assertEqual(conf.host, u'host')
         self.assertEqual(conf.app_id, u'4')
-
-    def test_initialize_from_env(self):
-        with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
-            conf = Config.from_env()
-            self.assertEqual(conf.ssl, True)
-            self.assertEqual(conf.key, u'plah')
-            self.assertEqual(conf.secret, u'bob')
-            self.assertEqual(conf.host, u'somehost')
-            self.assertEqual(conf.app_id, u'42')
-
-        with mock.patch.object(os, 'environ', new={'PUSHER_DSN':'https://plah:bob@somehost/apps/42'}):
-            conf = Config.from_env('PUSHER_DSN')
-            self.assertEqual(conf.ssl, True)
-            self.assertEqual(conf.key, u'plah')
-            self.assertEqual(conf.secret, u'bob')
-            self.assertEqual(conf.host, u'somehost')
-            self.assertEqual(conf.app_id, u'42')
 
     def test_authenticate_subscription_types(self):
         conf = Config.from_url(u'http://foo:bar@host/apps/4')
