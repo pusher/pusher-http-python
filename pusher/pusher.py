@@ -137,8 +137,12 @@ class Pusher(object):
 
         http://pusher.com/docs/rest_api#method-post-event
         '''
-        if isinstance(channels, six.string_types) or not isinstance(channels, (collections.Sized, collections.Iterable)):
-            raise TypeError("Expected a collection of channels (each channel should be %s)" % text)
+        
+        if isinstance(channels, dict) or not (isinstance(channels, six.string_types) or isinstance(channels, (collections.Sized, collections.Iterable))):
+            raise TypeError("Expected a single string or collection of channels (each channel should be %s)" % text)
+
+        if isinstance(channels, six.string_types):
+            channels = [channels]
 
         if len(channels) > 10:
             raise ValueError("Too many channels")
