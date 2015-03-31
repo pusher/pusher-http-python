@@ -39,8 +39,8 @@ constructor arguments which identify your Pusher app. You can find them by
 going to "API Keys" on your app at https://app.pusher.com.
 
 ```python
-from pusher import Config, Pusher
-pusher = Pusher(config=Config(app_id=u'4', key=u'key', secret=u'secret'))
+from pusher import Pusher
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret')
 ```
 
 You can then trigger events to channels. Channel and event names may only
@@ -48,6 +48,32 @@ contain alphanumeric characters, `-` and `_`:
 
 ```python
 pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
+```
+
+## Configuration
+
+```python
+from pusher import Pusher, Config
+pusher = Pusher(app_id, key, secret, config=None, backend=None)
+```
+
+|Argument   |Description   |
+|:-:|:-:|
+|app_id `String`  |**Required** <br> The Pusher application ID |
+|key `String`     |**Required** <br> The Pusher application key |
+|secret `String`  |**Required** <br> The Pusher application secret token |
+|config `Config`  | **Default:`None`** <br> Additional Configuration via a `Config` object |
+|config.ssl `bool` | **Default:`False`** <br> Use HTTPS |
+|config.host `String` | **Default:`None`** <br> The host to connect to |
+|config.port `int` | **Default:`None`** <br>Which port to connect to |
+|config.cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
+|backend `Object`  | an object that responds to the send_request(request) method. If none is provided, a `python.sync.SynchronousBackend` instance is created. |
+
+##### Example
+
+```py
+from pusher import Pusher, Config
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', Config(ssl=True, cluster=u'eu'))
 ```
 
 Triggering Events
@@ -159,13 +185,13 @@ pusher.users_info(u'presence-chatroom')
 Authenticating Channel Subscription
 -----------------
 
-#### `Config::authenticate_subscription`
+#### `Pusher::authenticate`
 
 In order for users to subscribe to a private- or presence-channel, they must be authenticated by your server.
 
 The client will make a POST request to an endpoint (either "/pusher/auth" or any which you specify) with a body consisting of the channel's name and socket_id.
 
-Using your `Config` instance, with which you initialized `Pusher`, you can generate an authentication signature. Having responded to the request with this signature, the subscription will be authenticated.
+Using your `Pusher` instance, with which you initialized `Pusher`, you can generate an authentication signature. Having responded to the request with this signature, the subscription will be authenticated.
 
 |Argument   |Description   |
 |:-:|:-:|
@@ -182,8 +208,7 @@ Using your `Config` instance, with which you initialized `Pusher`, you can gener
 ###### Private Channels
 
 ```python
-config = pusher.config
-auth = config.authenticate_subscription(
+auth = pusher.authenticate_subscription(
 
   channel=u"private-channel",
 
@@ -195,9 +220,7 @@ auth = config.authenticate_subscription(
 ###### Presence Channels
 
 ```python
-config = pusher.config
-
-auth = config.authenticate_subscription(
+auth = pusher.authenticate_subscription(
 
   channel=u"presence-channel",
 
@@ -216,9 +239,9 @@ auth = config.authenticate_subscription(
 Receiving Webhooks
 -----------------
 
-If you have webhooks set up to POST a payload to a specified endpoint, you may wish to validate that these are actually from Pusher. The `Config` object achieves this by checking the authentication signature in the request body using your application credentials.
+If you have webhooks set up to POST a payload to a specified endpoint, you may wish to validate that these are actually from Pusher. The `Pusher` object achieves this by checking the authentication signature in the request body using your application credentials.
 
-#### `Config::validate_webhook`
+#### `Pusher::validate_webhook`
 
 |Argument   |Description   |
 |:-:|:-:|
@@ -233,7 +256,7 @@ If you have webhooks set up to POST a payload to a specified endpoint, you may w
 ##### Example
 
 ```python
-webhook = pusher.config.validate_webhook(
+webhook = pusher.validate_webhook(
 
   key="key_sent_in_header",
 
@@ -253,4 +276,4 @@ To run the tests run `python setup.py test`
 License
 -------
 
-Copyright (c) 2014 Pusher Ltd. See LICENSE for details.
+Copyright (c) 2015 Pusher Ltd. See LICENSE for details.
