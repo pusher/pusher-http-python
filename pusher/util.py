@@ -3,6 +3,8 @@
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 
+from pusher.errors import *
+
 import json
 import re
 import six
@@ -17,21 +19,6 @@ if sys.version_info < (3,):
     text = 'a unicode string'
 else:
     text = 'a string'
-
-class PusherError(Exception):
-    pass
-
-class PusherBadRequest(PusherError):
-    pass
-
-class PusherBadAuth(PusherError):
-    pass
-
-class PusherForbidden(PusherError):
-    pass
-
-class PusherBadStatus(PusherError):
-    pass
 
 def process_response(status, body):
     if status == 200:
