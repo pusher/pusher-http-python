@@ -10,16 +10,16 @@ class TornadoBackend(object):
     """Adapter for the tornado.httpclient module.
 
     :param config:  pusher.Pusher object
+    :param kwargs:  options for the httpclient.HTTPClient constructor
     """
-    def __init__(self, config):
-        if config.ssl:
-            raise NotImplementedError("SSL not supported for this backend")
+    def __init__(self, config, **kwargs):
         self.config = config
+        self.http = httpclient.HTTPClient(**kwargs)
 
     def send_request(self, request):
         method = request.method
-        url = "http://%s:%s%s?%s" % (self.config.host, self.config.port, request.path, request.query_string)
         data = request.body
         headers = {'Content-Type': 'application/json'}
 
-        return tornado.httpclient.HTTPRequest(url, method=method, body=data, request_timeout=self.config.timeout, headers=headers)
+        request = self.http.request.httpclient.HTTPRequest(request.url, method=method, body=data, headers=headers, request_timeout=self.config.timeout)
+        return self.http.fetch(request, raise_error=False)
