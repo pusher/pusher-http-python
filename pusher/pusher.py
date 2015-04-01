@@ -34,13 +34,13 @@ class Pusher(object):
     :param ssl:     Whenever to use SSL or plain HTTP 
     :param host:    Used for custom host destination
     :param port:    Used for custom port destination
-    :param timeout: Request timeout
+    :param timeout: Request timeout (in seconds)
     :param cluster: Convention for other clusters than the main Pusher-one.
       Eg: 'eu' will resolve to the api-eu.pusherapp.com host
     :param backend: an http adapter class (AsyncIOBackend, RequestsBackend, SynchronousBackend, TornadoBackend)
     :param backend_options: additional backend
     """
-    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=None, cluster=None, backend=SynchronousBackend, **backend_options):
+    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None, backend=SynchronousBackend, **backend_options):
         
         if not isinstance(app_id, six.text_type):
             raise TypeError("App ID should be %s" % text)
@@ -74,8 +74,12 @@ class Pusher(object):
             self.host = "api.pusherapp.com"
 
         if port and not isinstance(port, six.integer_types):
-            raise TypeError("Port should be a number")
+            raise TypeError("Port should be an integer")
         self.port = port or (443 if ssl else 80)
+
+        if not isinstance(timeout, six.integer_types):
+            raise TypeError("Timeout should be an integer")
+        self.timeout = timeout
 
         self.backend = backend
         self.backend_options = backend_options
