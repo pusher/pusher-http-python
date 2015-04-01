@@ -12,7 +12,8 @@ class RequestsBackend(object):
     :param config:  pusher.Pusher object
     :param options: key-value passed into the requests.request constructor
     """
-    def __init__(self, _, **options):
+    def __init__(self, config, **options):
+        self.config = config
         self.options = {'verify': True}
         self.options.update(options)
 
@@ -22,6 +23,7 @@ class RequestsBackend(object):
             request.url,
             headers=request.headers,
             data=request.body,
+            timeout=self.config.timeout,
             **self.options
         )
         return process_response(resp.status_code, resp.text)
