@@ -3,7 +3,7 @@
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.config import Config
-from pusher.request import Request
+from pusher.request import Request, request_method
 from pusher.signature import sign, verify
 from pusher.sync import SynchronousBackend
 from pusher.util import GET, POST, text, validate_channel, app_id_re, channel_name_re
@@ -14,30 +14,6 @@ import json
 import six
 import hashlib
 import time
-
-class RequestMethod(object):
-    def __init__(self, pusher, f):
-        self.pusher = pusher
-        self.f = f
-
-    def __call__(self, *args, **kwargs):
-        return self.pusher.backend.send_request(self.make_request(*args, **kwargs))
-
-    def make_request(self, *args, **kwargs):
-        return self.f(self.pusher, *args, **kwargs)
-
-def doc_string(doc):
-    def decorator(f):
-        f.__doc__ = doc
-        return f
-    return decorator
-
-def request_method(f):
-    @property
-    @doc_string(f.__doc__)
-    def wrapped(self):
-        return RequestMethod(self, f)
-    return wrapped
 
 def join_attributes(attributes):
     for attr in attributes:

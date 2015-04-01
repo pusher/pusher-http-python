@@ -11,6 +11,30 @@ import json
 import six
 import time
 
+class RequestMethod(object):
+    def __init__(self, pusher, f):
+        self.pusher = pusher
+        self.f = f
+
+    def __call__(self, *args, **kwargs):
+        return self.pusher.backend.send_request(self.make_request(*args, **kwargs))
+
+    def make_request(self, *args, **kwargs):
+        return self.f(self.pusher, *args, **kwargs)
+
+def doc_string(doc):
+    def decorator(f):
+        f.__doc__ = doc
+        return f
+    return decorator
+
+def request_method(f):
+    @property
+    @doc_string(f.__doc__)
+    def wrapped(self):
+        return RequestMethod(self, f)
+    return wrapped
+
 def make_query_string(params):
     return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))
 
