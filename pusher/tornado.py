@@ -9,18 +9,16 @@ import tornado.httpclient
 class TornadoBackend(object):
     """Adapter for the tornado.httpclient module.
 
-    :param config: a pusher.Config instance
     :param timeout: configurable timeout for the connection
     """
-    def __init__(self, config, timeout=None):
-        self.config = config
+    def __init__(self, timeout=None):
         self.timeout = timeout
-        if self.config.ssl:
-            raise NotImplementedError("SSL not supported for this backend")
 
-    def send_request(self, request):
+    def send_request(self, config, request):
+        if config.ssl:
+            raise NotImplementedError("SSL not supported for this backend")
         method = request.method
-        url = "http://%s:%s%s?%s" % (self.config.host, self.config.port, request.path, request.query_string)
+        url = "http://%s:%s%s?%s" % (config.host, config.port, request.path, request.query_string)
         data = request.body
         headers = {'Content-Type': 'application/json'}
 

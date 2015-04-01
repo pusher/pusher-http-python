@@ -8,7 +8,7 @@ import hmac
 import hashlib
 import unittest
 
-from pusher import Config, Pusher
+from pusher import Pusher
 from pusher.util import GET
 
 try:
@@ -37,19 +37,19 @@ class TestPusher(unittest.TestCase):
     def test_initialize_from_env(self):
         with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
             pusher = Pusher.from_env()
-            self.assertEqual(pusher.config.ssl, True)
-            self.assertEqual(pusher.config.key, u'plah')
-            self.assertEqual(pusher.config.secret, u'bob')
-            self.assertEqual(pusher.config.host, u'somehost')
-            self.assertEqual(pusher.config.app_id, u'42')
+            self.assertEqual(pusher.ssl, True)
+            self.assertEqual(pusher.key, u'plah')
+            self.assertEqual(pusher.secret, u'bob')
+            self.assertEqual(pusher.host, u'somehost')
+            self.assertEqual(pusher.app_id, u'42')
 
         with mock.patch.object(os, 'environ', new={'PUSHER_DSN':'https://plah:bob@somehost/apps/42'}):
             pusher = Pusher.from_env('PUSHER_DSN')
-            self.assertEqual(pusher.config.ssl, True)
-            self.assertEqual(pusher.config.key, u'plah')
-            self.assertEqual(pusher.config.secret, u'bob')
-            self.assertEqual(pusher.config.host, u'somehost')
-            self.assertEqual(pusher.config.app_id, u'42')
+            self.assertEqual(pusher.ssl, True)
+            self.assertEqual(pusher.key, u'plah')
+            self.assertEqual(pusher.secret, u'bob')
+            self.assertEqual(pusher.host, u'somehost')
+            self.assertEqual(pusher.app_id, u'42')
 
     def test_trigger_with_channels_list_success_case(self):
         json_dumped = u'{"message": "hello world"}'
@@ -134,10 +134,10 @@ class TestPusher(unittest.TestCase):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(pusher.config.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
+        signature = six.text_type(hmac.new(pusher.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
 
         with mock.patch('time.time', return_value=1200):
-            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), {u'time_ms': 1000000})
+            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), {u'time_ms': 1000000})
 
     def test_validate_webhook_bad_types(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
@@ -161,7 +161,7 @@ class TestPusher(unittest.TestCase):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         body = u'some body'
-        signature = six.text_type(hmac.new(pusher.config.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
+        signature = six.text_type(hmac.new(pusher.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
 
         with mock.patch('time.time') as time_mock:
             self.assertEqual(pusher.validate_webhook(u'badkey', signature, body), None)
@@ -175,7 +175,7 @@ class TestPusher(unittest.TestCase):
         signature = u'some signature'
 
         with mock.patch('time.time') as time_mock:
-            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), None)
+            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), None)
 
         time_mock.assert_not_called()
 
@@ -183,10 +183,10 @@ class TestPusher(unittest.TestCase):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(pusher.config.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
+        signature = six.text_type(hmac.new(pusher.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
 
         with mock.patch('time.time', return_value=1301):
-            self.assertEqual(pusher.validate_webhook(pusher.config.key, signature, body), None)
+            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), None)
 
     def test_channels_info_default_success_case(self):
         request = self.pusher.channels_info.make_request()

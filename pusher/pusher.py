@@ -2,17 +2,17 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.config import Config
 from pusher.request import Request, request_method
 from pusher.signature import sign, verify
 from pusher.sync import SynchronousBackend
 from pusher.util import GET, POST, text, validate_channel, app_id_re, channel_name_re
 
-import os
 import collections
-import json
-import six
 import hashlib
+import json
+import os
+import re
+import six
 import time
 
 def join_attributes(attributes):
@@ -28,39 +28,57 @@ class Pusher(object):
     This client supports various backend adapters to support various http
     libraries available in the python ecosystem. 
 
-    :param app_id: a pusher application identifier
-    :param key:    a pusher application key
-    :param secret: a pusher application secret token
-    :param config: a pusher.Config instance
+    :param app_id:  a pusher application identifier
+    :param key:     a pusher application key
+    :param secret:  a pusher application secret token
+    :param ssl:     Whenever to use SSL or plain HTTP 
+    :param host:    Used for custom host destination
+    :param port:    Used for custom port destination
+    :param timeout: Request timeout
+    :param cluster: Convention for other clusters than the main Pusher-one.
+      Eg: 'eu' will resolve to the api-eu.pusherapp.com host
     :param backend: an object that responds to the send_request(request)
                     method. If none is provided, a
                     python.sync.SynchronousBackend instance is created.
     """
-    def __init__(self, app_id, key, secret, config=None, backend=None):
+    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=None, cluster=None, backend=None):
         
         if not isinstance(app_id, six.text_type):
             raise TypeError("App ID should be %s" % text)
         if not app_id_re.match(app_id):
             raise ValueError("Invalid app id")
+        self.app_id = app_id
 
         if not isinstance(key, six.text_type):
             raise TypeError("Key should be %s" % text)
+        self.key = key
 
         if not isinstance(secret, six.text_type):
             raise TypeError("Secret should be %s" % text)
-        
-        if not config:
-            config=Config(app_id=app_id, key=key, secret=secret)
+        self.secret = secret
+
+        if not isinstance(ssl, bool):
+            raise TypeError("SSL should be a boolean")
+        self.ssl = ssl
+
+        if host:
+            if not isinstance(host, six.text_type):
+                raise TypeError("Host should be %s" % text)
+
+            self.host = host
+        elif cluster:
+            if not isinstance(cluster, six.text_type):
+                raise TypeError("Cluster should be %s" % text)
+
+            self.host = "api-%s.pusher.com" % cluster
         else:
-            config.app_id=app_id
-            config.key=key
-            config.secret=secret
-            
-        if not isinstance(config, Config):
-            raise TypeError("config should be a pusher.Config object")
-            
-        self.backend = backend or SynchronousBackend(config)
-        self.config = config
+            self.host = "api.pusherapp.com"
+
+        if port and not isinstance(port, six.integer_types):
+            raise TypeError("Port should be a number")
+        self.port = port or (443 if ssl else 80)
+
+        self.backend = backend or SynchronousBackend()
         
     @classmethod
     def from_url(cls, url):
@@ -73,9 +91,11 @@ class Pusher(object):
           >> from pusher import Pusher
           >> p = Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
         """
-        config=Config.from_url(url)
-        
-        return cls(config.app_id, config.key, config.secret, config)
+        m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", url)
+        if not m:
+            raise Exception("Unparsable url: %s" % url)
+        ssl = m.group(1) == 'https'
+        return cls(key=m.group(2), secret=m.group(3), host=m.group(4), app_id=m.group(5), ssl=ssl)
         
     @classmethod
     def from_env(cls, env='PUSHER_URL'):
@@ -94,8 +114,7 @@ class Pusher(object):
         if not val:
             raise Exception("Environment variable %s not found" % env)
         
-        config=Config.from_url(six.text_type(val))
-        return cls(config.app_id, config.key, config.secret, config)
+        return cls.from_url(six.text_type(val))
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
@@ -138,7 +157,7 @@ class Pusher(object):
             if not isinstance(socket_id, six.text_type):
                 raise TypeError("Socket ID should be %s" % text)
             params['socket_id'] = socket_id
-        return Request(self.config, POST, "/apps/%s/events" % self.config.app_id, params)
+        return Request(self, POST, "/apps/%s/events" % self.app_id, params)
         
     def authenticate(self, channel, socket_id, custom_data=None):
         """Used to generate delegated client subscription token.
@@ -164,9 +183,9 @@ class Pusher(object):
         if custom_data:
             string_to_sign += ":%s" % custom_data
 
-        signature = sign(self.config.secret, string_to_sign)
+        signature = sign(self.secret, string_to_sign)
 
-        auth = "%s:%s" % (self.config.key, signature)
+        auth = "%s:%s" % (self.key, signature)
         result = {'auth': auth}
 
         if custom_data:
@@ -191,10 +210,10 @@ class Pusher(object):
         if not isinstance(body, six.text_type):
             raise TypeError('body should be %s' % text)
 
-        if key != self.config.key:
+        if key != self.key:
             return None
 
-        if not verify(self.config.secret, body, signature):
+        if not verify(self.secret, body, signature):
             return None
 
         try:
@@ -224,7 +243,7 @@ class Pusher(object):
             params['info'] = join_attributes(attributes)
         if prefix_filter:
             params['filter_by_prefix'] = prefix_filter
-        return Request(self.config, GET, "/apps/%s/channels" % self.config.app_id, params)
+        return Request(self, GET, "/apps/%s/channels" % self.app_id, params)
 
     @request_method
     def channel_info(self, channel, attributes=[]):
@@ -238,7 +257,7 @@ class Pusher(object):
         params = {}
         if attributes:
             params['info'] = join_attributes(attributes)
-        return Request(self.config, GET, "/apps/%s/channels/%s" % (self.config.app_id, channel), params)
+        return Request(self, GET, "/apps/%s/channels/%s" % (self.app_id, channel), params)
 
     @request_method
     def users_info(self, channel):
@@ -249,4 +268,4 @@ class Pusher(object):
         '''
         validate_channel(channel)
 
-        return Request(self.config, GET, "/apps/%s/channels/%s/users" % (self.config.app_id, channel))
+        return Request(self, GET, "/apps/%s/channels/%s/users" % (self.app_id, channel))

@@ -17,7 +17,7 @@ class RequestMethod(object):
         self.f = f
 
     def __call__(self, *args, **kwargs):
-        return self.pusher.backend.send_request(self.make_request(*args, **kwargs))
+        return self.pusher.backend.send_request(self.pusher, self.make_request(*args, **kwargs))
 
     def make_request(self, *args, **kwargs):
         return self.f(self.pusher, *args, **kwargs)
@@ -44,7 +44,7 @@ class Request(object):
     An instance of that object is passed to the backend's send_request method
     for each request.
 
-    :param config: an instance of pusher.Config
+    :param config: an instance of pusher.Pusher
     :param method: HTTP method as a string
     :param path: The target path on the destination host
     :param params: Query params or body depending on the method
@@ -94,6 +94,7 @@ class Request(object):
 
     @property
     def url(self):
+        scheme = 'https' if self.config.ssl else 'http'
         return "%s://%s:%s%s" % (self.config.scheme, self.config.host, self.config.port, self.signed_path)
 
     @property
