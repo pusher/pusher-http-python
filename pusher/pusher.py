@@ -4,6 +4,7 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.config import Config
 from pusher.request import Request
+from pusher.signature import sign, verify
 from pusher.sync import SynchronousBackend
 from pusher.util import GET, POST, text, validate_channel, app_id_re, channel_name_re
 
@@ -11,18 +12,8 @@ import os
 import collections
 import json
 import six
-import hmac
 import hashlib
 import time
-
-try:
-    compare_digest = hmac.compare_digest
-except AttributeError:
-    # Not secure when the length is supposed to be kept secret
-    def compare_digest(a, b):
-        if len(a) != len(b):
-            return False
-        return reduce(lambda x, y: x | y, [ord(x) ^ ord(y) for x, y in zip(a, b)]) == 0
 
 class RequestMethod(object):
     def __init__(self, pusher, f):
@@ -197,7 +188,7 @@ class Pusher(object):
         if custom_data:
             string_to_sign += ":%s" % custom_data
 
-        signature = hmac.new(self.config.secret.encode('utf8'), string_to_sign.encode('utf8'), hashlib.sha256).hexdigest()
+        signature = sign(self.config.secret, string_to_sign)
 
         auth = "%s:%s" % (self.config.key, signature)
         result = {'auth': auth}
@@ -227,9 +218,7 @@ class Pusher(object):
         if key != self.config.key:
             return None
 
-        generated_signature = six.text_type(hmac.new(self.config.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
-
-        if not compare_digest(generated_signature, signature):
+        if not verify(self.config.secret, body, signature):
             return None
 
         try:

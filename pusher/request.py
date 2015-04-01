@@ -3,10 +3,10 @@
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.util import GET, POST
+from pusher.signature import sign
 
 import copy
 import hashlib
-import hmac
 import json
 import six
 import time
@@ -58,7 +58,7 @@ class Request(object):
         secret = self.config.secret.encode('utf8')
         message = auth_string.encode('utf8')
 
-        self.query_params['auth_signature'] = six.text_type(hmac.new(secret, message, hashlib.sha256).hexdigest())
+        self.query_params['auth_signature'] = sign(secret, message)
 
     @property
     def query_string(self):
