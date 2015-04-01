@@ -5,11 +5,15 @@ import aiohttp
 from pusher.http import process_response
 
 class AsyncIOBackend:
-    def send_request(_, config, request):
-        if config.ssl:
-            raise NotImplementedError("SSL not supported for this backend")
+    def __init__(_, _):
+        """Adapter for the requests module.
+
+        :param config:  pusher.Pusher object
+        """
+
+    def send_request(_, request):
         method = request.method
-        url = "http://%s:%s%s" % (config.host, config.port, request.path)
+        url = "%s%s" % (request.base_url, request.path)
         params = request.query_params
         data = request.body
         headers = request.headers

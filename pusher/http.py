@@ -19,7 +19,7 @@ class RequestMethod(object):
         self.f = f
 
     def __call__(self, *args, **kwargs):
-        return self.pusher.backend.send_request(self.pusher, self.make_request(*args, **kwargs))
+        return self.pusher.http.send_request(self.pusher, self.make_request(*args, **kwargs))
 
     def make_request(self, *args, **kwargs):
         return self.f(self.pusher, *args, **kwargs)
@@ -108,8 +108,11 @@ class Request(object):
 
     @property
     def url(self):
-        scheme = 'https' if self.config.ssl else 'http'
-        return "%s://%s:%s%s" % (self.config.scheme, self.config.host, self.config.port, self.signed_path)
+        return "%s%s" % (self.base_url, self.signed_path)
+
+    @property
+    def base_url(self):
+        return "%s://%s:%s" % (self.config.scheme, self.config.host, self.config.port)
 
     @property
     def headers(self):

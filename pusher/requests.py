@@ -9,13 +9,14 @@ import requests
 class RequestsBackend(object):
     """Adapter for the requests module.
 
+    :param config:  pusher.Pusher object
     :param options: key-value passed into the requests.request constructor
     """
-    def __init__(self, **options):
+    def __init__(self, _, **options):
         self.options = {'verify': True}
         self.options.update(options)
 
-    def send_request(self, config, request):
+    def send_request(self, request):
         resp = requests.request(
             request.method,
             request.url,

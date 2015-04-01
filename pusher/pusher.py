@@ -37,11 +37,10 @@ class Pusher(object):
     :param timeout: Request timeout
     :param cluster: Convention for other clusters than the main Pusher-one.
       Eg: 'eu' will resolve to the api-eu.pusherapp.com host
-    :param backend: an object that responds to the send_request(request)
-                    method. If none is provided, a
-                    python.sync.SynchronousBackend instance is created.
+    :param backend: an http adapter class (AsyncIOBackend, RequestsBackend, SynchronousBackend, TornadoBackend)
+    :param backend_options: additional backend
     """
-    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=None, cluster=None, backend=None):
+    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=None, cluster=None, backend=SynchronousBackend, **backend_options):
         
         if not isinstance(app_id, six.text_type):
             raise TypeError("App ID should be %s" % text)
@@ -78,8 +77,10 @@ class Pusher(object):
             raise TypeError("Port should be a number")
         self.port = port or (443 if ssl else 80)
 
-        self.backend = backend or SynchronousBackend()
-        
+        self.backend = backend
+        self.backend_options = backend_options
+        self.setup_http()
+
     @classmethod
     def from_url(cls, url):
         """Alternate constructor that extracts the information from a URL.
@@ -269,3 +270,14 @@ class Pusher(object):
             return None
 
         return body_data
+
+    def setup_http(self):
+        """
+        Used to configure the http client. Call this if any config has
+        changed on the object.
+        """
+        self.http = self.backend(self, **self.backend_options)
+
+    @property
+    def scheme(self):
+        return 'https' if self.ssl else 'http'

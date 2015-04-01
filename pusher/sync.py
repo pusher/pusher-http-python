@@ -12,20 +12,19 @@ import sys
 class SynchronousBackend(object):
     """Adapter for the standard-library http client.
 
+    :param config:  pusher.Pusher object
     :param timeout: configurable timeout for the TCP connection
     """
-    def __init__(self, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+    def __init__(self, config, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         self.timeout = timeout
-        self.http = None
+        if config.ssl:
+            ctx = ssl.create_default_context()
+            self.http = http_client.HTTPSConnection(config.host, config.port, timeout=self.timeout, context=ctx)
+        else:
+            self.http = http_client.HTTPConnection(config.host, config.port, timeout=self.timeout)
 
-    def send_request(self, config, request):
-        if self.http is None:
-            if config.ssl:
-                ctx = ssl.create_default_context()
-                self.http = http_client.HTTPSConnection(config.host, config.port, timeout=self.timeout, context=ctx)
-            else:
-                self.http = http_client.HTTPConnection(config.host, config.port, timeout=self.timeout)
 
+    def send_request(self, request):
         try:
             self.http.request(request.method, request.signed_path, request.body, {"Content-Type": "application/json"})
             resp = self.http.getresponse()
