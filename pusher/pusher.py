@@ -158,7 +158,46 @@ class Pusher(object):
                 raise TypeError("Socket ID should be %s" % text)
             params['socket_id'] = socket_id
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
-        
+
+    @request_method
+    def channels_info(self, prefix_filter=None, attributes=[]):
+        '''
+        Get information on multiple channels, see:
+
+        http://pusher.com/docs/rest_api#method-get-channels
+        '''
+        params = {}
+        if attributes:
+            params['info'] = join_attributes(attributes)
+        if prefix_filter:
+            params['filter_by_prefix'] = prefix_filter
+        return Request(self, GET, "/apps/%s/channels" % self.app_id, params)
+
+    @request_method
+    def channel_info(self, channel, attributes=[]):
+        '''
+        Get information on a specific channel, see:
+
+        http://pusher.com/docs/rest_api#method-get-channel
+        '''
+        validate_channel(channel)
+
+        params = {}
+        if attributes:
+            params['info'] = join_attributes(attributes)
+        return Request(self, GET, "/apps/%s/channels/%s" % (self.app_id, channel), params)
+
+    @request_method
+    def users_info(self, channel):
+        '''
+        Fetch user ids currently subscribed to a presence channel
+
+        http://pusher.com/docs/rest_api#method-get-users
+        '''
+        validate_channel(channel)
+
+        return Request(self, GET, "/apps/%s/channels/%s/users" % (self.app_id, channel))
+
     def authenticate(self, channel, socket_id, custom_data=None):
         """Used to generate delegated client subscription token.
 
@@ -230,42 +269,3 @@ class Pusher(object):
             return None
 
         return body_data
-
-    @request_method
-    def channels_info(self, prefix_filter=None, attributes=[]):
-        '''
-        Get information on multiple channels, see:
-
-        http://pusher.com/docs/rest_api#method-get-channels
-        '''
-        params = {}
-        if attributes:
-            params['info'] = join_attributes(attributes)
-        if prefix_filter:
-            params['filter_by_prefix'] = prefix_filter
-        return Request(self, GET, "/apps/%s/channels" % self.app_id, params)
-
-    @request_method
-    def channel_info(self, channel, attributes=[]):
-        '''
-        Get information on a specific channel, see:
-
-        http://pusher.com/docs/rest_api#method-get-channel
-        '''
-        validate_channel(channel)
-
-        params = {}
-        if attributes:
-            params['info'] = join_attributes(attributes)
-        return Request(self, GET, "/apps/%s/channels/%s" % (self.app_id, channel), params)
-
-    @request_method
-    def users_info(self, channel):
-        '''
-        Fetch user ids currently subscribed to a presence channel
-
-        http://pusher.com/docs/rest_api#method-get-users
-        '''
-        validate_channel(channel)
-
-        return Request(self, GET, "/apps/%s/channels/%s/users" % (self.app_id, channel))
