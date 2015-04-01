@@ -2,10 +2,10 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.request import Request, request_method
+from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
 from pusher.sync import SynchronousBackend
-from pusher.util import GET, POST, text, validate_channel, app_id_re, channel_name_re
+from pusher.util import text, validate_channel, app_id_re, channel_name_re
 
 import collections
 import hashlib

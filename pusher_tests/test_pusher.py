@@ -9,7 +9,7 @@ import hashlib
 import unittest
 
 from pusher import Pusher
-from pusher.util import GET
+from pusher.http import GET
 
 try:
     import unittest.mock as mock

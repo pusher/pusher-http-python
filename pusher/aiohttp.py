@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import aiohttp
-import pusher
+
+from pusher.http import process_response
 
 class AsyncIOBackend:
     def send_request(_, config, request):
@@ -15,4 +16,4 @@ class AsyncIOBackend:
 
         response = yield from aiohttp.request(method, url, params=params, data=data, headers=headers)
         body = yield from response.read_and_close()
-        return pusher.process_response(response.status, body.decode('utf8'))
+        return process_response(response.status, body.decode('utf8'))

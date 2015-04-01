@@ -2,7 +2,7 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.util import GET, POST
+from pusher.errors import *
 from pusher.signature import sign
 
 import copy
@@ -10,6 +10,8 @@ import hashlib
 import json
 import six
 import time
+
+GET, POST, PUT, DELETE = "GET", "POST", "PUT", "DELETE"
 
 class RequestMethod(object):
     def __init__(self, pusher, f):
@@ -37,6 +39,18 @@ def request_method(f):
 
 def make_query_string(params):
     return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))
+
+def process_response(status, body):
+    if status == 200:
+        return json.loads(body)
+    elif status == 400:
+        raise PusherBadRequest(body)
+    elif status == 401:
+        raise PusherBadAuth(body)
+    elif status == 403:
+        raise PusherForbidden(body)
+    else:
+        raise PusherBadStatus("%s: %s" % (status, body))
 
 class Request(object):
     """Represents the request to be made to the Pusher API.

@@ -2,7 +2,7 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.util import process_response
+from pusher.http import process_response
 
 import requests
 

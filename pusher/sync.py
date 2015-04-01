@@ -2,7 +2,7 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.util import PusherError, process_response
+from pusher.http import PusherError, process_response
 from six.moves import http_client
 
 import socket

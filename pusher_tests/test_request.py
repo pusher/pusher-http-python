@@ -5,7 +5,7 @@ from __future__ import print_function, absolute_import, division
 import unittest
 
 from pusher import Pusher
-from pusher.request import Request
+from pusher.http import Request
 
 try:
     import unittest.mock as mock
