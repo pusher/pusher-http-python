@@ -16,6 +16,8 @@ class SynchronousBackend(object):
     """
     def __init__(self, config):
         if config.ssl:
+            if sys.version_info < (3,4):
+                raise NotImplementedError("SSL requires python >= 3.4, earlier versions don't support certificate validation")
             ctx = ssl.create_default_context()
             self.http = http_client.HTTPSConnection(config.host, config.port, timeout=config.timeout, context=ctx)
         else:

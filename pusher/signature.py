@@ -16,8 +16,8 @@ except AttributeError:
 def sign(secret, string_to_sign):
 	return six.text_type(
 		hmac.new(
-				secret.encode('utf8'),
-				string_to_sign.encode('utf8'),
+				secret,
+				string_to_sign,
 				hashlib.sha256
 			)
 			.hexdigest()

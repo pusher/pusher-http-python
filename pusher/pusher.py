@@ -227,7 +227,7 @@ class Pusher(object):
         if custom_data:
             string_to_sign += ":%s" % custom_data
 
-        signature = sign(self.secret, string_to_sign)
+        signature = sign(self.secret.encode('utf8'), string_to_sign.encode('utf8'))
 
         auth = "%s:%s" % (self.key, signature)
         result = {'auth': auth}
@@ -257,7 +257,7 @@ class Pusher(object):
         if key != self.key:
             return None
 
-        if not verify(self.secret, body, signature):
+        if not verify(self.secret.encode('utf8'), body.encode('utf8'), signature):
             return None
 
         try:
