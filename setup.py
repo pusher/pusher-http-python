@@ -19,12 +19,11 @@ setup(
 
     packages=['pusher'],
 
-    install_requires=['six'],
+    install_requires=['six', 'requests>=2.3.0'],
     tests_require=['nose', 'mock'],
 
     extras_require={
         'aiohttp': ["aiohttp>=0.9.0"],
-        'requests': ['requests>=2.3.0'],
         'tornado': ['tornado>=4.0.0'],
     },
 

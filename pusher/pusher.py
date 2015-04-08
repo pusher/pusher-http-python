@@ -4,7 +4,7 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
-from pusher.sync import SynchronousBackend
+from pusher.requests import RequestsBackend
 from pusher.util import text, validate_channel, app_id_re, channel_name_re
 
 import collections
@@ -40,7 +40,7 @@ class Pusher(object):
     :param backend: an http adapter class (AsyncIOBackend, RequestsBackend, SynchronousBackend, TornadoBackend)
     :param backend_options: additional backend
     """
-    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None, backend=SynchronousBackend, **backend_options):
+    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None, backend=RequestsBackend, **backend_options):
         
         if not isinstance(app_id, six.text_type):
             raise TypeError("App ID should be %s" % text)
