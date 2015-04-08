@@ -5,7 +5,7 @@ from __future__ import (print_function, unicode_literals, absolute_import,
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
 from pusher.requests import RequestsBackend
-from pusher.util import text, validate_channel, app_id_re, channel_name_re
+from pusher.util import ensure_text, validate_channel, app_id_re, pusher_url_re, channel_name_re
 
 import collections
 import hashlib
@@ -16,10 +16,6 @@ import six
 import time
 
 def join_attributes(attributes):
-    for attr in attributes:
-        if not isinstance(attr, six.text_type):
-            raise TypeError('Each attr should be %s' % text)
-
     return six.text_type(',').join(attributes)
 
 class Pusher(object):
@@ -41,44 +37,30 @@ class Pusher(object):
     :param backend_options: additional backend
     """
     def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None, backend=RequestsBackend, **backend_options):
-        
-        if not isinstance(app_id, six.text_type):
-            raise TypeError("App ID should be %s" % text)
-        if not app_id_re.match(app_id):
+        self._app_id = ensure_text(app_id, "app_id")
+        if not app_id_re.match(self._app_id):
             raise ValueError("Invalid app id")
-        self._app_id = app_id
 
-        if not isinstance(key, six.text_type):
-            raise TypeError("Key should be %s" % text)
-        self._key = key
-
-        if not isinstance(secret, six.text_type):
-            raise TypeError("Secret should be %s" % text)
-        self._secret = secret
+        self._key = ensure_text(key, "key")
+        self._secret = ensure_text(secret, "secret")
 
         if not isinstance(ssl, bool):
             raise TypeError("SSL should be a boolean")
         self._ssl = ssl
 
         if host:
-            if not isinstance(host, six.text_type):
-                raise TypeError("Host should be %s" % text)
-
-            self._host = host
+            self._host = ensure_text(host, "host")
         elif cluster:
-            if not isinstance(cluster, six.text_type):
-                raise TypeError("Cluster should be %s" % text)
-
-            self._host = "api-%s.pusher.com" % cluster
+            self._host = six.text_type("api-%s.pusher.com") % ensure_text(cluster, "cluster")
         else:
-            self._host = "api.pusherapp.com"
+            self._host = six.text_type("api.pusherapp.com")
 
         if port and not isinstance(port, six.integer_types):
-            raise TypeError("Port should be an integer")
+            raise TypeError("port should be an integer")
         self._port = port or (443 if ssl else 80)
 
         if not isinstance(timeout, six.integer_types):
-            raise TypeError("Timeout should be an integer")
+            raise TypeError("timeout should be an integer")
         self._timeout = timeout
 
         self.http = backend(self, **backend_options)
@@ -94,16 +76,16 @@ class Pusher(object):
           >> from pusher import Pusher
           >> p = Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
         """
-        m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", six.text_type(url))
+        m = pusher_url_re.match(ensure_text(url, "url"))
         if not m:
             raise Exception("Unparsable url: %s" % url)
         ssl = m.group(1) == 'https'
 
         options_ = {
-            'key': six.text_type(m.group(2)),
-            'secret': six.text_type(m.group(3)),
-            'host': six.text_type(m.group(4)),
-            'app_id': six.text_type(m.group(5)),
+            'key': m.group(2),
+            'secret': m.group(3),
+            'host': m.group(4),
+            'app_id': m.group(5),
             'ssl': ssl,
         }
         options_.update(options)
@@ -128,7 +110,7 @@ class Pusher(object):
         if not val:
             raise Exception("Environment variable %s not found" % env)
         
-        return cls.from_url(six.text_type(val), **options)
+        return cls.from_url(val, **options)
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
@@ -138,25 +120,25 @@ class Pusher(object):
         http://pusher.com/docs/rest_api#method-post-event
         '''
         
-        if isinstance(channels, dict) or not (isinstance(channels, six.string_types) or isinstance(channels, (collections.Sized, collections.Iterable))):
-            raise TypeError("Expected a single string or collection of channels (each channel should be %s)" % text)
-
         if isinstance(channels, six.string_types):
             channels = [channels]
+
+        if isinstance(channels, dict) or not isinstance(channels, (collections.Sized, collections.Iterable)):
+            raise TypeError("Expected a single or a list of channels")
 
         if len(channels) > 10:
             raise ValueError("Too many channels")
 
-        for channel in channels:
-            validate_channel(channel)
+        channels = list(map(validate_channel, channels))
 
-        if not isinstance(event_name, six.text_type):
-            raise TypeError("event_name should be %s" % text)
+        event_name = ensure_text(event_name, "event_name")
 
         if len(event_name) > 200:
             raise ValueError("event_name too long")
 
-        if not isinstance(data, six.text_type):
+        if isinstance(data, six.string_types):
+            data = ensure_text(data, "data")
+        else:
             data = json.dumps(data)
 
         if len(data) > 10240:
@@ -168,9 +150,8 @@ class Pusher(object):
             'data': data
         }
         if socket_id:
-            if not isinstance(socket_id, six.text_type):
-                raise TypeError("Socket ID should be %s" % text)
-            params['socket_id'] = socket_id
+            params['socket_id'] = ensure_text(socket_id, "socket_id")
+
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
     @request_method
@@ -184,8 +165,8 @@ class Pusher(object):
         if attributes:
             params['info'] = join_attributes(attributes)
         if prefix_filter:
-            params['filter_by_prefix'] = prefix_filter
-        return Request(self, GET, "/apps/%s/channels" % self.app_id, params)
+            params['filter_by_prefix'] = ensure_text(prefix_filter, "prefix_filter")
+        return Request(self, GET, six.text_type("/apps/%s/channels") % self.app_id, params)
 
     @request_method
     def channel_info(self, channel, attributes=[]):
@@ -219,14 +200,12 @@ class Pusher(object):
         :param socket_id: id of the socket that requires authorization
         :param custom_data: used on presence channels to provide user info
         """
-        if not isinstance(channel, six.text_type):
-            raise TypeError('Channel should be %s' % text)
+        channel = validate_channel(channel)
 
         if not channel_name_re.match(channel):
             raise ValueError('Channel should be a valid channel, got: %s' % channel)
 
-        if not isinstance(socket_id, six.text_type):
-            raise TypeError('Socket ID should %s' % text)
+        socket_id = ensure_text(socket_id, "socket_id")
 
         if custom_data:
             custom_data = json.dumps(custom_data)
@@ -236,7 +215,7 @@ class Pusher(object):
         if custom_data:
             string_to_sign += ":%s" % custom_data
 
-        signature = sign(self.secret.encode('utf8'), string_to_sign.encode('utf8'))
+        signature = sign(self.secret, string_to_sign)
 
         auth = "%s:%s" % (self.key, signature)
         result = {'auth': auth}
@@ -254,19 +233,14 @@ class Pusher(object):
         :param signature: signature that was given with the body
         :param body: content that needs to be verified
         """
-        if not isinstance(key, six.text_type):
-            raise TypeError('key should be %s' % text)
-
-        if not isinstance(signature, six.text_type):
-            raise TypeError('signature should be %s' % text)
-
-        if not isinstance(body, six.text_type):
-            raise TypeError('body should be %s' % text)
+        key = ensure_text(key, "key")
+        signature = ensure_text(signature, "signature")
+        body = ensure_text(body, "body")
 
         if key != self.key:
             return None
 
-        if not verify(self.secret.encode('utf8'), body.encode('utf8'), signature):
+        if not verify(self.secret, body, signature):
             return None
 
         try:

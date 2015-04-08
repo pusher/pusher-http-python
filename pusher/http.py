@@ -93,10 +93,7 @@ class Request(object):
             make_query_string(self.query_params)
         ])
 
-        secret = self.config.secret.encode('utf8')
-        message = auth_string.encode('utf8')
-
-        self.query_params['auth_signature'] = sign(secret, message)
+        self.query_params['auth_signature'] = sign(self.config.secret, auth_string)
 
     @property
     def query_string(self):

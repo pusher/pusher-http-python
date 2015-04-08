@@ -23,16 +23,13 @@ class TestPusher(unittest.TestCase):
     def test_app_id_should_be_text(self):
         self.assertRaises(TypeError, lambda: Pusher(key=u'key', secret=u'secret', ssl=False))
         self.assertRaises(TypeError, lambda: Pusher(app_id=4, key=u'key', secret=u'secret'))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=b'4', key=u'key', secret=u'secret'))
 
     def test_key_should_be_text(self):
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', secret=u'secret'))
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=4, secret=u'secret'))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=b'key', secret=u'secret'))
 
     def test_secret_should_be_text(self):
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=4))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=b'secret'))
         
     def test_initialize_from_env(self):
         with mock.patch.object(os, 'environ', new={'PUSHER_URL':'https://plah:bob@somehost/apps/42'}):
@@ -91,13 +88,13 @@ class TestPusher(unittest.TestCase):
 
     def test_trigger_disallow_invalid_channels(self):
         self.assertRaises(ValueError, lambda:
-            self.pusher.trigger.make_request([u'some_channel!'], u'some_event', {u'message': u'hello world'}))
+            self.pusher.trigger.make_request([u'so/me_channel!'], u'some_event', {u'message': u'hello world'}))
             
     def test_authenticate_types(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
-        self.assertRaises(TypeError, lambda: pusher.authenticate(b'plah', u'34554'))
-        self.assertRaises(TypeError, lambda: pusher.authenticate(u'plah', b'324435'))
+        self.assertRaises(TypeError, lambda: pusher.authenticate(2423, u'34554'))
+        self.assertRaises(TypeError, lambda: pusher.authenticate(u'plah', 234234))
         self.assertRaises(ValueError, lambda: pusher.authenticate(u'::', u'345345'))
 
     def test_authenticate_for_private_channels(self):
@@ -134,7 +131,7 @@ class TestPusher(unittest.TestCase):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(pusher.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
+        signature = six.text_type(hmac.new(pusher.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
 
         with mock.patch('time.time', return_value=1200):
             self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), {u'time_ms': 1000000})
@@ -149,11 +146,8 @@ class TestPusher(unittest.TestCase):
 
         with mock.patch('time.time') as time_mock:
             self.assertRaises(TypeError, lambda: pusher.validate_webhook(4, u'signature', u'body'))
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(b'test', u'signature', u'body'))
             self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', 4, u'body'))
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', b'signature', u'body'))
             self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', u'signature', 4))
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', u'signature', b'body'))
 
         time_mock.assert_not_called()
 

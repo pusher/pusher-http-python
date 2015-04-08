@@ -14,14 +14,14 @@ except AttributeError:
         return reduce(lambda x, y: x | y, [ord(x) ^ ord(y) for x, y in zip(a, b)]) == 0
 
 def sign(secret, string_to_sign):
-	return six.text_type(
-		hmac.new(
-				secret,
-				string_to_sign,
-				hashlib.sha256
-			)
-			.hexdigest()
-		)
+    return six.text_type(
+        hmac.new(
+                secret.encode('utf8'),
+                string_to_sign.encode('utf8'),
+                hashlib.sha256
+            )
+            .hexdigest()
+        )
 
 def verify(secret, string_to_sign, signature):
-	return compare_digest(signature, sign(secret, string_to_sign))
+    return compare_digest(signature, sign(secret, string_to_sign))

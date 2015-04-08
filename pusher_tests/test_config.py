@@ -21,18 +21,12 @@ class TestConfig(unittest.TestCase):
 
     def test_app_id_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Pusher(app_id=4, key=u'key', secret=u'secret', ssl=False))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=b'4', key=u'key', secret=u'secret', ssl=False))
 
     def test_key_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=4, secret=u'secret', ssl=False))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=b'key', secret=u'secret', ssl=False))
 
     def test_secret_should_be_text_if_present(self):
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=4, ssl=False))
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=b'secret', ssl=False))
-
-    def test_ssl_should_be_required(self):
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=b'secret'))
 
     def test_ssl_should_be_boolean(self):
         Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=False)
@@ -43,7 +37,6 @@ class TestConfig(unittest.TestCase):
     def test_host_should_be_text(self):
         Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=u'foo')
 
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=b'foo'))
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=4))
 
     def test_port_should_be_number(self):
@@ -54,7 +47,6 @@ class TestConfig(unittest.TestCase):
     def test_cluster_should_be_text(self):
         Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
 
-        self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=b'eu'))
         self.assertRaises(TypeError, lambda: Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=4))
 
     def test_host_behaviour(self):
@@ -82,7 +74,6 @@ class TestConfig(unittest.TestCase):
 
     def test_initialize_from_url(self):
         self.assertRaises(TypeError, lambda: Pusher.from_url(4))
-        self.assertRaises(TypeError, lambda: Pusher.from_url(b'http://foo:bar@host/apps/4'))
         self.assertRaises(Exception, lambda: Pusher.from_url(u'httpsahsutaeh'))
 
         conf = Pusher.from_url(u'http://foo:bar@host/apps/4')
