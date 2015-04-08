@@ -14,7 +14,7 @@ class AsyncIOBackend:
         self.config = config
         self.conn = aiohttp.TCPConnector()
 
-    def send_request(_, request):
+    def send_request(self, request):
         method = request.method
         url = "%s%s" % (request.base_url, request.path)
         params = request.query_params
