@@ -84,7 +84,7 @@ class Pusher(object):
         self.http = backend(self, **backend_options)
 
     @classmethod
-    def from_url(cls, url):
+    def from_url(cls, url, **options):
         """Alternate constructor that extracts the information from a URL.
 
         :param url: String containing a URL
@@ -94,14 +94,25 @@ class Pusher(object):
           >> from pusher import Pusher
           >> p = Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
         """
-        m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", url)
+        m = re.match("(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)", six.text_type(url))
         if not m:
             raise Exception("Unparsable url: %s" % url)
         ssl = m.group(1) == 'https'
-        return cls(key=m.group(2), secret=m.group(3), host=m.group(4), app_id=m.group(5), ssl=ssl)
+
+        options_ = {
+            'key': six.text_type(m.group(2)),
+            'secret': six.text_type(m.group(3)),
+            'host': six.text_type(m.group(4)),
+            'app_id': six.text_type(m.group(5)),
+            'ssl': ssl,
+        }
+        options_.update(options)
+
+
+        return cls(**options_)
         
     @classmethod
-    def from_env(cls, env='PUSHER_URL'):
+    def from_env(cls, env='PUSHER_URL', **options):
         """Alternate constructor that extracts the information from an URL
         stored in an environment variable. The pusher heroku addon will set
         the PUSHER_URL automatically when installed for example.
@@ -117,7 +128,7 @@ class Pusher(object):
         if not val:
             raise Exception("Environment variable %s not found" % env)
         
-        return cls.from_url(six.text_type(val))
+        return cls.from_url(six.text_type(val), **options)
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):

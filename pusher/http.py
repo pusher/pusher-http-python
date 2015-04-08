@@ -19,7 +19,7 @@ class RequestMethod(object):
         self.f = f
 
     def __call__(self, *args, **kwargs):
-        return self.pusher.http.send_request(self.pusher, self.make_request(*args, **kwargs))
+        return self.pusher.http.send_request(self.make_request(*args, **kwargs))
 
     def make_request(self, *args, **kwargs):
         return self.f(self.pusher, *args, **kwargs)
