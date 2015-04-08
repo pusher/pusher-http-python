@@ -16,9 +16,10 @@ class RequestsBackend(object):
         self.config = config
         self.options = {'verify': True}
         self.options.update(options)
+        self.session = requests.Session()
 
     def send_request(self, request):
-        resp = requests.request(
+        resp = self.session.request(
             request.method,
             request.url,
             headers=request.headers,
