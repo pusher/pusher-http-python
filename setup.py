@@ -17,7 +17,16 @@ setup(
     keywords='pusher rest realtime websockets service',
     license='MIT',
 
-    packages=['pusher'],
+    packages=[
+        'pusher',
+        'pusher.aiohttp',
+        'pusher.errors',
+        'pusher.http',
+        'pusher.requests',
+        'pusher.signature',
+        'pusher.tornado',
+        'pusher.util',
+    ],
 
     install_requires=['six', 'requests>=2.3.0'],
     tests_require=['nose', 'mock'],
