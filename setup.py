@@ -4,7 +4,7 @@ setup(
     name='pusher-rest',
     version='0.1.0',
     description='A Python library to interract with the Pusher API',
-    url='http://github.com/pusher/pusher-rest-python',
+    url='https://github.com/pusher/pusher-rest-python',
     author='Pusher',
     author_email='support@pusher.com',
     classifiers=[
