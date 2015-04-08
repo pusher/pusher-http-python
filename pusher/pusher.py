@@ -46,44 +46,42 @@ class Pusher(object):
             raise TypeError("App ID should be %s" % text)
         if not app_id_re.match(app_id):
             raise ValueError("Invalid app id")
-        self.app_id = app_id
+        self._app_id = app_id
 
         if not isinstance(key, six.text_type):
             raise TypeError("Key should be %s" % text)
-        self.key = key
+        self._key = key
 
         if not isinstance(secret, six.text_type):
             raise TypeError("Secret should be %s" % text)
-        self.secret = secret
+        self._secret = secret
 
         if not isinstance(ssl, bool):
             raise TypeError("SSL should be a boolean")
-        self.ssl = ssl
+        self._ssl = ssl
 
         if host:
             if not isinstance(host, six.text_type):
                 raise TypeError("Host should be %s" % text)
 
-            self.host = host
+            self._host = host
         elif cluster:
             if not isinstance(cluster, six.text_type):
                 raise TypeError("Cluster should be %s" % text)
 
-            self.host = "api-%s.pusher.com" % cluster
+            self._host = "api-%s.pusher.com" % cluster
         else:
-            self.host = "api.pusherapp.com"
+            self._host = "api.pusherapp.com"
 
         if port and not isinstance(port, six.integer_types):
             raise TypeError("Port should be an integer")
-        self.port = port or (443 if ssl else 80)
+        self._port = port or (443 if ssl else 80)
 
         if not isinstance(timeout, six.integer_types):
             raise TypeError("Timeout should be an integer")
-        self.timeout = timeout
+        self._timeout = timeout
 
-        self.backend = backend
-        self.backend_options = backend_options
-        self.setup_http()
+        self.http = backend(self, **backend_options)
 
     @classmethod
     def from_url(cls, url):
@@ -275,12 +273,33 @@ class Pusher(object):
 
         return body_data
 
-    def setup_http(self):
-        """
-        Used to configure the http client. Call this if any config has
-        changed on the object.
-        """
-        self.http = self.backend(self, **self.backend_options)
+    @property
+    def app_id(self):
+        return self._app_id
+
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def secret(self):
+        return self._secret
+
+    @property
+    def host(self):
+        return self._host
+
+    @property
+    def port(self):
+        return self._port
+
+    @property
+    def timeout(self):
+        return self._timeout
+
+    @property
+    def ssl(self):
+        return self._ssl
 
     @property
     def scheme(self):
