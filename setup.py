@@ -29,7 +29,7 @@ setup(
     ],
 
     install_requires=['six', 'requests>=2.3.0'],
-    tests_require=['nose', 'mock'],
+    tests_require=['nose', 'mock', 'HTTPretty'],
 
     extras_require={
         'aiohttp': ["aiohttp>=0.9.0"],
