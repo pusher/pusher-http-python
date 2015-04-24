@@ -3,9 +3,13 @@
 from __future__ import print_function, absolute_import, division
 
 import pusher
-import unittest
 import httpretty
 import sys
+
+if (sys.version_info < (2,7)):
+  import unittest2 as unittest
+else:
+  import unittest
 
 @unittest.skipIf(sys.version_info >= (3,), "skip")
 class TestURLFetchBackend(unittest.TestCase):

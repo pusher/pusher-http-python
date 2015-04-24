@@ -10,4 +10,5 @@ install:
   - "pip install aiohttp"
   - "pip install tornado"
   - "pip install urlfetch"
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
 script: "python setup.py test"
