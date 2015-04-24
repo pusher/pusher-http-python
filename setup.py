@@ -4,7 +4,7 @@ setup(
     name='pusher',
     version='1.0.0',
     description='A Python library to interract with the Pusher API',
-    url='https://github.com/pusher/pusher-rest-python',
+    url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
     author_email='support@pusher.com',
     classifiers=[
@@ -27,6 +27,7 @@ setup(
     extras_require={
         'aiohttp': ["aiohttp>=0.9.0"],
         'tornado': ['tornado>=4.0.0'],
+        'urlfetch': ['urlfetch>=1.0']
     },
 
     test_suite='pusher_tests',
