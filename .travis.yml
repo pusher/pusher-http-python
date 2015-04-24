@@ -5,5 +5,10 @@ python:
   - "2.7"
 #  - "3.2"
   - "3.3"
-install: "python setup.py develop"
+install: 
+  - "python setup.py develop"
+  - "pip install aiohttp"
+  - "pip install tornado"
+  - "pip install urlfetch"
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
 script: "python setup.py test"

@@ -4,8 +4,8 @@ from __future__ import print_function, absolute_import, division
 
 import unittest
 
-from pusher import Config
-from pusher.request import Request
+from pusher import Pusher
+from pusher.http import Request
 
 try:
     import unittest.mock as mock
@@ -14,7 +14,7 @@ except ImportError:
 
 class TestRequest(unittest.TestCase):
     def test_get_signature_generation(self):
-        conf = Config.from_url(u'http://key:secret@somehost/apps/4')
+        conf = Pusher.from_url(u'http://key:secret@somehost/apps/4')
 
         expected = {
             u'auth_key': u'key',
@@ -30,7 +30,7 @@ class TestRequest(unittest.TestCase):
             self.assertEqual(req.query_params, expected)
 
     def test_post_signature_generation(self):
-        conf = Config.from_url(u'http://key:secret@somehost/apps/4')
+        conf = Pusher.from_url(u'http://key:secret@somehost/apps/4')
 
         expected = {
             u'auth_key': u'key',

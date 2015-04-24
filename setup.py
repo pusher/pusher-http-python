@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
 setup(
-    name='pusher-rest',
-    version='0.1.0',
+    name='pusher',
+    version='1.0.0',
     description='A Python library to interract with the Pusher API',
-    url='http://github.com/pusher/pusher-rest-python',
+    url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
     author_email='support@pusher.com',
     classifiers=[
@@ -17,15 +17,17 @@ setup(
     keywords='pusher rest realtime websockets service',
     license='MIT',
 
-    packages=['pusher'],
+    packages=[
+        'pusher'
+    ],
 
-    install_requires=['six'],
-    tests_require=['nose', 'mock'],
+    install_requires=['six', 'requests>=2.3.0'],
+    tests_require=['nose', 'mock', 'HTTPretty'],
 
     extras_require={
         'aiohttp': ["aiohttp>=0.9.0"],
-        'requests': ['requests>=2.3.0'],
         'tornado': ['tornado>=4.0.0'],
+        'urlfetch': ['urlfetch>=1.0']
     },
 
     test_suite='pusher_tests',

@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
 
 import aiohttp
-import pusher
+import asyncio
+
+from pusher.http import process_response
 
 class AsyncIOBackend:
-    """Adapter for the aiohttp module.
-
-    This backend is only availble for python 3 users and doesn't support SSL.
-
-    :param config: pusher.Config instance
-    """
     def __init__(self, config):
+        """Adapter for the requests module.
+
+        :param config:  pusher.Pusher object
+        """
         self.config = config
-        if config.ssl:
-            raise NotImplementedError("SSL not supported for this backend")
+        self.conn = aiohttp.TCPConnector()
 
     def send_request(self, request):
         method = request.method
-        url = "http://%s:%s%s" % (self.config.host, self.config.port, request.path)
+        url = "%s%s" % (request.base_url, request.path)
         params = request.query_params
         data = request.body
         headers = request.headers
 
-        response = yield from aiohttp.request(method, url, params=params, data=data, headers=headers)
+        response = yield from asyncio.wait_for(
+            aiohttp.request(method, url, params=params, data=data, headers=headers, connector=self.conn),
+            timeout=self.config.timeout
+        )
         body = yield from response.read_and_close()
-        return pusher.process_response(response.status, body.decode('utf8'))
+        return process_response(response.status, body.decode('utf8'))

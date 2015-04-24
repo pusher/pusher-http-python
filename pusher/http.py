@@ -2,17 +2,55 @@
 
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
-from pusher.util import GET, POST
+from pusher.errors import *
+from pusher.signature import sign
 
 import copy
 import hashlib
-import hmac
 import json
 import six
 import time
 
+GET, POST, PUT, DELETE = "GET", "POST", "PUT", "DELETE"
+
+class RequestMethod(object):
+    def __init__(self, pusher, f):
+        self.pusher = pusher
+        self.f = f
+
+    def __call__(self, *args, **kwargs):
+        return self.pusher.http.send_request(self.make_request(*args, **kwargs))
+
+    def make_request(self, *args, **kwargs):
+        return self.f(self.pusher, *args, **kwargs)
+
+def doc_string(doc):
+    def decorator(f):
+        f.__doc__ = doc
+        return f
+    return decorator
+
+def request_method(f):
+    @property
+    @doc_string(f.__doc__)
+    def wrapped(self):
+        return RequestMethod(self, f)
+    return wrapped
+
 def make_query_string(params):
     return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))
+
+def process_response(status, body):
+    if status == 200:
+        return json.loads(body)
+    elif status == 400:
+        raise PusherBadRequest(body)
+    elif status == 401:
+        raise PusherBadAuth(body)
+    elif status == 403:
+        raise PusherForbidden(body)
+    else:
+        raise PusherBadStatus("%s: %s" % (status, body))
 
 class Request(object):
     """Represents the request to be made to the Pusher API.
@@ -20,7 +58,7 @@ class Request(object):
     An instance of that object is passed to the backend's send_request method
     for each request.
 
-    :param config: an instance of pusher.Config
+    :param config: an instance of pusher.Pusher
     :param method: HTTP method as a string
     :param path: The target path on the destination host
     :param params: Query params or body depending on the method
@@ -55,10 +93,7 @@ class Request(object):
             make_query_string(self.query_params)
         ])
 
-        secret = self.config.secret.encode('utf8')
-        message = auth_string.encode('utf8')
-
-        self.query_params['auth_signature'] = six.text_type(hmac.new(secret, message, hashlib.sha256).hexdigest())
+        self.query_params['auth_signature'] = sign(self.config.secret, auth_string)
 
     @property
     def query_string(self):
@@ -70,7 +105,11 @@ class Request(object):
 
     @property
     def url(self):
-        return "%s://%s:%s%s" % (self.config.scheme, self.config.host, self.config.port, self.signed_path)
+        return "%s%s" % (self.base_url, self.signed_path)
+
+    @property
+    def base_url(self):
+        return "%s://%s:%s" % (self.config.scheme, self.config.host, self.config.port)
 
     @property
     def headers(self):
