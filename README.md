@@ -1,23 +1,40 @@
-# Pusher REST Python library
+# Pusher HTTP Python Library
 
 ![Travis-CI](https://travis-ci.org/pusher/pusher-http-python.svg)
 
 *status: Alpha*
 
-This is the new python library that will replace the "pusher" module once it
-becomes stable enough.
+The new Python library for interacting with the Pusher HTTP API.
 
-In order to use this library, you need to have an account on
-http://pusher.com. After registering, you will need the application
-credentials for your app.
+This package lets you trigger events to your client and query the state of your Pusher channels. When used with a server, you can validate Pusher webhooks and authenticate private- or presence-channels.
+
+In order to use this library, you need to have a free account on <http://pusher.com>. After registering, you will need the application credentials for your app.
 
 Features
 --------
 
 * Python 2.6, 2.7 and 3.3 support
-* Adapters for various http libraries like requests, aiohttp and tornado
+* Adapters for various http libraries like requests, urlfetch, aiohttp and tornado.
 * WebHook validation
 * Signature generation for socket subscriptions
+
+###Table of Contents
+
+- [Installation](#installation)
+- [Getting started](#getting-started)
+- [Configuration](#configuration)
+- [Triggering Events](#triggering-events)
+- [Querying Application State](#querying-application-state)
+  - [Getting Information For All Channels](#getting-information-for-all-channels)
+  - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
+  - [Getting User Information For A Presence Channel](#getting-user-information-for-a-presence-channel)
+- [Authenticating Channel Subscription](#authenticating-channel-subscription)
+- [Receiving Webhooks](#receiving-webhooks)
+- [Request Library Configuration](#request-library-configuration)
+  - [Google App Engine](#google-app-engine)
+- [Feature Support](#feature-support)
+- [Running the tests](#running-the-tests)
+- [License](#license)
 
 Installation
 ------------
@@ -26,7 +43,7 @@ You can install this module using your package management method or choice,
 normally `easy_install` or `pip`. For example:
 
 ```bash
-pip install pusher-rest
+pip install pusher
 ```
 
 **Note: When 1.0 is reached `pusher-rest` will no longer be updated. Instead `pusher` should be used**
@@ -36,7 +53,7 @@ Getting started
 
 The minimum configuration required to use the Pusher object are the three
 constructor arguments which identify your Pusher app. You can find them by
-going to "API Keys" on your app at https://app.pusher.com.
+going to "API Keys" on your app at <https://app.pusher.com>.
 
 ```python
 from pusher import Pusher
@@ -54,7 +71,7 @@ pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
 
 ```python
 from pusher import Pusher
-pusher = Pusher(app_id, key, secret, config=None, backend=None)
+pusher = Pusher(app_id, key, secret)
 ```
 
 |Argument   |Description   |
@@ -64,15 +81,15 @@ pusher = Pusher(app_id, key, secret, config=None, backend=None)
 |secret `String`  |**Required** <br> The Pusher application secret token |
 |host `String`    | **Default:`None`** <br> The host to connect to |
 |port `int`       | **Default:`None`** <br>Which port to connect to |
-|ssl `bool`       | **Default:`False`** <br> Use HTTPS |
+|ssl `bool`       | **Default:`True`** <br> Use HTTPS |
 |cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
-|backend `Object` | an object that responds to the send_request(request) method. If none is provided, a `python.sync.SynchronousBackend` instance is created. |
+|backend `Object` | an object that responds to the send_request(request) method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 
 ##### Example
 
 ```py
-from pusher import Pusher, Config
-pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', Config(ssl=True, cluster=u'eu'))
+from pusher import Pusher
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
 ```
 
 Triggering Events
@@ -266,6 +283,53 @@ webhook = pusher.validate_webhook(
 
 print webhook["events"]
 ```
+
+## Request Library Configuration
+
+Users can configure the library to use different backends to send calls to our API. The HTTP libraries we support are:
+
+* [Requests](http://docs.python-requests.org/en/latest/) (`pusher.requests.RequestsBackend`). This is used by default. 
+* [Tornado](http://www.tornadoweb.org/en/stable/) (`pusher.tornado.TornadoBackend`).
+* [AsyncIO](http://asyncio.org/) (`pusher.aiohttp.AsyncIOBackend`).
+* [URLFetch](https://pypi.python.org/pypi/urlfetch) (`pusher.urlfetch.URLFetchBackend`).
+
+Upon initializing a Pusher instance, pass in any of these options to the `backend` keyword argument. 
+
+### Google App Engine
+
+GAE users are advised to use the URLFetch backend to ensure compatability.
+
+## Feature Support
+
+Feature                                    | Supported
+-------------------------------------------| :-------:
+Trigger event on single channel            | *&#10004;*
+Trigger event on multiple channels         | *&#10004;*
+Excluding recipients from events           | *&#10004;*
+Authenticating private channels            | *&#10004;*
+Authenticating presence channels           | *&#10004;*
+Get the list of channels in an application | *&#10004;*
+Get the state of a single channel          | *&#10004;*
+Get a list of users in a presence channel  | *&#10004;*
+WebHook validation                         | *&#10004;*
+Heroku add-on support						   | *&#10004;*
+Debugging & Logging                        | *&#10004;*
+Cluster configuration                      | *&#10004;*
+Timeouts                                   | *&#10004;*
+HTTPS                                      | *&#10004;*
+HTTP Proxy configuration                   | *&#10004;*
+HTTP KeepAlive                             | *&#10004;*
+
+#### Helper Functionality
+
+These are helpers that have been implemented to to ensure interactions with the HTTP API only occur if they will not be rejected e.g. [channel naming conventions](https://pusher.com/docs/client_api_guide/client_channels#naming-channels).
+
+Helper Functionality                     | Supported
+-----------------------------------------| :-------:
+Channel name validation 					 | &#10004;
+Limit to 10 channels per trigger         | &#10004;
+Limit event name length to 200 chars     | &#10004;
+
 
 Running the tests
 -----------------
