@@ -18,14 +18,7 @@ setup(
     license='MIT',
 
     packages=[
-        'pusher',
-        'pusher.aiohttp',
-        'pusher.errors',
-        'pusher.http',
-        'pusher.requests',
-        'pusher.signature',
-        'pusher.tornado',
-        'pusher.util',
+        'pusher'
     ],
 
     install_requires=['six', 'requests>=2.3.0'],
