@@ -224,7 +224,7 @@ Using your `Pusher` instance, with which you initialized `Pusher`, you can gener
 ###### Private Channels
 
 ```python
-auth = pusher.authenticate_subscription(
+auth = pusher.authenticate(
 
   channel=u"private-channel",
 
