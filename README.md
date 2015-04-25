@@ -317,8 +317,8 @@ Debugging & Logging                        | *&#10004;*
 Cluster configuration                      | *&#10004;*
 Timeouts                                   | *&#10004;*
 HTTPS                                      | *&#10004;*
-HTTP Proxy configuration                   | *&#10004;*
-HTTP KeepAlive                             | *&#10004;*
+HTTP Proxy configuration                   | *&#10008;*
+HTTP KeepAlive                             | *&#10008;*
 
 #### Helper Functionality
 
