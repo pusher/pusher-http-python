@@ -4,7 +4,7 @@
 
 *status: Alpha*
 
-The new Python library for interacting with the Pusher HTTP API.
+The new Python library for interacting with the Pusher HTTP API. This version, 1.x.x, is a major breaking change from versions <= 0.8. 
 
 This package lets you trigger events to your client and query the state of your Pusher channels. When used with a server, you can validate Pusher webhooks and authenticate private- or presence-channels.
 
