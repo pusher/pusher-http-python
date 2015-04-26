@@ -36,7 +36,8 @@ class Pusher(object):
     :param backend: an http adapter class (AsyncIOBackend, RequestsBackend, SynchronousBackend, TornadoBackend)
     :param backend_options: additional backend
     """
-    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None, backend=RequestsBackend, **backend_options):
+    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None,
+                 json_encoder=None, json_decoder=None, backend=RequestsBackend, **backend_options):
         self._app_id = ensure_text(app_id, "app_id")
         if not app_id_re.match(self._app_id):
             raise ValueError("Invalid app id")
@@ -62,6 +63,8 @@ class Pusher(object):
         if not isinstance(timeout, six.integer_types):
             raise TypeError("timeout should be an integer")
         self._timeout = timeout
+        self._json_encoder = json_encoder
+        self._json_decoder = json_decoder
 
         self.http = backend(self, **backend_options)
 
@@ -139,7 +142,7 @@ class Pusher(object):
         if isinstance(data, six.string_types):
             data = ensure_text(data, "data")
         else:
-            data = json.dumps(data)
+            data = json.dumps(data, cls=self._json_encoder)
 
         if len(data) > 10240:
             raise ValueError("Too much data")
@@ -208,7 +211,7 @@ class Pusher(object):
         socket_id = ensure_text(socket_id, "socket_id")
 
         if custom_data:
-            custom_data = json.dumps(custom_data)
+            custom_data = json.dumps(custom_data, cls=self._json_encoder)
 
         string_to_sign = "%s:%s" % (socket_id, channel)
 
@@ -244,7 +247,7 @@ class Pusher(object):
             return None
 
         try:
-            body_data = json.loads(body)
+            body_data = json.loads(body, cls=self._json_decoder)
         except ValueError:
             return None
 
@@ -252,7 +255,6 @@ class Pusher(object):
         if not time_ms:
             return None
 
-        print(abs(time.time()*1000 - time_ms))
         if abs(time.time()*1000 - time_ms) > 300000:
             return None
 

@@ -5,11 +5,15 @@ from __future__ import print_function, absolute_import, division
 import os
 import six
 import hmac
+import json
 import hashlib
 import unittest
+import time
+from decimal import Decimal
 
 from pusher import Pusher
 from pusher.http import GET
+from pusher.signature import sign
 
 try:
     import unittest.mock as mock
@@ -125,7 +129,7 @@ class TestPusher(unittest.TestCase):
             actual = pusher.authenticate(u'presence-channel', u'34543245', custom_data)
 
         self.assertEqual(actual, expected)
-        dumps_mock.assert_called_once_with(custom_data)            
+        dumps_mock.assert_called_once_with(custom_data, cls=None)
 
     def test_validate_webhook_success_case(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
@@ -223,6 +227,40 @@ class TestPusher(unittest.TestCase):
         self.assertEqual(request.method, GET)
         self.assertEqual(request.path, u'/apps/4/channels/presence-channel/users')
         self.assertEqual(request.params, {})
+
+
+class TestJson(unittest.TestCase):
+    def setUp(self):
+        class JSONEncoder(json.JSONEncoder):
+            def default(self, o):
+                if isinstance(o, Decimal):
+                    return str(o)
+                return super(JSONEncoder, self).default(o)
+
+        constants = {"NaN": 99999}
+
+        class JSONDecoder(json.JSONDecoder):
+            def __init__(self, **kwargs):
+                super(JSONDecoder, self).__init__(parse_constant=constants.__getitem__)
+
+        self.pusher = Pusher.from_url(u'http://key:secret@somehost/apps/4',
+                                      json_encoder=JSONEncoder,
+                                      json_decoder=JSONDecoder)
+
+    def test_custom_json_decoder(self):
+        t = 1000 * time.time()
+        body = u'{"nan": NaN, "time_ms": %f}' % t
+        signature = sign(self.pusher.secret, body)
+        data = self.pusher.validate_webhook(self.pusher.key, signature, body)
+        self.assertEqual({u"nan": 99999, u"time_ms": t}, data)
+
+    def test_custom_json_encoder(self):
+        expected = {
+            u'channel_data': '{"money": "1.32"}',
+            u'auth': u'key:75c6044a30f2ccd9952c48cfcf149cb0a4843bf38bab47545fb953acd62bd0c9'
+        }
+        data = self.pusher.authenticate("presence-c1", "1", {"money": Decimal("1.32")})
+        self.assertEqual(expected, data)
 
 if __name__ == '__main__':
     unittest.main()
