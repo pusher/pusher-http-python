@@ -80,6 +80,8 @@ pusher = Pusher(app_id, key, secret)
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
 |cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
 |backend `Object` | an object that responds to the send_request(request) method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
+|json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
+|json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
 
 ##### Example
 
