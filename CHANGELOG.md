@@ -1,3 +1,7 @@
+### 1.1.1 2015-05-08
+
+* Library now validates `socket_id` for the `trigger` method.
+
 ## 1.1.0 2015-05-07
 
 * User can now specify a custom JSON encoder or decoder upon initializing Pusher.
