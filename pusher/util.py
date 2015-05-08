@@ -11,6 +11,7 @@ import sys
 channel_name_re = re.compile('^[-a-zA-Z0-9_=@,.;]+$')
 app_id_re       = re.compile('^[0-9]+$')
 pusher_url_re   = re.compile('(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)')
+socket_id_re    = re.compile('\d+\.\d+')
 
 if sys.version_info < (3,):
     text = 'a unicode string'
@@ -34,3 +35,11 @@ def validate_channel(channel):
         raise ValueError("Invalid Channel: %s" % channel)
 
     return channel
+
+def validate_socket_id(socket_id):
+    socket_id = ensure_text(socket_id, "socket_id")
+
+    if not socket_id_re.match(socket_id):
+        raise ValueError("Invalid socket ID: %s" % socket_id)
+
+    return socket_id

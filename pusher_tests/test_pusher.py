@@ -105,10 +105,10 @@ class TestPusher(unittest.TestCase):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
 
         expected = {
-            u'auth': u"foo:076740bd063f0299742a73bc5aac88900e5f35cb0185a1facbf45d326b5b204b"
+            u'auth': u"foo:89955e77e1b40e33df6d515a5ecbba86a01dc816a5b720da18a06fd26f7d92ff"
         }
 
-        self.assertEqual(pusher.authenticate(u'private-channel', u'34523'), expected)
+        self.assertEqual(pusher.authenticate(u'private-channel', u'345.23'), expected)
 
     def test_authenticate_for_presence_channels(self):
         pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
@@ -121,12 +121,12 @@ class TestPusher(unittest.TestCase):
         }
 
         expected = {
-            u'auth': u"foo:fbbc6d8acc85fc807bba060e2df45aba33deb8ad44cbee1633675b3ce73f4817",
+            u'auth': u"foo:e80ba6439492c2113022c39297a87a948de14061cc67b5788e045645a68b8ccd",
             u'channel_data': u"{\"user_id\":\"fred\",\"user_info\":{\"key\":\"value\"}}"
         }
 
         with mock.patch('json.dumps', return_value=expected[u'channel_data']) as dumps_mock:
-            actual = pusher.authenticate(u'presence-channel', u'34543245', custom_data)
+            actual = pusher.authenticate(u'presence-channel', u'345.43245', custom_data)
 
         self.assertEqual(actual, expected)
         dumps_mock.assert_called_once_with(custom_data, cls=None)
@@ -257,9 +257,9 @@ class TestJson(unittest.TestCase):
     def test_custom_json_encoder(self):
         expected = {
             u'channel_data': '{"money": "1.32"}',
-            u'auth': u'key:75c6044a30f2ccd9952c48cfcf149cb0a4843bf38bab47545fb953acd62bd0c9'
+            u'auth': u'key:7f2ae5922800a20b9615543ce7c8e7d1c97115d108939410825ea690f308a05f'
         }
-        data = self.pusher.authenticate("presence-c1", "1", {"money": Decimal("1.32")})
+        data = self.pusher.authenticate("presence-c1", "1.1", {"money": Decimal("1.32")})
         self.assertEqual(expected, data)
 
 if __name__ == '__main__':

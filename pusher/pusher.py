@@ -5,7 +5,7 @@ from __future__ import (print_function, unicode_literals, absolute_import,
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
 from pusher.requests import RequestsBackend
-from pusher.util import ensure_text, validate_channel, app_id_re, pusher_url_re, channel_name_re
+from pusher.util import ensure_text, validate_channel, validate_socket_id, app_id_re, pusher_url_re, channel_name_re
 
 import collections
 import hashlib
@@ -153,7 +153,7 @@ class Pusher(object):
             'data': data
         }
         if socket_id:
-            params['socket_id'] = ensure_text(socket_id, "socket_id")
+            params['socket_id'] = validate_socket_id(socket_id)
 
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
@@ -208,7 +208,7 @@ class Pusher(object):
         if not channel_name_re.match(channel):
             raise ValueError('Channel should be a valid channel, got: %s' % channel)
 
-        socket_id = ensure_text(socket_id, "socket_id")
+        socket_id = validate_socket_id(socket_id)
 
         if custom_data:
             custom_data = json.dumps(custom_data, cls=self._json_encoder)
