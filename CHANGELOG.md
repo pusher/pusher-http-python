@@ -1,3 +1,7 @@
+### 1.1.2 2015-08-08
+
+Fixed oversight in socket_id validation regex.
+
 ### 1.1.1 2015-05-08
 
 * Library now validates `socket_id` for the `trigger` method.
