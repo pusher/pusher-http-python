@@ -1,4 +1,8 @@
-### 1.1.2 2015-08-08
+### 1.1.3 2015-05-12
+
+Tightened up socket_id validation regex.
+
+### 1.1.2 2015-05-08
 
 Fixed oversight in socket_id validation regex.
 
