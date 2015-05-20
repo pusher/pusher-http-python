@@ -234,7 +234,7 @@ auth = pusher.authenticate(
 ###### Presence Channels
 
 ```python
-auth = pusher.authenticate_subscription(
+auth = pusher.authenticate(
 
   channel=u"presence-channel",
 
