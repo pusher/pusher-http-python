@@ -12,15 +12,21 @@ else:
   import unittest
 
 @unittest.skipIf(sys.version_info >= (3,), "skip")
-class TestURLFetchBackend(unittest.TestCase):
+class TestGAEBackend(unittest.TestCase):
 
   def setUp(self):
-    import pusher.urlfetch
+    import pusher.gae
+    from google.appengine.api import apiproxy_stub_map, urlfetch_stub
+
+    apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap() 
+    apiproxy_stub_map.apiproxy.RegisterStub('urlfetch', 
+    urlfetch_stub.URLFetchServiceStub()) 
+
     self.p = pusher.Pusher.from_url(u'http://key:secret@api.pusherapp.com/apps/4',
-                                  backend=pusher.urlfetch.URLFetchBackend)
+                                  backend=pusher.gae.GAEBackend)
 
   @httpretty.activate
-  def test_trigger_urlfetch_success(self):
+  def test_trigger_gae_success(self):
     httpretty.register_uri(httpretty.POST, "http://api.pusherapp.com/apps/4/events",
                        body="{}",
                        content_type="application/json")

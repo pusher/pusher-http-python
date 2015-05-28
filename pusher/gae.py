@@ -3,10 +3,10 @@
 from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 
-import urlfetch
+from google.appengine.api import urlfetch
 from pusher.http import process_response
 
-class URLFetchBackend(object):
+class GAEBackend(object):
   """Adapter for the URLFetch Module. Necessary for using this library with Google
   App Engine"""
 
@@ -19,7 +19,7 @@ class URLFetchBackend(object):
       url=request.url,
       headers=request.headers,
       method=request.method,
-      data=request.body,
+      payload=request.body,
       deadline=self.config.timeout,
       **self.options
     )

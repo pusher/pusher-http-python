@@ -26,8 +26,7 @@ setup(
 
     extras_require={
         'aiohttp': ["aiohttp>=0.9.0"],
-        'tornado': ['tornado>=4.0.0'],
-        'urlfetch': ['urlfetch>=1.0']
+        'tornado': ['tornado>=4.0.0']
     },
 
     test_suite='pusher_tests',

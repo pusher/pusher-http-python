@@ -289,13 +289,13 @@ Users can configure the library to use different backends to send calls to our A
 * [Requests](http://docs.python-requests.org/en/latest/) (`pusher.requests.RequestsBackend`). This is used by default. 
 * [Tornado](http://www.tornadoweb.org/en/stable/) (`pusher.tornado.TornadoBackend`).
 * [AsyncIO](http://asyncio.org/) (`pusher.aiohttp.AsyncIOBackend`).
-* [URLFetch](https://pypi.python.org/pypi/urlfetch) (`pusher.urlfetch.URLFetchBackend`).
+* [Google App Engine](https://cloud.google.com/appengine/docs/python/urlfetch/) (`pusher.gae.GAEBackend`).
 
 Upon initializing a Pusher instance, pass in any of these options to the `backend` keyword argument. 
 
 ### Google App Engine
 
-GAE users are advised to use the URLFetch backend to ensure compatability.
+GAE users are advised to use the `pusher.gae.GAEBackend` backend to ensure compatability.
 
 ## Feature Support
 
