@@ -5,13 +5,16 @@ from __future__ import print_function, absolute_import, division
 import pusher
 import httpretty
 import sys
+import os
 
 if (sys.version_info < (2,7)):
   import unittest2 as unittest
 else:
   import unittest
 
-@unittest.skipIf(sys.version_info >= (3,), "skip")
+skip_test = (sys.version_info[0:2] != (2,7)) or os.environ.get("TRAVIS_PYTHON_VERSION") 
+
+@unittest.skipIf(skip_test, "skip")
 class TestGAEBackend(unittest.TestCase):
 
   def setUp(self):
