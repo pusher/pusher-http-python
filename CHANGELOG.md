@@ -1,3 +1,8 @@
+### 1.2.0 2015-05-29
+
+* Renamed `URLFetchBackend` to `GAEBackend`, which specifically imports the Google App Engine urlfetch library. 
+* Library creates an SSL context from certificate, addressing users receiving `InsecurePlatformWarning`s.
+
 ### 1.1.3 2015-05-12
 
 Tightened up socket_id validation regex.
