@@ -21,7 +21,7 @@ setup(
         'pusher'
     ],
 
-    install_requires=['six', 'requests>=2.3.0'],
+    install_requires=['six', 'requests>=2.3.0', 'urllib3', 'pyopenssl', 'ndg-httpsclient', 'pyasn1'],
     tests_require=['nose', 'mock', 'HTTPretty'],
 
     extras_require={
