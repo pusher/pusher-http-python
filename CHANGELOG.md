@@ -1,3 +1,7 @@
+#### 1.2.1 2015-06-03
+
+Added cacert.pem to the package, getting rid of errors upon SSL calls.
+
 ### 1.2.0 2015-05-29
 
 * Renamed `URLFetchBackend` to `GAEBackend`, which specifically imports the Google App Engine urlfetch library. 
