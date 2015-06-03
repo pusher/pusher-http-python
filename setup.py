@@ -29,5 +29,9 @@ setup(
         'tornado': ['tornado>=4.0.0']
     },
 
+    package_data={
+        'pusher': ['cacert.pem']
+    },
+
     test_suite='pusher_tests',
 )
