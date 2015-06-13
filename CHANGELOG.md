@@ -1,3 +1,7 @@
+#### 1.2.2 2015-06-12
+
+Added Wheel file publishing. No functional changes.
+
 #### 1.2.1 2015-06-03
 
 Added cacert.pem to the package, getting rid of errors upon SSL calls.
