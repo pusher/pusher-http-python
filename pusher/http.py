@@ -63,7 +63,9 @@ class Request(object):
     :param path: The target path on the destination host
     :param params: Query params or body depending on the method
     """
-    def __init__(self, config, method, path, params={}):
+    def __init__(self, config, method, path, params=None):
+        if params is None:
+            params = {}
         self.config = config
         self.method = method
         self.path = path
