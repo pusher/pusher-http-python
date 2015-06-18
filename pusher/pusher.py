@@ -4,7 +4,6 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
-from pusher.requests import RequestsBackend
 from pusher.util import ensure_text, validate_channel, validate_socket_id, app_id_re, pusher_url_re, channel_name_re
 
 import collections
@@ -37,7 +36,12 @@ class Pusher(object):
     :param backend_options: additional backend
     """
     def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None,
-                 json_encoder=None, json_decoder=None, backend=RequestsBackend, **backend_options):
+                 json_encoder=None, json_decoder=None, backend=None, **backend_options):
+
+        if backend is None:
+            from pusher.requests import RequestsBackend
+            backend = RequestsBackend
+
         self._app_id = ensure_text(app_id, "app_id")
         if not app_id_re.match(self._app_id):
             raise ValueError("Invalid app id")
