@@ -336,6 +336,18 @@ Running the tests
 
 To run the tests run `python setup.py test`
 
+Making a release
+----------------
+
+* Update the changelog. `git changelog` from the [git-extras]()
+* Update the setup.py version
+* `git tag v$VERSION`
+* `git push && git push --tags`
+* `make` - publishes to pypi
+
+If you get the `error: invalid command 'bdist_wheel'` message on the last step
+`pip install wheel` and re-run `make`.
+
 License
 -------
 
