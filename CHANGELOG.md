@@ -1,3 +1,9 @@
+
+#### 1.2.3 2015-06-22
+
+* Fixes sharing default mutable argument between requests
+* Only load RequestsBackend when required (avoids issues on GAE)
+
 #### 1.2.2 2015-06-12
 
 Added Wheel file publishing. No functional changes.
