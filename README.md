@@ -339,7 +339,8 @@ To run the tests run `python setup.py test`
 Making a release
 ----------------
 
-* Update the changelog. `git changelog` from the [git-extras]()
+* Update the CHANGELOG.md file. `git changelog` from the
+  [git-extras](https://github.com/tj/git-extras/blob/master/Commands.md#git-changelog) package can be useful to pull commits from the release.
 * Update the setup.py version
 * `git tag v$VERSION`
 * `git push && git push --tags`
