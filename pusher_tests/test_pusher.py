@@ -87,6 +87,28 @@ class TestPusher(unittest.TestCase):
 
             self.assertEqual(request.params, expected_params)
 
+    def test_trigger_batch_success_case(self):
+        json_dumped = u'{"message": "something"}'
+
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = self.pusher.trigger_batch.make_request([{
+                        u'channel': u'my-chan',
+                        u'name': u'my-event',
+                        u'data': {u'message': u'something'}
+                    }])
+
+            expected_params = {
+                u'batch': [{
+                    u'channel': u'my-chan',
+                    u'name': u'my-event',
+                    u'data': json_dumped
+                }]
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+
     def test_trigger_disallow_non_string_or_list_channels(self):
         self.assertRaises(TypeError, lambda:
             self.pusher.trigger.make_request({u'channels': u'test_channel'}, u'some_event', {u'message': u'hello world'}))
