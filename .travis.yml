@@ -4,9 +4,11 @@ python:
   - "2.6"
   - "2.7"
   - "3.3"
+  - "3.4"
 install: 
   - "python setup.py develop"
-  - "pip install aiohttp"
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then pip install aiohttp==0.17.4; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then pip install aiohttp; fi
   - "pip install tornado"
   - "pip install urlfetch"
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi

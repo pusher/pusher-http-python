@@ -47,7 +47,7 @@ class TestRequest(unittest.TestCase):
                 req = Request(conf, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
                 self.assertEqual(req.query_params, expected)
 
-            json_dumps_mock.assert_called_once({u"foo": u"bar"})
+            json_dumps_mock.assert_called_once_with({u"foo": u"bar"})
 
 if __name__ == '__main__':
     unittest.main()
