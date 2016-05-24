@@ -1,4 +1,8 @@
 
+#### 1.3.0 2016-05-24
+
+* Add support for batch events
+
 #### 1.2.3 2015-06-22
 
 * Fixes sharing default mutable argument between requests
