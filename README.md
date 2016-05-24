@@ -118,6 +118,38 @@ This call will trigger to `'a_channel'` and `'another_channel'`, and exclude the
 pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'}, "1234.12")
 ```
 
+#### `Pusher::trigger_batch`
+
+It's also possible to send distinct messages in batches to limit the overhead
+of HTTP headers. There is a current limit of 10 events per batch on
+our multi-tenant clusters.
+
+|Argument   |Description   |
+|:-:|:-:|
+|batch `Array` of `Dict`  |**Required** <br> A list of events to trigger   |
+
+Events are a `Dict` with keys:
+|Argument   |Description   |
+|:-:|:-:|
+|channel `String`| **Required** <br> The name of the channel to publish to. |
+|name `String`| **Required** <br> The name of the event you wish to trigger. |
+|data `JSONable data` | **Required** <br> The event's payload |
+|socket_id `String` | **Default:`None`** <br> The socket_id of the connection you wish to exclude from receiving the event. You can read more [here](http://pusher.com/docs/duplicates). |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|`Dict`| An empty dict on success |
+
+
+##### Example
+
+```python
+pusher.trigger_batch([
+  { u'channel': u'a_channel', u'name': u'an_event', u'data': {u'some': u'data'}, u'socket_id': '1234.12'},
+  { u'channel': u'a_channel', u'name': u'an_event', u'data': {u'some': u'other data'}}
+])
+```
+
 #### Event Buffer
 
 Version 1.0.0 of the library introduced support for event buffering. The purpose of this functionality is to ensure that events that are triggered during whilst a client is offline for a short period of time will still be delivered upon reconnection.
