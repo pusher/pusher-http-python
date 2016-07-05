@@ -4,7 +4,9 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
-from pusher.util import ensure_text, validate_channel, validate_socket_id, app_id_re, pusher_url_re, channel_name_re
+from pusher.util import ensure_text, validate_channel, validate_socket_id, pusher_url_re, channel_name_re
+from pusher.config import Config
+from pusher.notification_client import NotificationClient
 
 import collections
 import hashlib
@@ -13,11 +15,12 @@ import os
 import re
 import six
 import time
+import copy
 
 def join_attributes(attributes):
     return six.text_type(',').join(attributes)
 
-class Pusher(object):
+class Pusher(Config):
     """Client for the Pusher HTTP API.
 
     This client supports various backend adapters to support various http
@@ -36,23 +39,13 @@ class Pusher(object):
     :param backend_options: additional backend
     """
     def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None,
-                 json_encoder=None, json_decoder=None, backend=None, **backend_options):
-
-        if backend is None:
-            from pusher.requests import RequestsBackend
-            backend = RequestsBackend
-
-        self._app_id = ensure_text(app_id, "app_id")
-        if not app_id_re.match(self._app_id):
-            raise ValueError("Invalid app id")
-
-        self._key = ensure_text(key, "key")
-        self._secret = ensure_text(secret, "secret")
-
-        if not isinstance(ssl, bool):
-            raise TypeError("SSL should be a boolean")
-        self._ssl = ssl
-
+                 json_encoder=None, json_decoder=None, backend=None, notification_host=None,
+                 notification_ssl=True, **backend_options):
+        super(Pusher, self).__init__(
+            app_id, key, secret, ssl,
+            host, port, timeout, cluster,
+            json_encoder, json_decoder, backend,
+            **backend_options)
         if host:
             self._host = ensure_text(host, "host")
         elif cluster:
@@ -60,17 +53,11 @@ class Pusher(object):
         else:
             self._host = six.text_type("api.pusherapp.com")
 
-        if port and not isinstance(port, six.integer_types):
-            raise TypeError("port should be an integer")
-        self._port = port or (443 if ssl else 80)
-
-        if not isinstance(timeout, six.integer_types):
-            raise TypeError("timeout should be an integer")
-        self._timeout = timeout
-        self._json_encoder = json_encoder
-        self._json_decoder = json_decoder
-
-        self.http = backend(self, **backend_options)
+        self._notification_client = NotificationClient(
+            app_id, key, secret, notification_ssl,
+            notification_host, port, timeout, cluster,
+            json_encoder, json_decoder, backend,
+            **backend_options)
 
     @classmethod
     def from_url(cls, url, **options):
@@ -116,7 +103,7 @@ class Pusher(object):
         val = os.environ.get(env)
         if not val:
             raise Exception("Environment variable %s not found" % env)
-        
+
         return cls.from_url(val, **options)
 
     @request_method
@@ -126,7 +113,7 @@ class Pusher(object):
 
         http://pusher.com/docs/rest_api#method-post-event
         '''
-        
+
         if isinstance(channels, six.string_types):
             channels = [channels]
 
@@ -280,36 +267,11 @@ class Pusher(object):
         return body_data
 
     @property
-    def app_id(self):
-        return self._app_id
+    def notification_client(self):
+        return self._notification_client
 
-    @property
-    def key(self):
-        return self._key
-
-    @property
-    def secret(self):
-        return self._secret
-
-    @property
-    def host(self):
-        return self._host
-
-    @property
-    def port(self):
-        return self._port
-
-    @property
-    def timeout(self):
-        return self._timeout
-
-    @property
-    def ssl(self):
-        return self._ssl
-
-    @property
-    def scheme(self):
-        return 'https' if self.ssl else 'http'
+    def notify(self, interests, notification):
+        self._notification_client.notify(interests, notification)
 
     def _data_to_string(self, data):
         if isinstance(data, six.string_types):
