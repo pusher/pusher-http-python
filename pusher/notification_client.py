@@ -1,23 +1,24 @@
 from .config import Config
 from .http import POST, Request, request_method
+from .util import ensure_text
 
 DEFAULT_HOST = "yolo.ngrok.io"
 RESTRICTED_GCM_KEYS = ['to', 'registration_ids']
-API_PREFIX = '/customer_api'
-API_VERSION = '/v1'
+API_PREFIX = 'customer_api'
+API_VERSION = 'v1'
 GCM_TTL = 241920
 WEBHOOK_LEVELS = ['INFO', 'DEBUG', '']
 
 class NotificationClient(Config):
 
 	def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None,
-                 json_encoder=None, json_decoder=None, backend=None, **backend_options):
+				 json_encoder=None, json_decoder=None, backend=None, **backend_options):
 
 		super(NotificationClient, self).__init__(
 			app_id, key, secret, ssl,
 			host, port, timeout, cluster,
-		    json_encoder, json_decoder, backend,
-		    **backend_options)
+			json_encoder, json_decoder, backend,
+			**backend_options)
 
 		if host:
 			self._host = ensure_text(host, "host")
@@ -30,15 +31,19 @@ class NotificationClient(Config):
 		if not isinstance(interests, list) and not isinstance(interests, set):
 			raise TypeError("Interests must be a list or a set")
 
+		if len(interests) is not 1:
+			raise ValueError("Currently sending to more than one interest is unsupported")
+
 		if not isinstance(notification, dict):
 			raise TypeError("Notification must be a dictionary")
 
 		params = {
-		    'interests': interests,
+			'interests': interests,
 		}
 		params.update(notification)
 		self.validate_notification(params)
-		return Request(self, POST, "/customer_api/v1/apps/%s/notifications" % self.app_id, params)
+		path =  "/%s/%s/apps/%s/notifications" % (API_PREFIX, API_VERSION, self.app_id)
+		return Request(self, POST, path, params)
 
 	def validate_notification(self, notification):
 		gcm_payload = notification.get('gcm')
@@ -78,8 +83,8 @@ class NotificationClient(Config):
 		webhook_level = notification.get('webhook_level')
 
 		if webhook_level:
-			 if not webhook_url:
+			if not webhook_url:
 				raise ValueError("webhook_level cannot be used without a webhook_url")
 
-			 if not webhook_level in WEBHOOK_LEVELS:
+			if not webhook_level in WEBHOOK_LEVELS:
 				raise ValueError("webhook_level must be either INFO or DEBUG. Blank will default to INFO")
