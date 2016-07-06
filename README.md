@@ -150,21 +150,65 @@ pusher.trigger_batch([
 ])
 ```
 
-#### Event Buffer
+## Push Notifications (BETA)
 
-Version 1.0.0 of the library introduced support for event buffering. The purpose of this functionality is to ensure that events that are triggered during whilst a client is offline for a short period of time will still be delivered upon reconnection.
+Pusher now allows sending native notifications to iOS and Android devices. Check out the [documentation](https://pusher.com/docs/push_notifications) for information on how to set up push notifications on Android and iOS. There is no additional setup required to use it with this library. It works out of the box wit the same Pusher instance. All you need are the same pusher credentials.
 
-**Note: this requires your Pusher application to be on a cluster that has the Event Buffer capability.**
+### Sending native pushes
 
-As part of this the trigger function now returns a set of event_id values for each event triggered on a channel. These can then be used by the client to tell the Pusher service the last event it has received. If additional events have been triggered after that event ID the service has the opportunity to provide the client with those IDs.
+The native notifications API is hosted at `nativepushclient-cluster1.pusher.com` and only accepts https requests.
 
-##### Example
+You can send pushes by using the `notify` method, either globally or on the instance. The method takes two parameters:
+
+- `interests`: An Array of strings which represents the interests your devices are subscribed to. These are akin to channels in the DDN with less of an epehemeral nature. Note that currently, you can only send to _one_ interest.
+- `data`: The content of the notification represented by a Hash. You must supply either the `gcm` or `apns` key. For a detailed list of the acceptable keys, take a look at the [docs](https://pusher.com/docs/push_notifications#payload).
+
+Example:
 
 ```python
-events = pusher.trigger([u'a_channel', u'another_channel'], u'an_event', {u'some': u'data'}, "1234.12")
+data = {
+  'apns': {
+    'priority': 5,
+    'aps': {
+      'alert': {
+        'body': 'tada'
+      }
+    }
+  }
+}
 
-#=> {'event_ids': {'another_channel': 'eudhq17zrhfbwc', 'a_channel': 'eudhq17zrhfbtn'}}
+pusher.notify(["my-favourite-interest"], data)
 ```
+
+### Errors
+
+Push notification requests, once submitted to the service are executed asynchronously. To make reporting errors easier, you can supply a `webhook_url` field in the body of the request. This will be used by the service to send a webhook to the supplied URL if there are errors.
+
+You may also supply a `webhook_level` field in the body, which can either be INFO or DEBUG. It defaults to INFO - where INFO only reports customer facing errors, while DEBUG reports all errors.
+
+For example:
+
+```python
+data = {
+  "apns": {
+    "aps": {
+      "alert": {
+        "body": "hello"
+      }
+    }
+  },
+  'gcm': {
+    'notification': {
+      "title": "hello",
+      "icon": "icon"
+    }
+  },
+  "webhook_url": "http://yolo.com",
+  "webhook_level": "INFO"
+}
+```
+
+**NOTE:** This is currently a BETA feature and there might be minor bugs and issues. Changes to the API will be kept to a minimum, but changes are expected. If you come across any bugs or issues, please do get in touch via [support](support@pusher.com) or create an issue here.
 
 Querying Application State
 -----------------
