@@ -15,7 +15,6 @@ import os
 import re
 import six
 import time
-import copy
 
 def join_attributes(attributes):
     return six.text_type(',').join(attributes)
