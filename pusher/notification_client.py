@@ -2,7 +2,7 @@ from .config import Config
 from .http import POST, Request, request_method
 from .util import ensure_text
 
-DEFAULT_HOST = "yolo.ngrok.io"
+DEFAULT_HOST = "nativepushclient-cluster1.pusher.com"
 RESTRICTED_GCM_KEYS = ['to', 'registration_ids']
 API_PREFIX = 'customer_api'
 API_VERSION = 'v1'

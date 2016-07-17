@@ -26,7 +26,7 @@ class TestNotificationClient(unittest.TestCase):
 	def test_notify_success_case(self):
 		request = self.client.notify.make_request(['yolo'], self.success_fixture)
 		self.assertEqual(request.method, u'POST')
-		self.assertEqual(request.base_url, u'https://yolo.ngrok.io:443')
+		self.assertEqual(request.base_url, u'https://nativepushclient-cluster1.pusher.com:443')
 		self.assertEqual(request.path, '/customer_api/v1/apps/4/notifications')
 		self.assertEqual(request.params, {
 			'interests': ['yolo'],
