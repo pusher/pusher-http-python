@@ -4,7 +4,7 @@ from .util import ensure_text
 
 DEFAULT_HOST = "nativepushclient-cluster1.pusher.com"
 RESTRICTED_GCM_KEYS = ['to', 'registration_ids']
-API_PREFIX = 'customer_api'
+API_PREFIX = 'server_api'
 API_VERSION = 'v1'
 GCM_TTL = 241920
 WEBHOOK_LEVELS = ['INFO', 'DEBUG', '']
