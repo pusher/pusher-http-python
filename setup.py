@@ -2,7 +2,7 @@
 from setuptools import setup
 setup(
     name='pusher',
-    version='1.4rc1',
+    version='1.4rc2',
     description='A Python library to interract with the Pusher API',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
