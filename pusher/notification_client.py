@@ -2,7 +2,7 @@ from .config import Config
 from .http import POST, Request, request_method
 from .util import ensure_text
 
-DEFAULT_HOST = "nativepushclient-cluster1.pusher.com"
+DEFAULT_HOST = "nativepush-cluster1.pusher.com"
 RESTRICTED_GCM_KEYS = ['to', 'registration_ids']
 API_PREFIX = 'server_api'
 API_VERSION = 'v1'

@@ -158,7 +158,7 @@ Pusher now allows sending native notifications to iOS and Android devices. Check
 
 ### Sending native pushes
 
-The native notifications API is hosted at `nativepushclient-cluster1.pusher.com` and only accepts https requests.
+The native notifications API is hosted at `nativepush-cluster1.pusher.com` and only accepts https requests.
 
 You can send pushes by using the `notify` method, either globally or on the instance. The method takes two parameters:
 
@@ -366,12 +366,12 @@ print webhook["events"]
 
 Users can configure the library to use different backends to send calls to our API. The HTTP libraries we support are:
 
-* [Requests](http://docs.python-requests.org/en/latest/) (`pusher.requests.RequestsBackend`). This is used by default. 
+* [Requests](http://docs.python-requests.org/en/latest/) (`pusher.requests.RequestsBackend`). This is used by default.
 * [Tornado](http://www.tornadoweb.org/en/stable/) (`pusher.tornado.TornadoBackend`).
 * [AsyncIO](http://asyncio.org/) (`pusher.aiohttp.AsyncIOBackend`).
 * [Google App Engine](https://cloud.google.com/appengine/docs/python/urlfetch/) (`pusher.gae.GAEBackend`).
 
-Upon initializing a Pusher instance, pass in any of these options to the `backend` keyword argument. 
+Upon initializing a Pusher instance, pass in any of these options to the `backend` keyword argument.
 
 ### Google App Engine
 
