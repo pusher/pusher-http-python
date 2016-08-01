@@ -41,13 +41,17 @@ class TestRequest(unittest.TestCase):
         }
 
         with mock.patch('time.time', return_value=1000):
-            # patching this, because json can be unambiguously parsed, but not 
+            # patching this, because json can be unambiguously parsed, but not
             # unambiguously generated (think whitespace).
             with mock.patch('json.dumps', return_value='{"foo": "bar"}') as json_dumps_mock:
                 req = Request(conf, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
                 self.assertEqual(req.query_params, expected)
 
             json_dumps_mock.assert_called_once_with({u"foo": u"bar"})
+
+    def test_x_pusher_library_header(self):
+        req = Request(conf, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
+        self.assertEqual(req.headers(), {})
 
 if __name__ == '__main__':
     unittest.main()

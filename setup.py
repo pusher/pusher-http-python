@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+
+from pusher.version import VERSION
+
 setup(
     name='pusher',
-    version='1.4rc3',
+    version=VERSION,
     description='A Python library to interract with the Pusher API',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
