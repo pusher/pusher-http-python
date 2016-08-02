@@ -54,7 +54,7 @@ class TestRequest(unittest.TestCase):
         req = Request(conf, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
         self.assertTrue('X-Pusher-Library' in req.headers)
         pusherLib = req.headers['X-Pusher-Library']
-        self.assertRegex(pusherLib, r'^pusher-http-python \d+(\.\d+)+(rc\d+)?$')
+        self.assertRegexpMatches(pusherLib, r'^pusher-http-python \d+(\.\d+)+(rc\d+)?$')
 
 if __name__ == '__main__':
     unittest.main()
