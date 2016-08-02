@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+import re
 
-from pusher.version import VERSION
+# Lovingly adapted from https://github.com/kennethreitz/requests/blob/39d693548892057adad703fda630f925e61ee557/setup.py#L50-L55
+with open('pusher/version.py', 'r') as fd:
+    VERSION = re.search(r'^VERSION = [\']([^\']*)[\']',
+                        fd.read(), re.MULTILINE).group(1)
+
+if not VERSION:
+    raise RuntimeError('Ensure `VERSION` is correctly set in ./pusher/version.py')
 
 setup(
     name='pusher',
