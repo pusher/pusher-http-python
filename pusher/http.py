@@ -4,6 +4,7 @@ from __future__ import (print_function, unicode_literals, absolute_import,
                         division)
 from pusher.errors import *
 from pusher.signature import sign
+from pusher.version import VERSION
 
 import copy
 import hashlib
@@ -117,7 +118,7 @@ class Request(object):
 
     @property
     def headers(self):
+        hdrs = {"X-Pusher-Library": "pusher-http-python " + VERSION}
         if self.method == POST:
-            return {"Content-Type": "application/json"}
-        else:
-            return {}
+            hdrs["Content-Type"] = "application/json"
+        return hdrs

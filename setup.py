@@ -1,8 +1,19 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+import os
+import re
+
+# Lovingly adapted from https://github.com/kennethreitz/requests/blob/39d693548892057adad703fda630f925e61ee557/setup.py#L50-L55
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pusher/version.py'), 'r') as fd:
+    VERSION = re.search(r'^VERSION = [\']([^\']*)[\']',
+                        fd.read(), re.MULTILINE).group(1)
+
+if not VERSION:
+    raise RuntimeError('Ensure `VERSION` is correctly set in ./pusher/version.py')
+
 setup(
     name='pusher',
-    version='1.4rc3',
+    version=VERSION,
     description='A Python library to interract with the Pusher API',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
