@@ -50,8 +50,11 @@ class TestRequest(unittest.TestCase):
             json_dumps_mock.assert_called_once_with({u"foo": u"bar"})
 
     def test_x_pusher_library_header(self):
-        req = Request(conf, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
-        self.assertEqual(req.headers(), {})
+        conf = Pusher.from_url(u'http://key:secret@somehost/apps/4')
+        req = Request(conf, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
+        self.assertTrue('X-Pusher-Library' in req.headers)
+        pusherLib = req.headers['X-Pusher-Library']
+        self.assertRegex(pusherLib, r'^pusher-http-python \d+(\.\d+)+(rc\d+)?$')
 
 if __name__ == '__main__':
     unittest.main()
