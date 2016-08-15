@@ -42,10 +42,8 @@ def make_query_string(params):
     return '&'.join(map('='.join, sorted(params.items(), key=lambda x: x[0])))
 
 def process_response(status, body):
-    if status == 200:
+    if status == 200 or status == 202:
         return json.loads(body)
-    if status == 202:
-        return True
     elif status == 400:
         raise PusherBadRequest(body)
     elif status == 401:

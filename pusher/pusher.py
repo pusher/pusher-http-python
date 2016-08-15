@@ -270,7 +270,7 @@ class Pusher(Config):
         return self._notification_client
 
     def notify(self, interest, notification):
-        self._notification_client.notify(interest, notification)
+        return self._notification_client.notify(interest, notification)
 
     def _data_to_string(self, data):
         if isinstance(data, six.string_types):
