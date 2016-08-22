@@ -31,8 +31,8 @@ class NotificationClient(Config):
 		if not isinstance(interests, list) and not isinstance(interests, set):
 			raise TypeError("Interests must be a list or a set")
 
-		if len(interests) is not 1:
-			raise ValueError("Currently sending to more than one interest is unsupported")
+		if len(interests) is 0:
+			raise ValueError("Interests must not be empty")
 
 		if not isinstance(notification, dict):
 			raise TypeError("Notification must be a dictionary")
