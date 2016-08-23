@@ -51,5 +51,5 @@ class TestNotificationClient(unittest.TestCase):
 		request = configured_client.notify.make_request([u'blargh'], self.success_fixture)
 		self.assertEqual(request.base_url, u'http://foo.bar.io:80')
 
-	def test_only_one_interest_sent_to(self):
-		self.assertRaises(ValueError, lambda: self.client.notify([u'yolo', u'woot'], self.success_fixture))
+	def test_at_least_one_interest_sent_to(self):
+		self.assertRaises(ValueError, lambda: self.client.notify([], self.success_fixture))
