@@ -129,6 +129,7 @@ our multi-tenant clusters.
 |batch `Array` of `Dict`  |**Required** <br> A list of events to trigger   |
 
 Events are a `Dict` with keys:
+
 |Argument   |Description   |
 |:-:|:-:|
 |channel `String`| **Required** <br> The name of the channel to publish to. |
