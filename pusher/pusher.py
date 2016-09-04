@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import (print_function, unicode_literals, absolute_import,
-                        division)
-from pusher.http import GET, POST, Request, request_method
+from __future__ import (
+    print_function,
+    unicode_literals,
+    absolute_import,
+    division)
+
+from pusher.util import (
+    ensure_text,
+    validate_channel,
+    validate_socket_id,
+    pusher_url_re,
+    channel_name_re)
+
 from pusher.signature import sign, verify
-from pusher.util import ensure_text, validate_channel, validate_socket_id, pusher_url_re, channel_name_re, join_attributes
 from pusher.pusher_client import PusherClient
 from pusher.notification_client import NotificationClient
-
 
 import collections
 import hashlib
@@ -33,22 +41,22 @@ class Pusher(object):
     :param timeout: Request timeout (in seconds)
     :param cluster: Convention for other clusters than the main Pusher-one.
       Eg: 'eu' will resolve to the api-eu.pusherapp.com host
-    :param backend: an http adapter class (AsyncIOBackend, RequestsBackend, SynchronousBackend, TornadoBackend)
+    :param backend: an http adapter class (AsyncIOBackend, RequestsBackend,
+      SynchronousBackend, TornadoBackend)
     :param backend_options: additional backend
     """
-    def __init__(self, app_id, key, secret, ssl=True, host=None, port=None, timeout=5, cluster=None,
-                 json_encoder=None, json_decoder=None, backend=None, notification_host=None,
-                 notification_ssl=True, **backend_options):
+    def __init__(
+            self, app_id, key, secret, ssl=True, host=None, port=None,
+            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            backend=None, notification_host=None, notification_ssl=True,
+            **backend_options):
         self._pusher_client = PusherClient(
-            app_id, key, secret, ssl,
-            host, port, timeout, cluster,
-            json_encoder, json_decoder, backend,
-            **backend_options)
+            app_id, key, secret, ssl, host, port, timeout, cluster,
+            json_encoder, json_decoder, backend, **backend_options)
 
         self._notification_client = NotificationClient(
-            app_id, key, secret, notification_ssl,
-            notification_host, port, timeout, cluster,
-            json_encoder, json_decoder, backend,
+            app_id, key, secret, notification_ssl, notification_host, port,
+            timeout, cluster, json_encoder, json_decoder, backend,
             **backend_options)
 
 
@@ -61,11 +69,13 @@ class Pusher(object):
         Usage::
 
           >> from pusher import Pusher
-          >> p = Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
+          >> p =
+            Pusher.from_url("http://mykey:mysecret@api.pusher.com/apps/432")
         """
         m = pusher_url_re.match(ensure_text(url, "url"))
         if not m:
             raise Exception("Unparsable url: %s" % url)
+
         ssl = m.group(1) == 'https'
 
         options_ = {
@@ -73,8 +83,8 @@ class Pusher(object):
             'secret': m.group(3),
             'host': m.group(4),
             'app_id': m.group(5),
-            'ssl': ssl,
-        }
+            'ssl': ssl}
+
         options_.update(options)
 
         return cls(**options_)
@@ -106,7 +116,8 @@ class Pusher(object):
 
         http://pusher.com/docs/rest_api#method-post-event
         '''
-        return self._pusher_client.trigger(channels, event_name, data, socket_id)
+        return self._pusher_client.trigger(
+            channels, event_name, data, socket_id)
 
 
     def trigger_batch(self, batch=[], already_encoded=False):
@@ -144,6 +155,11 @@ class Pusher(object):
         '''
         return self._pusher_client.users_info(channel)
 
+
+    def notify(self, interest, notification):
+        return self._notification_client.notify(interest, notification)
+
+
     def authenticate(self, channel, socket_id, custom_data=None):
         """Used to generate delegated client subscription token.
 
@@ -176,6 +192,7 @@ class Pusher(object):
 
         return result
 
+
     def validate_webhook(self, key, signature, body):
         """Used to validate incoming webhook messages. When used it guarantees
         that the sender is Pusher and not someone else impersonating it.
@@ -207,12 +224,3 @@ class Pusher(object):
             return None
 
         return body_data
-
-    def notify(self, interest, notification):
-        return self._notification_client.notify(interest, notification)
-
-    def _data_to_string(self, data):
-        if isinstance(data, six.string_types):
-            return ensure_text(data, "data")
-        else:
-            return json.dumps(data, cls=self._json_encoder)
