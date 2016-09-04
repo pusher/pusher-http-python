@@ -213,6 +213,7 @@ class Pusher(object):
 
         try:
             body_data = json.loads(body, cls=self._json_decoder)
+
         except ValueError:
             return None
 
