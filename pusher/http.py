@@ -15,15 +15,15 @@ import time
 GET, POST, PUT, DELETE = "GET", "POST", "PUT", "DELETE"
 
 class RequestMethod(object):
-    def __init__(self, pusher, f):
-        self.pusher = pusher
+    def __init__(self, client, f):
+        self.client = client
         self.f = f
 
     def __call__(self, *args, **kwargs):
-        return self.pusher.http.send_request(self.make_request(*args, **kwargs))
+        return self.client.http.send_request(self.make_request(*args, **kwargs))
 
     def make_request(self, *args, **kwargs):
-        return self.f(self.pusher, *args, **kwargs)
+        return self.f(self.client, *args, **kwargs)
 
 def doc_string(doc):
     def decorator(f):
@@ -59,15 +59,15 @@ class Request(object):
     An instance of that object is passed to the backend's send_request method
     for each request.
 
-    :param config: an instance of pusher.Pusher
+    :param client: an instance of pusher.Client
     :param method: HTTP method as a string
     :param path: The target path on the destination host
     :param params: Query params or body depending on the method
     """
-    def __init__(self, config, method, path, params=None):
+    def __init__(self, client, method, path, params=None):
         if params is None:
             params = {}
-        self.config = config
+        self.client = client
         self.method = method
         self.path = path
         self.params = copy.copy(params)
@@ -84,7 +84,7 @@ class Request(object):
     def _generate_auth(self):
         self.body_md5 = hashlib.md5(self.body).hexdigest()
         self.query_params.update({
-            'auth_key': self.config.key,
+            'auth_key': self.client.key,
             'body_md5': six.text_type(self.body_md5),
             'auth_version': '1.0',
             'auth_timestamp': '%.0f' % time.time()
@@ -96,7 +96,7 @@ class Request(object):
             make_query_string(self.query_params)
         ])
 
-        self.query_params['auth_signature'] = sign(self.config.secret, auth_string)
+        self.query_params['auth_signature'] = sign(self.client.secret, auth_string)
 
     @property
     def query_string(self):
@@ -112,7 +112,7 @@ class Request(object):
 
     @property
     def base_url(self):
-        return "%s://%s:%s" % (self.config.scheme, self.config.host, self.config.port)
+        return "%s://%s:%s" % (self.client.scheme, self.client.host, self.client.port)
 
     @property
     def headers(self):

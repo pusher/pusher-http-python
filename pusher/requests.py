@@ -17,13 +17,13 @@ CERT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/cacert.pem'
 class RequestsBackend(object):
     """Adapter for the requests module.
 
-    :param config:  pusher.Pusher object
+    :param client:  pusher.Client object
     :param options: key-value passed into the requests.request constructor
     """
-    def __init__(self, config, **options):
-        self.config = config
+    def __init__(self, client, **options):
+        self.client = client
         self.options = options
-        if self.config.ssl:
+        if self.client.ssl:
             self.options.update({'verify': CERT_PATH})        
         self.session = requests.Session()
 
@@ -33,7 +33,7 @@ class RequestsBackend(object):
             request.url,
             headers=request.headers,
             data=request.body,
-            timeout=self.config.timeout,
+            timeout=self.client.timeout,
             **self.options
         )
         return process_response(resp.status_code, resp.text)

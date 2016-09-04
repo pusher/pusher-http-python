@@ -389,7 +389,7 @@ Get the list of channels in an application | *&#10004;*
 Get the state of a single channel          | *&#10004;*
 Get a list of users in a presence channel  | *&#10004;*
 WebHook validation                         | *&#10004;*
-Heroku add-on support						   | *&#10004;*
+Heroku add-on support                           | *&#10004;*
 Debugging & Logging                        | *&#10004;*
 Cluster configuration                      | *&#10004;*
 Timeouts                                   | *&#10004;*
@@ -403,7 +403,7 @@ These are helpers that have been implemented to to ensure interactions with the 
 
 Helper Functionality                     | Supported
 -----------------------------------------| :-------:
-Channel name validation 					 | &#10004;
+Channel name validation                      | &#10004;
 Limit to 10 channels per trigger         | &#10004;
 Limit event name length to 200 chars     | &#10004;
 
