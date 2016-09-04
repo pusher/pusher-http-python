@@ -50,7 +50,8 @@ class NotificationClient(Client):
             'interests': interests}
 
         params.update(notification)
-        path = "/%s/%s/apps/%s/notifications" %
-            (API_PREFIX, API_VERSION, self.app_id)
+        path = (
+            "/%s/%s/apps/%s/notifications" %
+            (API_PREFIX, API_VERSION, self.app_id))
 
         return Request(self, POST, path, params)

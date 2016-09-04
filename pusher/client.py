@@ -10,6 +10,7 @@ from pusher.util import ensure_text, app_id_re
 
 import six
 
+
 class Client(object):
     def __init__(
             self, app_id, key, secret, ssl=True, host=None, port=None,

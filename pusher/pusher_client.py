@@ -39,9 +39,9 @@ class PusherClient(Client):
             self._host = ensure_text(host, "host")
 
         elif cluster:
-            self._host = six.text_type("api-%s.pusher.com") %
-                ensure_text(cluster, "cluster")
-
+            self._host = (
+                six.text_type("api-%s.pusher.com") %
+                ensure_text(cluster, "cluster"))
         else:
             self._host = six.text_type("api.pusherapp.com")
 
