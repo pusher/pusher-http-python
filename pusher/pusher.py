@@ -136,73 +136,16 @@ class Pusher(object):
         return self._pusher_client.users_info(channel)
 
 
+    @doc_string(PusherClient.authenticate.__doc__)
+    def authenticate(self, channel, socket_id, custom_data=None):
+        return self.pusher_client.authenticate(channel, socket_id, custom_data)
+
+
+    @doc_string(PusherClient.validate_webhook.__doc__)
+    def authenticate(self, key, signature, body):
+        return self.pusher_client.validate_webhook(key, signature, body)
+
+
     @doc_string(NotificationClient.notify.__doc__)
     def notify(self, interest, notification):
         return self._notification_client.notify(interest, notification)
-
-
-    def authenticate(self, channel, socket_id, custom_data=None):
-        """Used to generate delegated client subscription token.
-
-        :param channel: name of the channel to authorize subscription to
-        :param socket_id: id of the socket that requires authorization
-        :param custom_data: used on presence channels to provide user info
-        """
-        channel = validate_channel(channel)
-
-        if not channel_name_re.match(channel):
-            raise ValueError('Channel should be a valid channel, got: %s' % channel)
-
-        socket_id = validate_socket_id(socket_id)
-
-        if custom_data:
-            custom_data = json.dumps(custom_data, cls=self._json_encoder)
-
-        string_to_sign = "%s:%s" % (socket_id, channel)
-
-        if custom_data:
-            string_to_sign += ":%s" % custom_data
-
-        signature = sign(self.secret, string_to_sign)
-
-        auth = "%s:%s" % (self.key, signature)
-        result = {'auth': auth}
-
-        if custom_data:
-            result['channel_data'] = custom_data
-
-        return result
-
-
-    def validate_webhook(self, key, signature, body):
-        """Used to validate incoming webhook messages. When used it guarantees
-        that the sender is Pusher and not someone else impersonating it.
-
-        :param key: key used to sign the body
-        :param signature: signature that was given with the body
-        :param body: content that needs to be verified
-        """
-        key = ensure_text(key, "key")
-        signature = ensure_text(signature, "signature")
-        body = ensure_text(body, "body")
-
-        if key != self.key:
-            return None
-
-        if not verify(self.secret, body, signature):
-            return None
-
-        try:
-            body_data = json.loads(body, cls=self._json_decoder)
-
-        except ValueError:
-            return None
-
-        time_ms = body_data.get('time_ms')
-        if not time_ms:
-            return None
-
-        if abs(time.time()*1000 - time_ms) > 300000:
-            return None
-
-        return body_data

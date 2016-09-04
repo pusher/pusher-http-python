@@ -23,6 +23,11 @@ class TestNotificationClient(unittest.TestCase):
             }
         }
 
+    def test_host_should_be_text(self):
+        NotificationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=u'foo')
+
+        self.assertRaises(TypeError, lambda: NotificationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=4))
+
     def test_notify_success_case(self):
         request = self.client.notify.make_request(['yolo'], self.success_fixture)
         self.assertEqual(request.method, u'POST')
