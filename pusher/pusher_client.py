@@ -13,8 +13,8 @@ from pusher.util import (
     join_attributes,
     data_to_string)
 
-from pusher.http import GET, POST, Request, request_method
 from pusher.client import Client
+from pusher.http import GET, POST, Request, request_method
 
 import collections
 import hashlib
