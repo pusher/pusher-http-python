@@ -6,12 +6,12 @@ import asyncio
 from pusher.http import process_response
 
 class AsyncIOBackend:
-    def __init__(self, config):
+    def __init__(self, client):
         """Adapter for the requests module.
 
-        :param config:  pusher.Pusher object
+        :param client:  pusher.Client object
         """
-        self.config = config
+        self.client = client
         self.conn = aiohttp.TCPConnector()
 
     def send_request(self, request):
@@ -23,7 +23,7 @@ class AsyncIOBackend:
 
         response = yield from asyncio.wait_for(
             aiohttp.request(method, url, params=params, data=data, headers=headers, connector=self.conn),
-            timeout=self.config.timeout
+            timeout=self.client.timeout
         )
         body = yield from response.read_and_close()
         return process_response(response.status, body.decode('utf8'))

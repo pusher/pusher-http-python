@@ -10,8 +10,8 @@ class GAEBackend(object):
   """Adapter for the URLFetch Module. Necessary for using this library with Google
   App Engine"""
 
-  def __init__(self, config, **options):
-    self.config = config
+  def __init__(self, client, **options):
+    self.client = client
     self.options = options
   
   def send_request(self, request):
@@ -20,7 +20,7 @@ class GAEBackend(object):
       headers=request.headers,
       method=request.method,
       payload=request.body,
-      deadline=self.config.timeout,
+      deadline=self.client.timeout,
       **self.options
     )
     return process_response(resp.status_code, resp.content)

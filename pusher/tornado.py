@@ -12,11 +12,11 @@ from tornado.concurrent import TracebackFuture
 class TornadoBackend(object):
     """Adapter for the tornado.httpclient module.
 
-    :param config:  pusher.Pusher object
+    :param client:  pusher.Client object
     :param kwargs:  options for the httpclient.HTTPClient constructor
     """
-    def __init__(self, config, **kwargs):
-        self.config = config
+    def __init__(self, client, **kwargs):
+        self.client = client
         self.http = tornado.httpclient.AsyncHTTPClient(**kwargs)
 
     def send_request(self, request):
@@ -36,7 +36,7 @@ class TornadoBackend(object):
                 body = (result.body or b'').decode('utf8')
                 future.set_result(process_response(code, body))
 
-        request = tornado.httpclient.HTTPRequest(request.url, method=method, body=data, headers=headers, request_timeout=self.config.timeout)
+        request = tornado.httpclient.HTTPRequest(request.url, method=method, body=data, headers=headers, request_timeout=self.client.timeout)
         response_future = self.http.fetch(request, raise_error=False)
         response_future.add_done_callback(process_response_future)
 
