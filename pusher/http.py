@@ -6,6 +6,7 @@ from __future__ import (
     absolute_import,
     division)
 
+from pusher.util import doc_string
 from pusher.errors import *
 from pusher.signature import sign
 from pusher.version import VERSION
@@ -32,14 +33,6 @@ class RequestMethod(object):
 
     def make_request(self, *args, **kwargs):
         return self.f(self.client, *args, **kwargs)
-
-
-def doc_string(doc):
-    def decorator(f):
-        f.__doc__ = doc
-        return f
-
-    return decorator
 
 
 def request_method(f):

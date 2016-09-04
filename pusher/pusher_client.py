@@ -48,6 +48,10 @@ class PusherClient(Client):
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
+        """Trigger an event on one or more channels, see:
+
+        http://pusher.com/docs/rest_api#method-post-event
+        """
         if isinstance(channels, six.string_types):
             channels = [channels]
 
@@ -83,12 +87,10 @@ class PusherClient(Client):
 
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
-        '''
-        Trigger multiple events with a single HTTP call.
+        """Trigger multiple events with a single HTTP call.
 
         http://pusher.com/docs/rest_api#method-post-batch-events
-        '''
-
+        """
         if not already_encoded:
             for event in batch:
                 event['data'] = data_to_string(event['data'],
@@ -103,11 +105,10 @@ class PusherClient(Client):
 
     @request_method
     def channels_info(self, prefix_filter=None, attributes=[]):
-        '''
-        Get information on multiple channels, see:
+        """Get information on multiple channels, see:
 
         http://pusher.com/docs/rest_api#method-get-channels
-        '''
+        """
         params = {}
         if attributes:
             params['info'] = join_attributes(attributes)
@@ -122,11 +123,10 @@ class PusherClient(Client):
 
     @request_method
     def channel_info(self, channel, attributes=[]):
-        '''
-        Get information on a specific channel, see:
+        """Get information on a specific channel, see:
 
         http://pusher.com/docs/rest_api#method-get-channel
-        '''
+        """
         validate_channel(channel)
 
         params = {}
@@ -139,11 +139,10 @@ class PusherClient(Client):
 
     @request_method
     def users_info(self, channel):
-        '''
-        Fetch user ids currently subscribed to a presence channel
+        """Fetch user ids currently subscribed to a presence channel
 
         http://pusher.com/docs/rest_api#method-get-users
-        '''
+        """
         validate_channel(channel)
 
         return Request(
