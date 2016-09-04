@@ -64,3 +64,11 @@ def data_to_string(data, json_encoder):
 
     else:
         return json.dumps(data, cls=json_encoder)
+
+
+def doc_string(doc):
+    def decorator(f):
+        f.__doc__ = doc
+        return f
+
+    return decorator

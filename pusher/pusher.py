@@ -11,7 +11,8 @@ from pusher.util import (
     validate_channel,
     validate_socket_id,
     pusher_url_re,
-    channel_name_re)
+    channel_name_re,
+    doc_string)
 
 from pusher.signature import sign, verify
 from pusher.pusher_client import PusherClient
@@ -110,52 +111,32 @@ class Pusher(object):
         return cls.from_url(val, **options)
 
 
+    @doc_string(PusherClient.trigger.__doc__)
     def trigger(self, channels, event_name, data, socket_id=None):
-        '''
-        Trigger an event on one or more channels, see:
-
-        http://pusher.com/docs/rest_api#method-post-event
-        '''
         return self._pusher_client.trigger(
             channels, event_name, data, socket_id)
 
 
+    @doc_string(PusherClient.trigger_batch.__doc__)
     def trigger_batch(self, batch=[], already_encoded=False):
-        '''
-        Trigger multiple events with a single HTTP call.
-
-        http://pusher.com/docs/rest_api#method-post-batch-events
-        '''
         return self._pusher_client.trigger_batch(batch, already_encoded)
 
-
+    @doc_string(PusherClient.channels_info.__doc__)
     def channels_info(self, prefix_filter=None, attributes=[]):
-        '''
-        Get information on multiple channels, see:
-
-        http://pusher.com/docs/rest_api#method-get-channels
-        '''
         return self._pusher_client.channels_info(prefix_filter, attributes)
 
 
+    @doc_string(PusherClient.channel_info.__doc__)
     def channel_info(self, channel, attributes=[]):
-        '''
-        Get information on a specific channel, see:
-
-        http://pusher.com/docs/rest_api#method-get-channel
-        '''
         return self._pusher_client.channel_info(channel, attributes)
 
 
+    @doc_string(PusherClient.users_info.__doc__)
     def users_info(self, channel):
-        '''
-        Fetch user ids currently subscribed to a presence channel
-
-        http://pusher.com/docs/rest_api#method-get-users
-        '''
         return self._pusher_client.users_info(channel)
 
 
+    @doc_string(NotificationClient.notify.__doc__)
     def notify(self, interest, notification):
         return self._notification_client.notify(interest, notification)
 

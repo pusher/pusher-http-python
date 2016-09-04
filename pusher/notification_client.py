@@ -37,6 +37,10 @@ class NotificationClient(Client):
 
     @request_method
     def notify(self, interests, notification):
+        """Send push notifications, see:
+
+        https://github.com/pusher/pusher-http-python#push-notifications-beta
+        """
         if not isinstance(interests, list) and not isinstance(interests, set):
             raise TypeError("Interests must be a list or a set")
 
