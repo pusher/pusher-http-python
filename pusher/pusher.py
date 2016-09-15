@@ -17,6 +17,7 @@ from pusher.util import (
 from pusher.signature import sign, verify
 from pusher.pusher_client import PusherClient
 from pusher.notification_client import NotificationClient
+from pusher.authentication_client import AuthenticationClient
 
 import collections
 import hashlib
@@ -55,6 +56,10 @@ class Pusher(object):
             app_id, key, secret, ssl, host, port, timeout, cluster,
             json_encoder, json_decoder, backend, **backend_options)
 
+        self._authentication_client = AuthenticationClient(
+            app_id, key, secret, ssl, host, port, timeout, cluster,
+            json_encoder, json_decoder, backend, **backend_options)
+
         self._notification_client = NotificationClient(
             app_id, key, secret, notification_ssl, notification_host, port,
             timeout, cluster, json_encoder, json_decoder, backend,
@@ -63,7 +68,7 @@ class Pusher(object):
 
     @classmethod
     def from_url(cls, url, **options):
-        """Alternate constructor that extracts the information from a URL.
+        """Alternative constructor that extracts the information from a URL.
 
         :param url: String containing a URL
 
@@ -93,7 +98,7 @@ class Pusher(object):
 
     @classmethod
     def from_env(cls, env='PUSHER_URL', **options):
-        """Alternate constructor that extracts the information from an URL
+        """Alternative constructor that extracts the information from an URL
         stored in an environment variable. The pusher heroku addon will set
         the PUSHER_URL automatically when installed for example.
 
@@ -121,6 +126,7 @@ class Pusher(object):
     def trigger_batch(self, batch=[], already_encoded=False):
         return self._pusher_client.trigger_batch(batch, already_encoded)
 
+
     @doc_string(PusherClient.channels_info.__doc__)
     def channels_info(self, prefix_filter=None, attributes=[]):
         return self._pusher_client.channels_info(prefix_filter, attributes)
@@ -136,14 +142,16 @@ class Pusher(object):
         return self._pusher_client.users_info(channel)
 
 
-    @doc_string(PusherClient.authenticate.__doc__)
+    @doc_string(AuthenticationClient.authenticate.__doc__)
     def authenticate(self, channel, socket_id, custom_data=None):
-        return self.pusher_client.authenticate(channel, socket_id, custom_data)
+        return self._authentication_client.authenticate(
+            channel, socket_id, custom_data)
 
 
-    @doc_string(PusherClient.validate_webhook.__doc__)
-    def authenticate(self, key, signature, body):
-        return self.pusher_client.validate_webhook(key, signature, body)
+    @doc_string(AuthenticationClient.validate_webhook.__doc__)
+    def validate_webhook(self, key, signature, body):
+        return self._authentication_client.validate_webhook(
+            key, signature, body)
 
 
     @doc_string(NotificationClient.notify.__doc__)
