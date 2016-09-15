@@ -16,6 +16,9 @@ import re
 import six
 import time
 
+PUSHER_HEADER_KEY = 'HTTP_X_PUSHER_KEY'
+PUSHER_HEADER_SIGNATURE = 'HTTP_X_PUSHER_SIGNATURE'
+
 def join_attributes(attributes):
     return six.text_type(',').join(attributes)
 
@@ -264,6 +267,17 @@ class Pusher(Config):
             return None
 
         return body_data
+
+    def validate_webhook_django(self, request):
+        """Convenience method for validating a webhook from a Django request
+
+        https://docs.djangoproject.com/en/1.8/ref/request-response/#django.http.HttpRequest
+
+        :param request: django.http.HttpRequest object
+        """
+        header_key = request.META.get(PUSHER_HEADER_KEY)
+        header_signature = request.META.get(PUSHER_HEADER_SIGNATURE)
+        return self.validate_webhook(header_key, header_signature, request.body)
 
     @property
     def notification_client(self):

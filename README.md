@@ -361,6 +361,25 @@ webhook = pusher.validate_webhook(
 print webhook["events"]
 ```
 
+#### `Pusher::validate_webhook_django`
+
+This is a convenience method for validating a webhook based on a Django request object. In your Django view, you can simply call `validate_webhook_django()`, passing it the incoming [django.http.HttpRequest](https://docs.djangoproject.com/en/1.8/ref/request-response/#django.http.HttpRequest) object.
+
+|Argument   |Description   |
+|:-:|:-:|
+|request `django.http.HttpRequest`   | **Required**<br>An actual [django.http.HttpRequest](https://docs.djangoproject.com/en/1.8/ref/request-response/#django.http.HttpRequest) object.   |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|body_data `Dict`   | If validation was successful, the return value will be the parsed payload. Otherwise, it will be `None`.   |
+
+##### Example
+
+```python
+webhook = pusher.validate_webhook_django(request)
+print webhook["events"]
+```
+
 ## Request Library Configuration
 
 Users can configure the library to use different backends to send calls to our API. The HTTP libraries we support are:
