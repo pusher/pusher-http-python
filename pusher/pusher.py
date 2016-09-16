@@ -8,13 +8,9 @@ from __future__ import (
 
 from pusher.util import (
     ensure_text,
-    validate_channel,
-    validate_socket_id,
     pusher_url_re,
-    channel_name_re,
     doc_string)
 
-from pusher.signature import sign, verify
 from pusher.pusher_client import PusherClient
 from pusher.notification_client import NotificationClient
 from pusher.authentication_client import AuthenticationClient

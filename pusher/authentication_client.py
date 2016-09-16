@@ -10,10 +10,11 @@ from pusher.util import (
     ensure_text,
     validate_channel,
     validate_socket_id,
-    data_to_string)
+    channel_name_re)
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
+from pusher.signature import sign, verify
 
 import collections
 import hashlib

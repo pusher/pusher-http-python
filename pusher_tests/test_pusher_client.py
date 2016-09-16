@@ -13,7 +13,6 @@ from decimal import Decimal
 
 from pusher.pusher_client import PusherClient
 from pusher.http import GET
-from pusher.signature import sign
 
 try:
     import unittest.mock as mock
@@ -154,97 +153,6 @@ class TestPusherClient(unittest.TestCase):
         self.assertEqual(request.path, u'/apps/4/channels/presence-channel/users')
         self.assertEqual(request.params, {})
 
-    def test_authenticate_for_private_channels(self):
-        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
-
-        expected = {
-            u'auth': u"foo:89955e77e1b40e33df6d515a5ecbba86a01dc816a5b720da18a06fd26f7d92ff"
-        }
-
-        self.assertEqual(pusher.authenticate(u'private-channel', u'345.23'), expected)
-
-    def test_authenticate_types(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        self.assertRaises(TypeError, lambda: pusher.authenticate(2423, u'34554'))
-        self.assertRaises(TypeError, lambda: pusher.authenticate(u'plah', 234234))
-        self.assertRaises(ValueError, lambda: pusher.authenticate(u'::', u'345345'))
-
-    def test_authenticate_for_presence_channels(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        custom_data = {
-            u'user_id': u'fred',
-            u'user_info': {
-                u'key': u'value'
-            }
-        }
-
-        expected = {
-            u'auth': u"foo:e80ba6439492c2113022c39297a87a948de14061cc67b5788e045645a68b8ccd",
-            u'channel_data': u"{\"user_id\":\"fred\",\"user_info\":{\"key\":\"value\"}}"
-        }
-
-        with mock.patch('json.dumps', return_value=expected[u'channel_data']) as dumps_mock:
-            actual = pusher.authenticate(u'presence-channel', u'345.43245', custom_data)
-
-        self.assertEqual(actual, expected)
-        dumps_mock.assert_called_once_with(custom_data, cls=None)
-
-    def test_validate_webhook_success_case(self):
-        pusher = Pusher.from_url(u'http://foo:bar@host/apps/4')
-
-        body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(pusher.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
-
-        with mock.patch('time.time', return_value=1200):
-            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), {u'time_ms': 1000000})
-
-    def test_validate_webhook_bad_types(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        pusher.validate_webhook(u'key', u'signature', u'body')
-
-        # These things are meant to be human readable, so enforcing being text is
-        # sensible.
-
-        with mock.patch('time.time') as time_mock:
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(4, u'signature', u'body'))
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', 4, u'body'))
-            self.assertRaises(TypeError, lambda: pusher.validate_webhook(u'key', u'signature', 4))
-
-        time_mock.assert_not_called()
-
-    def test_validate_webhook_bad_key(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        body = u'some body'
-        signature = six.text_type(hmac.new(pusher.secret.encode(u'utf8'), body.encode(u'utf8'), hashlib.sha256).hexdigest())
-
-        with mock.patch('time.time') as time_mock:
-            self.assertEqual(pusher.validate_webhook(u'badkey', signature, body), None)
-
-        time_mock.assert_not_called()
-
-    def test_validate_webhook_bad_signature(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        body = u'some body'
-        signature = u'some signature'
-
-        with mock.patch('time.time') as time_mock:
-            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), None)
-
-        time_mock.assert_not_called()
-
-    def test_validate_webhook_bad_time(self):
-        pusher = PusherClient.from_url(u'http://foo:bar@host/apps/4')
-
-        body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(pusher.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
-
-        with mock.patch('time.time', return_value=1301):
-            self.assertEqual(pusher.validate_webhook(pusher.key, signature, body), None)
 
 if __name__ == '__main__':
     unittest.main()
