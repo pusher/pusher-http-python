@@ -19,5 +19,6 @@ class TestRequestsBackend(unittest.TestCase):
     response = self.pusher.trigger(u'test_channel', u'test', {u'data': u'yolo'})
     self.assertEqual(response, {})
 
+
 if __name__ == '__main__':
     unittest.main()

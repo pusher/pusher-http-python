@@ -18,7 +18,6 @@ from pusher.http import GET, POST, Request, request_method
 
 import collections
 import hashlib
-import json
 import os
 import re
 import six

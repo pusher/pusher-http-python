@@ -17,7 +17,6 @@ from pusher.authentication_client import AuthenticationClient
 
 import collections
 import hashlib
-import json
 import os
 import re
 import six

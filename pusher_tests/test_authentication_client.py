@@ -113,7 +113,9 @@ class TestAuthenticationClient(unittest.TestCase):
         signature = u'some signature'
 
         with mock.patch('time.time') as time_mock:
-            self.assertEqual(authenticationClient.validate_webhook(authenticationClient.key, signature, body), None)
+            self.assertEqual(
+                authenticationClient.validate_webhook(
+                    authenticationClient.key, signature, body), None)
 
         time_mock.assert_not_called()
 
@@ -123,10 +125,53 @@ class TestAuthenticationClient(unittest.TestCase):
             key=u'foo', secret=u'bar', host=u'host', app_id=u'4', ssl=True)
 
         body = u'{"time_ms": 1000000}'
-        signature = six.text_type(hmac.new(authenticationClient.secret.encode('utf8'), body.encode('utf8'), hashlib.sha256).hexdigest())
+        signature = six.text_type(
+            hmac.new(
+                authenticationClient.secret.encode('utf8'),
+                body.encode('utf8'), hashlib.sha256).hexdigest())
 
         with mock.patch('time.time', return_value=1301):
-            self.assertEqual(authenticationClient.validate_webhook(authenticationClient.key, signature, body), None)
+            self.assertEqual(authenticationClient.validate_webhook(
+                authenticationClient.key, signature, body), None)
+
+
+class TestJson(unittest.TestCase):
+    def setUp(self):
+        class JSONEncoder(json.JSONEncoder):
+            def default(self, o):
+                if isinstance(o, Decimal):
+                    return str(o)
+
+                return super(JSONEncoder, self).default(o)
+
+        constants = {"NaN": 99999}
+
+        class JSONDecoder(json.JSONDecoder):
+            def __init__(self, **kwargs):
+                super(JSONDecoder, self).__init__(
+                    parse_constant=constants.__getitem__)
+
+        self.authentication_client = AuthenticationClient(
+            "4", "key", "secret", host="somehost", json_encoder=JSONEncoder,
+            json_decoder=JSONDecoder)
+
+
+    def test_custom_json_decoder(self):
+        t = 1000 * time.time()
+        body = u'{"nan": NaN, "time_ms": %f}' % t
+        signature = sign(self.authentication_client.secret, body)
+        data = self.authentication_client.validate_webhook(
+            self.authentication_client.key, signature, body)
+        self.assertEqual({u"nan": 99999, u"time_ms": t}, data)
+
+
+    def test_custom_json_encoder(self):
+        expected = {
+            u'channel_data': '{"money": "1.32"}',
+            u'auth': u'key:7f2ae5922800a20b9615543ce7c8e7d1c97115d108939410825ea690f308a05f'
+        }
+        data = self.authentication_client.authenticate("presence-c1", "1.1", {"money": Decimal("1.32")})
+        self.assertEqual(expected, data)
 
 
 if __name__ == '__main__':

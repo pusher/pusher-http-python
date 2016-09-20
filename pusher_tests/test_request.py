@@ -71,5 +71,6 @@ class TestRequest(unittest.TestCase):
         pusherLib = req.headers['X-Pusher-Library']
         self.assertRegexpMatches(pusherLib, r'^pusher-http-python \d+(\.\d+)+(rc\d+)?$')
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -58,3 +58,7 @@ class TestNotificationClient(unittest.TestCase):
 
     def test_at_least_one_interest_sent_to(self):
         self.assertRaises(ValueError, lambda: self.client.notify([], self.success_fixture))
+
+
+if __name__ == '__main__':
+    unittest.main()
