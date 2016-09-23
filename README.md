@@ -8,20 +8,20 @@ This package lets you trigger events to your client and query the state of your 
 
 In order to use this library, you need to have a free account on <http://pusher.com>. After registering, you will need the application credentials for your app.
 
-Features
---------
+## Features
 
 * Python 2.6, 2.7 and 3.3 support
 * Adapters for various http libraries like requests, urlfetch, aiohttp and tornado.
 * WebHook validation
 * Signature generation for socket subscriptions
 
-###Table of Contents
+### Table of Contents
 
 - [Installation](#installation)
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Triggering Events](#triggering-events)
+- [Push Notifications (BETA)](#push-notifications-beta)
 - [Querying Application State](#querying-application-state)
   - [Getting Information For All Channels](#getting-information-for-all-channels)
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
@@ -34,8 +34,7 @@ Features
 - [Running the tests](#running-the-tests)
 - [License](#license)
 
-Installation
-------------
+## Installation
 
 You can install this module using your package management method or choice,
 normally `easy_install` or `pip`. For example:
@@ -46,8 +45,7 @@ pip install pusher
 
 Users on Python 2.x and older versions of pip may get a warning, due to pip compiling the optional `pusher.aiohttp` module, which uses Python 3 syntax. However, as `pusher.aiohttp` is not used by default, this does not affect the library's functionality. See [our Github issue](https://github.com/pusher/pusher-http-python/issues/52), as well as [this issue from Gunicorn](https://github.com/benoitc/gunicorn/issues/788) for more details.
 
-Getting started
----------------
+## Getting started
 
 The minimum configuration required to use the Pusher object are the three
 constructor arguments which identify your Pusher app. You can find them by
@@ -92,8 +90,7 @@ from pusher import Pusher
 pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
 ```
 
-Triggering Events
------------------
+## Triggering Events
 
 To trigger an event on one or more channels, use the `trigger` method on the `Pusher` object.
 
@@ -211,8 +208,7 @@ data = {
 
 **NOTE:** This is currently a BETA feature and there might be minor bugs and issues. Changes to the API will be kept to a minimum, but changes are expected. If you come across any bugs or issues, please do get in touch via [support](support@pusher.com) or create an issue here.
 
-Querying Application State
------------------
+## Querying Application State
 
 ### Getting Information For All Channels
 
@@ -275,8 +271,7 @@ pusher.users_info(u'presence-chatroom')
 #=> {u'users': [{u'id': u'1035'}, {u'id': u'4821'}]}
 ```
 
-Authenticating Channel Subscription
------------------
+## Authenticating Channel Subscription
 
 #### `Pusher::authenticate`
 
@@ -329,8 +324,7 @@ auth = pusher.authenticate(
 # return `auth` as a response
 ```
 
-Receiving Webhooks
------------------
+## Receiving Webhooks
 
 If you have webhooks set up to POST a payload to a specified endpoint, you may wish to validate that these are actually from Pusher. The `Pusher` object achieves this by checking the authentication signature in the request body using your application credentials.
 
@@ -408,13 +402,11 @@ Limit to 10 channels per trigger         | &#10004;
 Limit event name length to 200 chars     | &#10004;
 
 
-Running the tests
------------------
+## Running the tests
 
 To run the tests run `python setup.py test`
 
-Making a release
-----------------
+## Making a release
 
 * Update the CHANGELOG.md file. `git changelog` from the
   [git-extras](https://github.com/tj/git-extras/blob/master/Commands.md#git-changelog) package can be useful to pull commits from the release.
@@ -426,7 +418,6 @@ Making a release
 If you get the `error: invalid command 'bdist_wheel'` message on the last step
 `pip install wheel` and re-run `make`.
 
-License
--------
+## License
 
 Copyright (c) 2015 Pusher Ltd. See LICENSE for details.
