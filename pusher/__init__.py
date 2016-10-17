@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pusher.pusher import Pusher
+from .pusher import Pusher
 
 __all__ = ['Pusher']
