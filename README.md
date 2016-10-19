@@ -79,9 +79,11 @@ pusher = Pusher(app_id, key, secret)
 |port `int`       | **Default:`None`** <br>Which port to connect to |
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
 |cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
-|backend `Object` | an object that responds to the send_request(request) method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
+|backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
 |json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
+
+The constructor will throw a `TypeError` if it is called with parameters that don’t match the types listed above.
 
 ##### Example
 
@@ -106,6 +108,8 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 |Return Values   |Description   |
 |:-:|:-:|
 |buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
+
+`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 10 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
 
 ##### Example
 
@@ -138,6 +142,7 @@ Events are a `Dict` with keys:
 |:-:|:-:|
 |`Dict`| An empty dict on success |
 
+`Pusher::trigger_batch` will throw a `TypeError` if the data parameter is not JSONable.
 
 ##### Example
 
@@ -224,6 +229,8 @@ data = {
 |:-:|:-:|
 |channels `Dict`   | A parsed response from the HTTP API. See example.   |
 
+`Pusher::channels_info` will throw a `TypeError` if `prefix_filter` is not a `String`.
+
 ##### Example
 
 ```python
@@ -245,6 +252,8 @@ channels = pusher.channels_info(u"presence-", [u'user_count'])
 |:-:|:-:|
 |channel `Dict`   |  A parsed response from the HTTP API. See example.  |
 
+`Pusher::channel_info` will throw a `ValueError` if `channel` is not a valid channel.
+
 ##### Example
 
 ```python
@@ -263,6 +272,8 @@ channel = pusher.channel_info(u'presence-chatroom', [u"user_count"])
 |Return Values   |Description   |
 |:-:|:-:|
 |users `Dict`   | A parsed response from the HTTP API. See example.   |
+
+`Pusher::users_info` will throw a `ValueError` if `channel` is not a valid channel.
 
 ##### Example
 
@@ -290,6 +301,8 @@ Using your `Pusher` instance, with which you initialized `Pusher`, you can gener
 |Return Values   |Description   |
 |:-:|:-:|
 |response `Dict`   | A dictionary to send as a response to the authentication request.|
+
+`Pusher::authenticate` will throw a `ValueError` if the `channel` or `socket_id` that it’s called with are invalid.
 
 ##### Example
 
@@ -339,6 +352,8 @@ If you have webhooks set up to POST a payload to a specified endpoint, you may w
 |Return Values   |Description   |
 |:-:|:-:|
 |body_data `Dict`   | If validation was successful, the return value will be the parsed payload. Otherwise, it will be `None`.   |
+
+`Pusher::validate_webhook` will raise a `TypeError` if it is called with any parameters of the wrong type.
 
 ##### Example
 
