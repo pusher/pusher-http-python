@@ -6,13 +6,13 @@ from __future__ import (
     absolute_import,
     division)
 
-from pusher.http import process_response
-
 import six
 import tornado
 import tornado.httpclient
 
 from tornado.concurrent import TracebackFuture
+
+from pusher.http import process_response
 
 
 class TornadoBackend(object):

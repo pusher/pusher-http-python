@@ -6,9 +6,9 @@ from __future__ import (
     absolute_import,
     division)
 
-from pusher.util import ensure_text, app_id_re
-
 import six
+
+from pusher.util import ensure_text, app_id_re
 
 
 class Client(object):

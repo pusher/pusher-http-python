@@ -6,6 +6,13 @@ from __future__ import (
     absolute_import,
     division)
 
+import collections
+import hashlib
+import os
+import re
+import six
+import time
+
 from pusher.util import (
     ensure_text,
     pusher_url_re,
@@ -14,13 +21,6 @@ from pusher.util import (
 from pusher.pusher_client import PusherClient
 from pusher.notification_client import NotificationClient
 from pusher.authentication_client import AuthenticationClient
-
-import collections
-import hashlib
-import os
-import re
-import six
-import time
 
 
 class Pusher(object):

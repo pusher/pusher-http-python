@@ -6,16 +6,16 @@ from __future__ import (
     absolute_import,
     division)
 
-from pusher.util import doc_string
-from pusher.errors import *
-from pusher.signature import sign
-from pusher.version import VERSION
-
 import copy
 import hashlib
 import json
 import six
 import time
+
+from pusher.util import doc_string
+from pusher.errors import *
+from pusher.signature import sign
+from pusher.version import VERSION
 
 
 GET, POST, PUT, DELETE = "GET", "POST", "PUT", "DELETE"

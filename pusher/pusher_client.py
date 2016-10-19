@@ -6,6 +6,13 @@ from __future__ import (
     absolute_import,
     division)
 
+import collections
+import hashlib
+import os
+import re
+import six
+import time
+
 from pusher.util import (
     ensure_text,
     validate_channel,
@@ -15,13 +22,6 @@ from pusher.util import (
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
-
-import collections
-import hashlib
-import os
-import re
-import six
-import time
 
 
 class PusherClient(Client):
