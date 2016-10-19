@@ -27,7 +27,7 @@ class TestRequest(unittest.TestCase):
         }
 
         with mock.patch('time.time', return_value=1000):
-            req = Request(conf, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
+            req = Request(conf._pusher_client, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
             self.assertEqual(req.query_params, expected)
 
     def test_post_signature_generation(self):
@@ -45,7 +45,7 @@ class TestRequest(unittest.TestCase):
             # patching this, because json can be unambiguously parsed, but not
             # unambiguously generated (think whitespace).
             with mock.patch('json.dumps', return_value='{"foo": "bar"}') as json_dumps_mock:
-                req = Request(conf, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
+                req = Request(conf._pusher_client, u'POST', u'/some/obscure/api', {u'foo': u'bar'})
                 self.assertEqual(req.query_params, expected)
 
             json_dumps_mock.assert_called_once_with({u"foo": u"bar"})
@@ -66,10 +66,11 @@ class TestRequest(unittest.TestCase):
 
     def test_x_pusher_library_header(self):
         conf = Pusher.from_url(u'http://key:secret@somehost/apps/4')
-        req = Request(conf, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
+        req = Request(conf._pusher_client, u'GET', u'/some/obscure/api', {u'foo': u'bar'})
         self.assertTrue('X-Pusher-Library' in req.headers)
         pusherLib = req.headers['X-Pusher-Library']
         self.assertRegexpMatches(pusherLib, r'^pusher-http-python \d+(\.\d+)+(rc\d+)?$')
+
 
 if __name__ == '__main__':
     unittest.main()

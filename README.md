@@ -8,20 +8,20 @@ This package lets you trigger events to your client and query the state of your 
 
 In order to use this library, you need to have a free account on <http://pusher.com>. After registering, you will need the application credentials for your app.
 
-Features
---------
+## Features
 
 * Python 2.6, 2.7 and 3.3 support
 * Adapters for various http libraries like requests, urlfetch, aiohttp and tornado.
 * WebHook validation
 * Signature generation for socket subscriptions
 
-###Table of Contents
+### Table of Contents
 
 - [Installation](#installation)
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Triggering Events](#triggering-events)
+- [Push Notifications (BETA)](#push-notifications-beta)
 - [Querying Application State](#querying-application-state)
   - [Getting Information For All Channels](#getting-information-for-all-channels)
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
@@ -34,8 +34,7 @@ Features
 - [Running the tests](#running-the-tests)
 - [License](#license)
 
-Installation
-------------
+## Installation
 
 You can install this module using your package management method or choice,
 normally `easy_install` or `pip`. For example:
@@ -46,8 +45,7 @@ pip install pusher
 
 Users on Python 2.x and older versions of pip may get a warning, due to pip compiling the optional `pusher.aiohttp` module, which uses Python 3 syntax. However, as `pusher.aiohttp` is not used by default, this does not affect the library's functionality. See [our Github issue](https://github.com/pusher/pusher-http-python/issues/52), as well as [this issue from Gunicorn](https://github.com/benoitc/gunicorn/issues/788) for more details.
 
-Getting started
----------------
+## Getting started
 
 The minimum configuration required to use the Pusher object are the three
 constructor arguments which identify your Pusher app. You can find them by
@@ -81,9 +79,11 @@ pusher = Pusher(app_id, key, secret)
 |port `int`       | **Default:`None`** <br>Which port to connect to |
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
 |cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
-|backend `Object` | an object that responds to the send_request(request) method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
+|backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
 |json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
+
+The constructor will throw a `TypeError` if it is called with parameters that don’t match the types listed above.
 
 ##### Example
 
@@ -92,8 +92,7 @@ from pusher import Pusher
 pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
 ```
 
-Triggering Events
------------------
+## Triggering Events
 
 To trigger an event on one or more channels, use the `trigger` method on the `Pusher` object.
 
@@ -109,6 +108,8 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 |Return Values   |Description   |
 |:-:|:-:|
 |buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
+
+`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 10 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
 
 ##### Example
 
@@ -141,6 +142,7 @@ Events are a `Dict` with keys:
 |:-:|:-:|
 |`Dict`| An empty dict on success |
 
+`Pusher::trigger_batch` will throw a `TypeError` if the data parameter is not JSONable.
 
 ##### Example
 
@@ -153,7 +155,7 @@ pusher.trigger_batch([
 
 ## Push Notifications (BETA)
 
-Pusher now allows sending native notifications to iOS and Android devices. Check out the [documentation](https://pusher.com/docs/push_notifications) for information on how to set up push notifications on Android and iOS. There is no additional setup required to use it with this library. It works out of the box wit the same Pusher instance. All you need are the same pusher credentials.
+Pusher now allows sending native notifications to iOS and Android devices. Check out the [documentation](https://pusher.com/docs/push_notifications) for information on how to set up push notifications on Android and iOS. There is no additional setup required to use it with this library. It works out of the box with the same Pusher instance. All you need are the same pusher credentials.
 
 ### Sending native pushes
 
@@ -211,8 +213,7 @@ data = {
 
 **NOTE:** This is currently a BETA feature and there might be minor bugs and issues. Changes to the API will be kept to a minimum, but changes are expected. If you come across any bugs or issues, please do get in touch via [support](support@pusher.com) or create an issue here.
 
-Querying Application State
------------------
+## Querying Application State
 
 ### Getting Information For All Channels
 
@@ -227,6 +228,8 @@ Querying Application State
 |Return Values   |Description   |
 |:-:|:-:|
 |channels `Dict`   | A parsed response from the HTTP API. See example.   |
+
+`Pusher::channels_info` will throw a `TypeError` if `prefix_filter` is not a `String`.
 
 ##### Example
 
@@ -249,6 +252,8 @@ channels = pusher.channels_info(u"presence-", [u'user_count'])
 |:-:|:-:|
 |channel `Dict`   |  A parsed response from the HTTP API. See example.  |
 
+`Pusher::channel_info` will throw a `ValueError` if `channel` is not a valid channel.
+
 ##### Example
 
 ```python
@@ -268,6 +273,8 @@ channel = pusher.channel_info(u'presence-chatroom', [u"user_count"])
 |:-:|:-:|
 |users `Dict`   | A parsed response from the HTTP API. See example.   |
 
+`Pusher::users_info` will throw a `ValueError` if `channel` is not a valid channel.
+
 ##### Example
 
 ```python
@@ -275,8 +282,7 @@ pusher.users_info(u'presence-chatroom')
 #=> {u'users': [{u'id': u'1035'}, {u'id': u'4821'}]}
 ```
 
-Authenticating Channel Subscription
------------------
+## Authenticating Channel Subscription
 
 #### `Pusher::authenticate`
 
@@ -295,6 +301,8 @@ Using your `Pusher` instance, with which you initialized `Pusher`, you can gener
 |Return Values   |Description   |
 |:-:|:-:|
 |response `Dict`   | A dictionary to send as a response to the authentication request.|
+
+`Pusher::authenticate` will throw a `ValueError` if the `channel` or `socket_id` that it’s called with are invalid.
 
 ##### Example
 
@@ -329,8 +337,7 @@ auth = pusher.authenticate(
 # return `auth` as a response
 ```
 
-Receiving Webhooks
------------------
+## Receiving Webhooks
 
 If you have webhooks set up to POST a payload to a specified endpoint, you may wish to validate that these are actually from Pusher. The `Pusher` object achieves this by checking the authentication signature in the request body using your application credentials.
 
@@ -345,6 +352,8 @@ If you have webhooks set up to POST a payload to a specified endpoint, you may w
 |Return Values   |Description   |
 |:-:|:-:|
 |body_data `Dict`   | If validation was successful, the return value will be the parsed payload. Otherwise, it will be `None`.   |
+
+`Pusher::validate_webhook` will raise a `TypeError` if it is called with any parameters of the wrong type.
 
 ##### Example
 
@@ -389,7 +398,7 @@ Get the list of channels in an application | *&#10004;*
 Get the state of a single channel          | *&#10004;*
 Get a list of users in a presence channel  | *&#10004;*
 WebHook validation                         | *&#10004;*
-Heroku add-on support						   | *&#10004;*
+Heroku add-on support                           | *&#10004;*
 Debugging & Logging                        | *&#10004;*
 Cluster configuration                      | *&#10004;*
 Timeouts                                   | *&#10004;*
@@ -403,18 +412,16 @@ These are helpers that have been implemented to to ensure interactions with the 
 
 Helper Functionality                     | Supported
 -----------------------------------------| :-------:
-Channel name validation 					 | &#10004;
+Channel name validation                      | &#10004;
 Limit to 10 channels per trigger         | &#10004;
 Limit event name length to 200 chars     | &#10004;
 
 
-Running the tests
------------------
+## Running the tests
 
 To run the tests run `python setup.py test`
 
-Making a release
-----------------
+## Making a release
 
 * Update the CHANGELOG.md file. `git changelog` from the
   [git-extras](https://github.com/tj/git-extras/blob/master/Commands.md#git-changelog) package can be useful to pull commits from the release.
@@ -426,7 +433,6 @@ Making a release
 If you get the `error: invalid command 'bdist_wheel'` message on the last step
 `pip install wheel` and re-run `make`.
 
-License
--------
+## License
 
 Copyright (c) 2015 Pusher Ltd. See LICENSE for details.
