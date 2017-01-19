@@ -6,12 +6,7 @@ from __future__ import (
     absolute_import,
     division)
 
-import collections
-import hashlib
 import os
-import re
-import six
-import time
 
 from pusher.util import (
     ensure_text,
@@ -19,7 +14,7 @@ from pusher.util import (
     doc_string)
 
 from pusher.pusher_client import PusherClient
-from pusher.notification_client import NotificationClient
+from pusher.notification_client import NotificationClient, ClientNotificationClient
 from pusher.authentication_client import AuthenticationClient
 
 
@@ -60,6 +55,10 @@ class Pusher(object):
             timeout, cluster, json_encoder, json_decoder, backend,
             **backend_options)
 
+        self._notification_client = NotificationClient(
+            app_id, key, secret, notification_ssl, notification_host, port,
+            timeout, cluster, json_encoder, json_decoder, backend,
+            **backend_options)
 
     @classmethod
     def from_url(cls, url, **options):
@@ -90,7 +89,6 @@ class Pusher(object):
 
         return cls(**options_)
 
-
     @classmethod
     def from_env(cls, env='PUSHER_URL', **options):
         """Alternative constructor that extracts the information from an URL
@@ -110,45 +108,85 @@ class Pusher(object):
 
         return cls.from_url(val, **options)
 
-
     @doc_string(PusherClient.trigger.__doc__)
     def trigger(self, channels, event_name, data, socket_id=None):
         return self._pusher_client.trigger(
             channels, event_name, data, socket_id)
 
-
     @doc_string(PusherClient.trigger_batch.__doc__)
     def trigger_batch(self, batch=[], already_encoded=False):
         return self._pusher_client.trigger_batch(batch, already_encoded)
-
 
     @doc_string(PusherClient.channels_info.__doc__)
     def channels_info(self, prefix_filter=None, attributes=[]):
         return self._pusher_client.channels_info(prefix_filter, attributes)
 
-
     @doc_string(PusherClient.channel_info.__doc__)
     def channel_info(self, channel, attributes=[]):
         return self._pusher_client.channel_info(channel, attributes)
 
-
     @doc_string(PusherClient.users_info.__doc__)
     def users_info(self, channel):
         return self._pusher_client.users_info(channel)
-
 
     @doc_string(AuthenticationClient.authenticate.__doc__)
     def authenticate(self, channel, socket_id, custom_data=None):
         return self._authentication_client.authenticate(
             channel, socket_id, custom_data)
 
-
     @doc_string(AuthenticationClient.validate_webhook.__doc__)
     def validate_webhook(self, key, signature, body):
         return self._authentication_client.validate_webhook(
             key, signature, body)
 
-
     @doc_string(NotificationClient.notify.__doc__)
     def notify(self, interest, notification):
         return self._notification_client.notify(interest, notification)
+
+
+class ClientPusher(object):
+    """Client for the Pusher HTTP API.
+
+    This client supports various backend adapters to support various http
+    libraries available in the python ecosystem.
+
+    :param app_id:  a pusher application identifier
+    :param key:     a pusher application key
+    :param secret:  a pusher application secret token
+    :param ssl:     Whenever to use SSL or plain HTTP
+    :param host:    Used for custom host destination
+    :param port:    Used for custom port destination
+    :param timeout: Request timeout (in seconds)
+    :param cluster: Convention for other clusters than the main Pusher-one.
+      Eg: 'eu' will resolve to the api-eu.pusherapp.com host
+    :param backend: an http adapter class (AsyncIOBackend, RequestsBackend,
+      SynchronousBackend, TornadoBackend)
+    :param backend_options: additional backend
+    """
+
+    def __init__(
+            self, app_id, key, secret, ssl=True, host=None, port=None,
+            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            backend=None, notification_host=None, notification_ssl=True,
+            client_id=None, **backend_options):
+
+        self._notification_client = ClientNotificationClient(
+            app_id, key, secret, notification_ssl, notification_host, port,
+            timeout, cluster, json_encoder, json_decoder, backend,
+            client_id=client_id, **backend_options)
+
+    @doc_string(ClientNotificationClient.register.__doc__)
+    def notifications_register(self, device_token):
+        return self._notification_client.register(device_token)
+
+    @doc_string(ClientNotificationClient.update_token.__doc__)
+    def notifications_update_token(self, device_token):
+        return self._notification_client.update_token(device_token)
+
+    @doc_string(ClientNotificationClient.subscribe.__doc__)
+    def notifications_subscribe(self, interest):
+        return self._notification_client.subscribe(interest)
+
+    @doc_string(ClientNotificationClient.unsubscribe.__doc__)
+    def notifications_unsubscribe(self, interest):
+        return self._notification_client.unsubscribe(interest)
