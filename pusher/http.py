@@ -13,7 +13,7 @@ import six
 import time
 
 from pusher.util import doc_string
-from pusher.errors import *
+from pusher.errors import PusherBadRequest, PusherBadAuth, PusherForbidden, PusherBadStatus
 from pusher.signature import sign
 from pusher.version import VERSION
 
@@ -22,14 +22,13 @@ GET, POST, PUT, DELETE = "GET", "POST", "PUT", "DELETE"
 
 
 class RequestMethod(object):
+
     def __init__(self, client, f):
         self.client = client
         self.f = f
 
-
     def __call__(self, *args, **kwargs):
         return self.client.http.send_request(self.make_request(*args, **kwargs))
-
 
     def make_request(self, *args, **kwargs):
         return self.f(self.client, *args, **kwargs)
@@ -51,6 +50,9 @@ def make_query_string(params):
 def process_response(status, body):
     if status == 200 or status == 202:
         return json.loads(body)
+
+    elif status == 204:
+        return None
 
     elif status == 400:
         raise PusherBadRequest(body)
@@ -84,7 +86,7 @@ class Request(object):
         self.method = method
         self.path = path
         self.params = copy.copy(params)
-        if method == POST:
+        if method in (POST, PUT, DELETE):
             self.body = six.text_type(json.dumps(params)).encode('utf8')
             self.query_params = {}
 
@@ -93,10 +95,9 @@ class Request(object):
             self.query_params = params
 
         else:
-            raise NotImplementedError("Only GET and POST supported")
+            raise NotImplementedError("Only GET, POST, PUT and DELETE supported")
 
         self._generate_auth()
-
 
     def _generate_auth(self):
         self.body_md5 = hashlib.md5(self.body).hexdigest()
@@ -114,21 +115,17 @@ class Request(object):
         self.query_params['auth_signature'] = sign(
             self.client.secret, auth_string)
 
-
     @property
     def query_string(self):
         return make_query_string(self.query_params)
-
 
     @property
     def signed_path(self):
         return "%s?%s" % (self.path, self.query_string)
 
-
     @property
     def url(self):
         return "%s%s" % (self.base_url, self.signed_path)
-
 
     @property
     def base_url(self):
@@ -136,11 +133,10 @@ class Request(object):
             "%s://%s:%s" %
             (self.client.scheme, self.client.host, self.client.port))
 
-
     @property
     def headers(self):
         hdrs = {"X-Pusher-Library": "pusher-http-python " + VERSION}
-        if self.method == POST:
+        if self.method in [POST, PUT, DELETE]:
             hdrs["Content-Type"] = "application/json"
 
         return hdrs
