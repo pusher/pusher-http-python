@@ -12,7 +12,7 @@ if not VERSION:
     raise RuntimeError('Ensure `VERSION` is correctly set in ./pusher/version.py')
 
 setup(
-    name='pusher',
+    name='pusher-mksp',
     version=VERSION,
     description='A Python library to interract with the Pusher API',
     url='https://github.com/pusher/pusher-http-python',
