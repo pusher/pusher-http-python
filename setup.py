@@ -24,6 +24,8 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Internet :: WWW/HTTP",
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
     ],
     keywords='pusher rest realtime websockets service',
     license='MIT',
