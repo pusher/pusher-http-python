@@ -19,11 +19,11 @@ setup(
     author='Pusher',
     author_email='support@pusher.com',
     classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "Topic :: Internet :: WWW/HTTP",
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Topic :: Internet :: WWW/HTTP',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
@@ -46,7 +46,7 @@ setup(
     tests_require=['nose', 'mock', 'HTTPretty'],
 
     extras_require={
-        'aiohttp': ["aiohttp>=0.9.0"],
+        'aiohttp': ['aiohttp>=0.9.0'],
         'tornado': ['tornado>=4.0.0']
     },
 
