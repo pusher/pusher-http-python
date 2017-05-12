@@ -1,3 +1,12 @@
+### 1.7.0 2016-05-12
+
+* Remove version freeze from urllib3 since upstream bugfix has been released. (See [here](https://github.com/shazow/urllib3/pull/987).)
+
+### 1.6.0 1016-10-26
+
+* Path to cacert.pem has been added to the setup.py, resolving an oversight that led to errors upon SSL requests.
+* Internal changes to ease future maintenance.
+
 ### 1.5.0 2016-08-23
 
 * Add support for publishing push notifications on up to 10 interests.
