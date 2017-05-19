@@ -2,7 +2,7 @@
 
 ![Travis-CI](https://travis-ci.org/pusher/pusher-http-python.svg)
 
-The new Python library for interacting with the Pusher HTTP API. This version, 1.x.x, is a major breaking change from versions <= 0.8. Version 0.8 can be found on the [0.8 branch](https://github.com/pusher/pusher-http-python/tree/0.8). Notes on the changes can be found [on this blog post](https://blog.pusher.com/announcing-version-1-0-0-of-the-python-library/)
+The Python library for interacting with the Pusher HTTP API. This version, 1.x.x, is a major breaking change from versions <= 0.8. Version 0.8 can be found on the [0.8 branch](https://github.com/pusher/pusher-http-python/tree/0.8). Notes on the changes can be found [on this blog post](https://blog.pusher.com/announcing-version-1-0-0-of-the-python-library/)
 
 This package lets you trigger events to your client and query the state of your Pusher channels. When used with a server, you can validate Pusher webhooks and authenticate private- or presence-channels.
 
@@ -53,7 +53,7 @@ going to "API Keys" on your app at <https://app.pusher.com>.
 
 ```python
 from pusher import Pusher
-pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret')
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', cluster=u'cluster')
 ```
 
 You can then trigger events to channels. Channel and event names may only
@@ -67,7 +67,7 @@ pusher.trigger(u'a_channel', u'an_event', {u'some': u'data'})
 
 ```python
 from pusher import Pusher
-pusher = Pusher(app_id, key, secret)
+pusher = Pusher(app_id, key, secret, cluster=u'cluster')
 ```
 
 |Argument   |Description   |
@@ -75,10 +75,10 @@ pusher = Pusher(app_id, key, secret)
 |app_id `String`  |**Required** <br> The Pusher application ID |
 |key `String`     |**Required** <br> The Pusher application key |
 |secret `String`  |**Required** <br> The Pusher application secret token |
+|cluster `String` | **Default:`mt1`** <br> The pusher application cluster. Will be overwritten if `host` is set |
 |host `String`    | **Default:`None`** <br> The host to connect to |
 |port `int`       | **Default:`None`** <br>Which port to connect to |
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
-|cluster `String` | **Default:`None`** <br> Convention for other clusters than the main Pusher-one. Eg: 'eu' will resolve to the api-eu.pusherapp.com host |
 |backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
 |json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
@@ -89,7 +89,7 @@ The constructor will throw a `TypeError` if it is called with parameters that do
 
 ```py
 from pusher import Pusher
-pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
+pusher = Pusher(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'cluster')
 ```
 
 ## Triggering Events
