@@ -57,7 +57,7 @@ class PusherClient(Client):
                 channels, (collections.Sized, collections.Iterable)):
             raise TypeError("Expected a single or a list of channels")
 
-        if len(channels) > 10:
+        if len(channels) > 100:
             raise ValueError("Too many channels")
 
         channels = list(map(validate_channel, channels))
