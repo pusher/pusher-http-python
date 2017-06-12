@@ -33,7 +33,6 @@ class RequestsBackend(object):
             self.options.update({'verify': CERT_PATH})
         self.session = requests.Session()
 
-
     def send_request(self, request):
         resp = self.session.request(
             request.method,
