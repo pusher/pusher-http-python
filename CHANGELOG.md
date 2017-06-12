@@ -1,4 +1,10 @@
-### 1.7.0 2016-05-12
+### 1.7.1 2017-06-12
+
+* Make python 2 and 3 support explicit in `setup.py`
+
+* Lift trigger channel limit to 100 for consistency with API
+
+### 1.7.0 2017-05-12
 
 * Remove version freeze from urllib3 since upstream bugfix has been released. (See [here](https://github.com/shazow/urllib3/pull/987).)
 

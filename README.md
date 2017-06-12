@@ -109,7 +109,7 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 |:-:|:-:|
 |buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
 
-`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 10 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
+`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 100 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
 
 ##### Example
 
@@ -412,8 +412,8 @@ These are helpers that have been implemented to to ensure interactions with the 
 
 Helper Functionality                     | Supported
 -----------------------------------------| :-------:
-Channel name validation                      | &#10004;
-Limit to 10 channels per trigger         | &#10004;
+Channel name validation                  | &#10004;
+Limit to 100 channels per trigger        | &#10004;
 Limit event name length to 200 chars     | &#10004;
 
 
