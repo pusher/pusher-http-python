@@ -8,7 +8,6 @@ class TestNotificationClient(unittest.TestCase):
         self.client = NotificationClient(app_id='4', key='key', secret='secret')
         self.success_fixture = {
             'webhook_url': 'http://webhook.com',
-            'webhook_level': 'DEBUG',
             'apns': {
                 'alert': {
                 'title': 'yolo',
@@ -36,7 +35,6 @@ class TestNotificationClient(unittest.TestCase):
         self.assertEqual(request.params, {
             'interests': ['yolo'],
             'webhook_url': 'http://webhook.com',
-            'webhook_level': 'DEBUG',
             'apns': {
                 'alert': {
                 'title': 'yolo',

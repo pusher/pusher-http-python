@@ -16,8 +16,6 @@ RESTRICTED_GCM_KEYS = ['to', 'registration_ids']
 API_PREFIX = 'server_api'
 API_VERSION = 'v1'
 GCM_TTL = 241920
-WEBHOOK_LEVELS = ['INFO', 'DEBUG', '']
-
 
 class NotificationClient(Client):
     def __init__(
