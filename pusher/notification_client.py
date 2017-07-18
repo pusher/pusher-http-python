@@ -20,7 +20,7 @@ GCM_TTL = 241920
 class NotificationClient(Client):
     def __init__(
             self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            timeout=30, cluster=None, json_encoder=None, json_decoder=None,
             backend=None, **backend_options):
         super(NotificationClient, self).__init__(
             app_id, key, secret, ssl, host, port, timeout, cluster,
