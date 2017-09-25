@@ -1,3 +1,9 @@
+### 1.7.2 2017-07-19
+
+* Remove `webhook_level` option to notify (depricated upstream)
+
+* Increase notify timeout to 30s
+
 ### 1.7.1 2017-06-12
 
 * Make python 2 and 3 support explicit in `setup.py`
