@@ -1,6 +1,6 @@
 # Pusher HTTP Python Library
 
-![Travis-CI](https://travis-ci.org/pusher/pusher-http-python.svg)
+[![Build Status](https://travis-ci.org/pusher/pusher-http-python.svg?branch=master)](https://travis-ci.org/pusher/pusher-http-python)
 
 The Python library for interacting with the Pusher HTTP API. This version, 1.x.x, is a major breaking change from versions <= 0.8. Version 0.8 can be found on the [0.8 branch](https://github.com/pusher/pusher-http-python/tree/0.8). Notes on the changes can be found [on this blog post](https://blog.pusher.com/announcing-version-1-0-0-of-the-python-library/)
 
