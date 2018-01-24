@@ -35,5 +35,5 @@ class AsyncIOBackend:
                 connector=self.conn),
             timeout=self.client.timeout)
 
-        body = yield from response.read_and_close()
-        return process_response(response.status, body.decode('utf8'))
+        body = yield from response.text('utf-8')
+        return process_response(response.status, body)
