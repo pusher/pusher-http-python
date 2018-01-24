@@ -1,3 +1,8 @@
+### 1.7.3 2018-01-24
+
+* Replace `read_and_close` with `text` in aiohttp adaptor (method removed
+  upstream)
+
 ### 1.7.2 2017-07-19
 
 * Remove `webhook_level` option to notify (depricated upstream)
