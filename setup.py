@@ -46,7 +46,7 @@ setup(
     tests_require=['nose', 'mock', 'HTTPretty'],
 
     extras_require={
-        'aiohttp': ['aiohttp>=0.9.0'],
+        'aiohttp': ['aiohttp>=0.20.0'],
         'tornado': ['tornado>=4.0.0']
     },
 
