@@ -19,21 +19,25 @@ class AsyncIOBackend:
         :param client:  pusher.Client object
         """
         self.client = client
-        self.conn = aiohttp.TCPConnector()
 
 
+    @asyncio.coroutine
     def send_request(self, request):
-        method = request.method
-        url = "%s%s" % (request.base_url, request.path)
-        params = request.query_params
-        data = request.body
-        headers = request.headers
-
-        response = yield from asyncio.wait_for(
-            aiohttp.request(
-                method, url, params=params, data=data, headers=headers,
-                connector=self.conn),
-            timeout=self.client.timeout)
-
-        body = yield from response.text('utf-8')
-        return process_response(response.status, body)
+        session = response = None
+        try:
+            session = aiohttp.ClientSession()
+            response = yield from session.request(
+                request.method,
+                "%s%s" % (request.base_url, request.path),
+                params=request.query_params,
+                data=request.body,
+                headers=request.headers,
+                timeout=self.client.timeout
+            )
+            body = yield from response.text('utf-8')
+            return body
+        finally:
+            if response is not None:
+                response.close()
+            if session is not None:
+                session.close()
