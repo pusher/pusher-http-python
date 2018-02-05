@@ -1,3 +1,7 @@
+### 1.7.4 2018-02-05
+
+* Properly close client after request in aiohttp adaptor
+
 ### 1.7.3 2018-01-24
 
 * Replace `read_and_close` with `text` in aiohttp adaptor (method removed
