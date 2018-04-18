@@ -1,9 +1,7 @@
 ---
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
   - "3.6"
@@ -14,5 +12,4 @@ install:
   - "if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pip install aiohttp; fi"
   - "pip install tornado"
   - "pip install urlfetch"
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
 script: "python setup.py test"
