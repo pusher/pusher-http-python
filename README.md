@@ -11,7 +11,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 ## Features
 
 * Python 2.7, 3.4, 3.5 and 3.6 support
-* Adapters for various http libraries like requests, urlfetch, aiohttp and tornado.
+* Adapters for various http libraries like requests, urlfetch, aiohttp (requires Python >= 3.5.3) and tornado.
 * WebHook validation
 * Signature generation for socket subscriptions
 
