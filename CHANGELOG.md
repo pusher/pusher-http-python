@@ -1,3 +1,8 @@
+### 2.0.0 2018-05-03
+
+* Drop support for Python 2.6, 3.3
+* Drop support for Python 3.4 with the aiohttp adaptor
+
 ### 1.7.4 2018-02-05
 
 * Properly close client after request in aiohttp adaptor
