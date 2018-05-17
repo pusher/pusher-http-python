@@ -40,4 +40,4 @@ class AsyncIOBackend:
             if response is not None:
                 response.close()
             if session is not None:
-                session.close()
+                yield from session.close()
