@@ -1,3 +1,7 @@
+### 2.0.1 2018-05-21
+
+* Fix issue where aiohttp ClientSession was not being closed
+
 ### 2.0.0 2018-05-03
 
 * Drop support for Python 2.6, 3.3
