@@ -21,7 +21,6 @@ In order to use this library, you need to have a free account on <http://pusher.
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Triggering Events](#triggering-events)
-- [Push Notifications (BETA)](#push-notifications-beta)
 - [Querying Application State](#querying-application-state)
   - [Getting Information For All Channels](#getting-information-for-all-channels)
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
@@ -158,63 +157,6 @@ pusher.trigger_batch([
   { u'channel': u'a_channel', u'name': u'an_event', u'data': {u'some': u'other data'}}
 ])
 ```
-
-## Push Notifications (BETA)
-
-Pusher now allows sending native notifications to iOS and Android devices. Check out the [documentation](https://pusher.com/docs/push_notifications) for information on how to set up push notifications on Android and iOS. There is no additional setup required to use it with this library. It works out of the box with the same Pusher instance. All you need are the same pusher credentials.
-
-### Sending native pushes
-
-The native notifications API is hosted at `nativepush-cluster1.pusher.com` and only accepts https requests.
-
-You can send pushes by using the `notify` method, either globally or on the instance. The method takes two parameters:
-
-- `interests`: An Array of strings which represents the interests your devices are subscribed to. These are akin to channels in the DDN with less of an ephemeral nature. Note that currently, you can only publish to, at most, _ten_ interests.
-- `data`: The content of the notification represented by a Hash. You must supply either the `gcm` or `apns` key. For a detailed list of the acceptable keys, take a look at the [docs](https://pusher.com/docs/push_notifications#payload).
-
-Example:
-
-```python
-data = {
-  'apns': {
-    'priority': 5,
-    'aps': {
-      'alert': {
-        'body': 'tada'
-      }
-    }
-  }
-}
-
-pusher.notify(["my-favourite-interest"], data)
-```
-
-### Errors
-
-Push notification requests, once submitted to the service are executed asynchronously. To make reporting errors easier, you can supply a `webhook_url` field in the body of the request. This will be used by the service to send a webhook to the supplied URL if there are errors.
-
-For example:
-
-```python
-data = {
-  "apns": {
-    "aps": {
-      "alert": {
-        "body": "hello"
-      }
-    }
-  },
-  'gcm': {
-    'notification': {
-      "title": "hello",
-      "icon": "icon"
-    }
-  },
-  "webhook_url": "http://yolo.com"
-}
-```
-
-**NOTE:** This is currently a BETA feature and there might be minor bugs and issues. Changes to the API will be kept to a minimum, but changes are expected. If you come across any bugs or issues, please do get in touch via [support](support@pusher.com) or create an issue here.
 
 ## Querying Application State
 
