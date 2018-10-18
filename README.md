@@ -2,8 +2,6 @@
 
 [![Build Status](https://travis-ci.org/pusher/pusher-http-python.svg?branch=master)](https://travis-ci.org/pusher/pusher-http-python)
 
-The Python library for interacting with the Pusher HTTP API. This version, 1.x.x, is a major breaking change from versions <= 0.8. Version 0.8 can be found on the [0.8 branch](https://github.com/pusher/pusher-http-python/tree/0.8). Notes on the changes can be found [on this blog post](https://blog.pusher.com/announcing-version-1-0-0-of-the-python-library/)
-
 This package lets you trigger events to your client and query the state of your Pusher channels. When used with a server, you can validate Pusher webhooks and authenticate private- or presence-channels.
 
 In order to use this library, you need to have a free account on <http://pusher.com>. After registering, you will need the application credentials for your app.
