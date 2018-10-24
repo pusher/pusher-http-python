@@ -35,7 +35,7 @@ class AsyncIOBackend:
                 timeout=self.client.timeout
             )
             body = yield from response.text('utf-8')
-            return body
+            return process_response(response.status, body)
         finally:
             if response is not None:
                 response.close()
