@@ -33,10 +33,7 @@ class TornadoBackend(object):
         future = Future()
 
         def process_response_future(response):
-            if response.exc_info() is not None:
-                future.set_exc_info(response.exc_info())
-
-            elif response.exception() is not None:
+            if response.exception() is not None:
                 future.set_exception(response.exception())
 
             else:
