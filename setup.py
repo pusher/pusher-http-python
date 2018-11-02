@@ -47,7 +47,7 @@ setup(
 
     extras_require={
         'aiohttp': ['aiohttp>=0.20.0'],
-        'tornado': ['tornado>=4.0.0']
+        'tornado': ['tornado>=5.0.0']
     },
 
     package_data={

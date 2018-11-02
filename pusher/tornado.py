@@ -10,7 +10,7 @@ import six
 import tornado
 import tornado.httpclient
 
-from tornado.concurrent import TracebackFuture
+from tornado.concurrent import Future
 
 from pusher.http import process_response
 
@@ -30,13 +30,10 @@ class TornadoBackend(object):
         method = request.method
         data = request.body
         headers = {'Content-Type': 'application/json'}
-        future = TracebackFuture()
+        future = Future()
 
         def process_response_future(response):
-            if response.exc_info() is not None:
-                future.set_exc_info(response.exc_info())
-
-            elif response.exception() is not None:
+            if response.exception() is not None:
                 future.set_exception(response.exception())
 
             else:
