@@ -368,7 +368,7 @@ To run the tests run `python setup.py test`
 
 * Update the CHANGELOG.md file. `git changelog` from the
   [git-extras](https://github.com/tj/git-extras/blob/master/Commands.md#git-changelog) package can be useful to pull commits from the release.
-* Update the setup.py version
+* Update the version in version.py
 * `git tag v$VERSION`
 * `git push && git push --tags`
 * `make` - publishes to pypi
