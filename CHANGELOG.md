@@ -1,3 +1,8 @@
+### 2.0.2 2018-11-05
+
+* Support Tornado 5, drop support for Tornado 4
+* Check for error responses with AsyncIO backend
+
 ### 2.0.1 2018-05-21
 
 * Fix issue where aiohttp ClientSession was not being closed
