@@ -12,6 +12,7 @@ import os
 import re
 import six
 import time
+import json
 
 from pusher.util import (
     ensure_text,
@@ -22,16 +23,23 @@ from pusher.util import (
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
+from pusher.crypto import *
+import random
+from datetime import datetime
 
 
 class PusherClient(Client):
     def __init__(
-            self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            self, app_id, key, secret, ssl=True,
+            host=None, port=None,
+            timeout=5, cluster=None,
+            encryption_master_key=None,
+            json_encoder=None, json_decoder=None,
             backend=None, **backend_options):
         super(PusherClient, self).__init__(
             app_id, key, secret, ssl, host, port, timeout, cluster,
-            json_encoder, json_decoder, backend, **backend_options)
+            encryption_master_key, json_encoder, json_decoder,
+            backend, **backend_options)
 
         if host:
             self._host = ensure_text(host, "host")
@@ -42,6 +50,7 @@ class PusherClient(Client):
                 ensure_text(cluster, "cluster"))
         else:
             self._host = six.text_type("api.pusherapp.com")
+
 
 
     @request_method
@@ -68,6 +77,13 @@ class PusherClient(Client):
             raise ValueError("event_name too long")
 
         data = data_to_string(data, self._json_encoder)
+
+        if is_encrypted_channel(channels[0]):
+            # set a random seed
+            random.seed(datetime.now())
+            # generate a 24-bytes random nonce as it is required by the encrypt() function (needed by nacl)
+            nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(24))
+            data = json.dumps(encrypt(channels[0], data, self._encryption_master_key, nonce), ensure_ascii=False)
 
         if len(data) > 10240:
             raise ValueError("Too much data")

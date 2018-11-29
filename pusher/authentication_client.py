@@ -13,25 +13,28 @@ import os
 import re
 import six
 import time
+import base64
 
 from pusher.util import (
     ensure_text,
     validate_channel,
     validate_socket_id,
-    channel_name_re)
+    channel_name_re
+    )
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
 from pusher.signature import sign, verify
+from pusher.crypto import *
 
 
 class AuthenticationClient(Client):
     def __init__(
             self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            timeout=5, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
             backend=None, **backend_options):
         super(AuthenticationClient, self).__init__(
-            app_id, key, secret, ssl, host, port, timeout, cluster,
+            app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
             json_encoder, json_decoder, backend, **backend_options)
 
         if host:
@@ -70,12 +73,17 @@ class AuthenticationClient(Client):
         signature = sign(self.secret, string_to_sign)
 
         auth = "%s:%s" % (self.key, signature)
-        result = {'auth': auth}
+        response_payload = { "auth": auth }
+
+        if is_encrypted_channel(channel):
+            shared_secret = generate_shared_secret(channel, self._encryption_master_key)
+            shared_secret_b64 = base64.b64encode(shared_secret)
+            response_payload["shared_secret"] = shared_secret_b64
 
         if custom_data:
-            result['channel_data'] = custom_data
+            response_payload['channel_data'] = custom_data
 
-        return result
+        return response_payload
 
 
     def validate_webhook(self, key, signature, body):

@@ -14,7 +14,7 @@ from pusher.util import ensure_text, app_id_re
 class Client(object):
     def __init__(
             self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            timeout=5, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
             backend=None, **backend_options):
         if backend is None:
               from .requests import RequestsBackend
@@ -43,6 +43,8 @@ class Client(object):
         self._timeout = timeout
         self._json_encoder = json_encoder
         self._json_decoder = json_decoder
+
+        self._encryption_master_key = encryption_master_key
 
         self.http = backend(self, **backend_options)
 
