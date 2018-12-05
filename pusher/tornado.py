@@ -18,12 +18,13 @@ from pusher.http import process_response
 class TornadoBackend(object):
     """Adapter for the tornado.httpclient module.
 
-    :param client:  pusher.Client object
-    :param kwargs:  options for the httpclient.HTTPClient constructor
+    :param client:   pusher.Client object
+    :param options:  options for the httpclient.HTTPClient constructor
     """
-    def __init__(self, client, **kwargs):
+    def __init__(self, client, **options):
         self.client = client
-        self.http = tornado.httpclient.AsyncHTTPClient(**kwargs)
+        self.options = options
+        self.http = tornado.httpclient.AsyncHTTPClient()
 
 
     def send_request(self, request):
@@ -43,8 +44,12 @@ class TornadoBackend(object):
                 future.set_result(process_response(code, body))
 
         request = tornado.httpclient.HTTPRequest(
-            request.url, method=method, body=data, headers=headers,
-            request_timeout=self.client.timeout)
+            request.url,
+            method=method,
+            body=data,
+            headers=headers,
+            request_timeout=self.client.timeout,
+            **self.options)
 
         response_future = self.http.fetch(request, raise_error=False)
         response_future.add_done_callback(process_response_future)
