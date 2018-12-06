@@ -10,9 +10,12 @@ import hashlib
 import unittest
 import time
 from decimal import Decimal
+import random
+import nacl
 
 from pusher.pusher_client import PusherClient
 from pusher.http import GET
+from pusher.crypto import *
 
 try:
     import unittest.mock as mock
@@ -32,6 +35,11 @@ class TestPusherClient(unittest.TestCase):
         PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
 
         self.assertRaises(TypeError, lambda: PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=4))
+
+    def test_encryption_master_key_should_be_text(self):
+        PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu', encryption_master_key="8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY")
+
+        self.assertRaises(TypeError, lambda: PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=4, encryption_master_key=48762478647865374856347856888764 ))
 
     def test_host_behaviour(self):
         conf = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
@@ -102,7 +110,77 @@ class TestPusherClient(unittest.TestCase):
 
             self.assertEqual(request.params, expected_params)
 
+    def test_trigger_with_private_encrypted_channel_string_fail_case_no_encryption_master_key_specified(self):
 
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+
+        with self.assertRaises(TypeError):
+            pc.trigger(u'private-encrypted-tst', u'some_event', {u'message': u'hello worlds'})
+
+
+    def test_trigger_with_public_channel_with_encryption_master_key_specified_success(self):
+        json_dumped = u'{"message": "something"}'
+
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY', ssl=True)
+
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = pc.trigger.make_request(u'donuts', u'some_event', {u'message': u'hello worlds'})
+            expected_params = {
+                u'channels': [u'donuts'],
+                u'data': json_dumped,
+                u'name': u'some_event'
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+    def test_trigger_with_private_encrypted_channel_success(self):
+        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        chan = u'private-encrypted-tst'
+        payload = {u'message': u'hello worlds'}
+
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
+
+        request = pc.trigger.make_request(chan, u'some_event', payload)
+
+        shared_secret = generate_shared_secret(chan, encryp_master_key)
+
+        box = nacl.secret.SecretBox(shared_secret)
+
+        # encrypt the data payload with nacl
+        nonce_b64 = json.loads(request.params["data"])["nonce"]
+        nonce = base64.b64decode(nonce_b64)
+        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf-8"), nonce)
+
+        # obtain the ciphertext
+        cipher_text = encrypted.ciphertext
+        # encode cipertext to base64
+        cipher_text_b64 = base64.b64encode(cipher_text)
+
+        # format expected output
+        json_dumped = json.dumps({ "nonce" : nonce_b64, "ciphertext": cipher_text_b64 }, ensure_ascii=False)
+
+        expected_params = {
+            u'channels': [u'private-encrypted-tst'],
+            u'data': json_dumped,
+            u'name': u'some_event'
+        }
+        self.assertEqual(request.params, expected_params)
+
+    def test_trigger_with_channel_string_success_case(self):
+        json_dumped = u'{"message": "hello worlds"}'
+
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = self.pusher_client.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello worlds'})
+
+            expected_params = {
+                u'channels': [u'some_channel'],
+                u'data': json_dumped,
+                u'name': u'some_event'
+            }
+
+            self.assertEqual(request.params, expected_params)
     def test_trigger_disallow_non_string_or_list_channels(self):
         self.assertRaises(TypeError, lambda:
             self.pusher_client.trigger.make_request({u'channels': u'test_channel'}, u'some_event', {u'message': u'hello world'}))

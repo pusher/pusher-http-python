@@ -13,6 +13,7 @@ import re
 import six
 import time
 import json
+import string
 
 from pusher.util import (
     ensure_text,

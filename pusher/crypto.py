@@ -44,13 +44,14 @@ def generate_shared_secret(channel, encryption_master_key):
     """
     if is_encryption_master_key_valid(encryption_master_key):
         # the key has to be 32 bits long
-        return hashlib.sha256( channel + encryption_master_key ).hexdigest()[:32]
+        return hashlib.sha256( channel.encode("utf-8") + encryption_master_key.encode("utf-8") ).hexdigest()[:32]
     raise ValueError("Provided encryption_master_key is not 32 char long")
 
 def encrypt(channel, data, encryption_master_key, nonce):
     """
-    encrypt() encripts the provided payload specified in the 'data' parameter
+    encrypt() encrypts the provided payload specified in the 'data' parameter
     """
+
     shared_secret = generate_shared_secret(channel, encryption_master_key)
 
     # the box setup to seal/unseal data payload
@@ -65,10 +66,10 @@ def encrypt(channel, data, encryption_master_key, nonce):
     """
 
     # convert nonce to base64
-    nonce_b64 = base64.b64encode(nonce)
+    nonce_b64 = base64.b64encode(nonce.encode("utf-8"))
 
     # encrypt the data payload with nacl
-    encrypted = box.encrypt(data, nonce)
+    encrypted = box.encrypt(data.encode("utf-8"), nonce.encode("utf-8"))
 
     # obtain the ciphertext
     cipher_text = encrypted.ciphertext
