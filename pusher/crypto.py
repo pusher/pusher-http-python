@@ -32,9 +32,9 @@ def is_encryption_master_key_valid(encryption_master_key):
     """
     is_encryption_master_key_valid() checks if the provided encryption_master_key is validby checking its length
     """
-    encryption_master_key = ensure_text(encryption_master_key, "encryption_master_key")
     if len(encryption_master_key) == 32:
         return True
+
     return False
 
 def generate_shared_secret(channel, encryption_master_key):
@@ -42,20 +42,25 @@ def generate_shared_secret(channel, encryption_master_key):
     generate_shared_secret() takes a utf8-string
     and returns the sha256 hash in utf8-string format
     """
-    if is_encryption_master_key_valid(encryption_master_key):
-        # the key has to be 32 bits long
-        return hashlib.sha256( channel.encode("utf-8") + encryption_master_key.encode("utf-8") ).hexdigest()[:32]
+
+    if encryption_master_key is not None:
+
+        encryption_master_key = ensure_text(encryption_master_key, "encryption_master_key")
+        channel = ensure_text(channel, "channel")
+
+        if is_encryption_master_key_valid(encryption_master_key):
+            # the key has to be 32 bits long
+            return hashlib.sha256((channel + encryption_master_key).encode('utf-8')).hexdigest()[:32]
+
     raise ValueError("Provided encryption_master_key is not 32 char long")
 
 def encrypt(channel, data, encryption_master_key, nonce):
     """
     encrypt() encrypts the provided payload specified in the 'data' parameter
     """
-
     shared_secret = generate_shared_secret(channel, encryption_master_key)
-
     # the box setup to seal/unseal data payload
-    box = nacl.secret.SecretBox(shared_secret)
+    box = nacl.secret.SecretBox(shared_secret.encode("utf-8"))
 
     """ this is here for reference the nonce
         it is currently passed to the function
@@ -64,6 +69,10 @@ def encrypt(channel, data, encryption_master_key, nonce):
         # generate the nonce with nacl
         #nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
     """
+
+
+    nonce = ensure_text(nonce, "nonce")
+    data = ensure_text(data, "data")
 
     # convert nonce to base64
     nonce_b64 = base64.b64encode(nonce.encode("utf-8"))
@@ -77,7 +86,7 @@ def encrypt(channel, data, encryption_master_key, nonce):
     cipher_text_b64 = base64.b64encode(cipher_text)
 
     # format output
-    return { "nonce" : nonce_b64, "ciphertext": cipher_text_b64 }
+    return { "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") }
 
 def decrypt():
     pass

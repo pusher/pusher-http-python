@@ -114,7 +114,7 @@ class TestPusherClient(unittest.TestCase):
 
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             pc.trigger(u'private-encrypted-tst', u'some_event', {u'message': u'hello worlds'})
 
 
@@ -135,30 +135,34 @@ class TestPusherClient(unittest.TestCase):
             self.assertEqual(request.params, expected_params)
 
     def test_trigger_with_private_encrypted_channel_success(self):
-        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
-        chan = u'private-encrypted-tst'
-        payload = {u'message': u'hello worlds'}
 
+        # instantiate a new client configured with the master encryption key
+        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
 
+        # trigger a request to a private-encrypted channel and capture the request to assert equality
+        chan = u'private-encrypted-tst'
+        payload = {u'message': u'hello worlds'}
         request = pc.trigger.make_request(chan, u'some_event', payload)
 
+        # simulate the same encryption process and check equality
         shared_secret = generate_shared_secret(chan, encryp_master_key)
 
-        box = nacl.secret.SecretBox(shared_secret)
+        box = nacl.secret.SecretBox(shared_secret.encode("utf-8"))
 
-        # encrypt the data payload with nacl
-        nonce_b64 = json.loads(request.params["data"])["nonce"]
-        nonce = base64.b64decode(nonce_b64)
-        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf-8"), nonce)
+        nonce_b64 = json.loads(request.params["data"])["nonce"].encode("utf-8")
+        nonce = ensure_text(base64.b64decode(nonce_b64),"nonce")
+
+        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf'-8"), nonce.encode("utf-8"))
 
         # obtain the ciphertext
         cipher_text = encrypted.ciphertext
+
         # encode cipertext to base64
         cipher_text_b64 = base64.b64encode(cipher_text)
 
         # format expected output
-        json_dumped = json.dumps({ "nonce" : nonce_b64, "ciphertext": cipher_text_b64 }, ensure_ascii=False)
+        json_dumped = json.dumps({ "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") })
 
         expected_params = {
             u'channels': [u'private-encrypted-tst'],
@@ -166,6 +170,7 @@ class TestPusherClient(unittest.TestCase):
             u'name': u'some_event'
         }
         self.assertEqual(request.params, expected_params)
+
 
     def test_trigger_with_channel_string_success_case(self):
         json_dumped = u'{"message": "hello worlds"}'

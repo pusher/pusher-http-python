@@ -30,7 +30,10 @@ def ensure_text(obj, name):
     if isinstance(obj, six.string_types):
        return six.text_type(obj)
 
-    raise TypeError("%s should be %s" % (name, text))
+    if isinstance(obj, six.binary_type):
+      return bytes(obj).decode('utf-8')
+
+    raise TypeError("%s should be %s instead it is a %s" % (name, text, type(obj)))
 
 
 def validate_channel(channel):
