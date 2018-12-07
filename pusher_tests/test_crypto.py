@@ -31,7 +31,6 @@ class TestCrypto(unittest.TestCase):
               crypto.is_encrypted_channel( t["input"] ),
               t["expected"]
           )
-            
     
     def test_is_encryption_master_key_valid(self):
 

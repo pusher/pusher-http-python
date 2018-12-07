@@ -53,7 +53,6 @@ class PusherClient(Client):
             self._host = six.text_type("api.pusherapp.com")
 
 
-
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
         """Trigger an event on one or more channels, see:

@@ -70,7 +70,6 @@ def encrypt(channel, data, encryption_master_key, nonce):
         #nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
     """
 
-
     nonce = ensure_text(nonce, "nonce")
     data = ensure_text(data, "data")
 

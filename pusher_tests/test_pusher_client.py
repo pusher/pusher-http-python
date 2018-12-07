@@ -171,7 +171,6 @@ class TestPusherClient(unittest.TestCase):
         }
         self.assertEqual(request.params, expected_params)
 
-
     def test_trigger_with_channel_string_success_case(self):
         json_dumped = u'{"message": "hello worlds"}'
 
@@ -186,6 +185,7 @@ class TestPusherClient(unittest.TestCase):
             }
 
             self.assertEqual(request.params, expected_params)
+
     def test_trigger_disallow_non_string_or_list_channels(self):
         self.assertRaises(TypeError, lambda:
             self.pusher_client.trigger.make_request({u'channels': u'test_channel'}, u'some_event', {u'message': u'hello world'}))
