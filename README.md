@@ -24,7 +24,7 @@ In order to use this library, you need to have a free account on <http://pusher.
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
   - [Getting User Information For A Presence Channel](#getting-user-information-for-a-presence-channel)
 - [Authenticating Channel Subscription](#authenticating-channel-subscription)
-- [End-to-end Encryption](#end-to-end-encryption)
+- [End-to-end Encryption (Beta)](#end-to-end-encryption-beta)
 - [Receiving Webhooks](#receiving-webhooks)
 - [Request Library Configuration](#request-library-configuration)
   - [Google App Engine](#google-app-engine)
@@ -282,7 +282,7 @@ auth = pusher_client.authenticate(
 # return `auth` as a response
 ```
 
-## End to End Encryption
+## End to End Encryption (Beta)
 
 This library supports end to end encryption of your private channels. This means that only you and your connected clients will be able to read your messages. Pusher cannot decrypt them. You can enable this feature by following these steps:
 
@@ -312,6 +312,8 @@ pusher_client.trigger('private-encrypted-my-channel', 'my-event', {
 4. Subscribe to these channels in your client, and you're done! You can verify it is working by checking out the debug console on the https://dashboard.pusher.com/ and seeing the scrambled ciphertext.
 
 **Important note: This will not encrypt messages on channels that are not prefixed by private-encrypted-.**
+
+More info on End-to-end Encrypted Channels [here](https://pusher.com/docs/client_api_guide/client_encrypted_channels).
 
 ## Receiving Webhooks
 
