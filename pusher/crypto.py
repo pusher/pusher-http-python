@@ -86,6 +86,3 @@ def encrypt(channel, data, encryption_master_key, nonce):
 
     # format output
     return { "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") }
-
-def decrypt():
-    pass
