@@ -69,20 +69,23 @@ class PusherClient(Client):
         if len(channels) > 100:
             raise ValueError("Too many channels")
 
-        channels = list(map(validate_channel, channels))
-
         event_name = ensure_text(event_name, "event_name")
-
         if len(event_name) > 200:
             raise ValueError("event_name too long")
 
         data = data_to_string(data, self._json_encoder)
+        if len(data) > 10240:
+            raise ValueError("Too much data")
+
+        channels = list(map(validate_channel, channels))
+
+        if len(channels) > 1:
+            for chan in channels:
+                if is_encrypted_channel(chan):
+                    raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
 
         if is_encrypted_channel(channels[0]):
             data = json.dumps(encrypt(channels[0], data, self._encryption_master_key), ensure_ascii=False)
-
-        if len(data) > 10240:
-            raise ValueError("Too much data")
 
         params = {
             'name': event_name,
@@ -93,6 +96,7 @@ class PusherClient(Client):
             params['socket_id'] = validate_socket_id(socket_id)
 
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
+
 
 
     @request_method

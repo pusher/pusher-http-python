@@ -195,6 +195,14 @@ class TestPusherClient(unittest.TestCase):
         self.assertRaises(ValueError, lambda:
             self.pusher_client.trigger.make_request([u'so/me_channel!'], u'some_event', {u'message': u'hello world'}))
 
+    def test_trigger_disallow_private_encrypted_channel_with_multiple_channels(self):
+        # instantiate a new client configured with the master encryption key
+        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
+
+        self.assertRaises(ValueError, lambda:
+            self.pusher_client.trigger.make_request([u'my-chan', u'private-encrypted-pippo'], u'some_event', {u'message': u'hello world'}))
+
     def test_channels_info_default_success_case(self):
         request = self.pusher_client.channels_info.make_request()
 
