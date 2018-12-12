@@ -108,9 +108,6 @@ class PusherClient(Client):
         if not already_encoded:
             for event in batch:
 
-                if not isinstance(event['channel'], six.string_types):
-                    raise TypeError("Channel name is expected to be a Python2 str or unicode or a Python 3 str")
-
                 validate_channel(event['channel'])
 
                 event_name = ensure_text(event['name'], "event_name")

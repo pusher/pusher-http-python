@@ -23,7 +23,7 @@ ENCRYPTED_PREFIX = 'private-encrypted-'
 
 def is_encrypted_channel(channel):
     """
-    is_encrypted_channel checks() if the channel is encrypted by verifying the prefix
+    is_encrypted_channel() checks if the channel is encrypted by verifying the prefix
     """
     if channel.startswith(ENCRYPTED_PREFIX):
         return True
@@ -31,7 +31,7 @@ def is_encrypted_channel(channel):
 
 def is_encryption_master_key_valid(encryption_master_key):
     """
-    is_encryption_master_key_valid() checks if the provided encryption_master_key is validby checking its length
+    is_encryption_master_key_valid() checks if the provided encryption_master_key is valid by checking its length
     """
     if len(encryption_master_key) == 32:
         return True
