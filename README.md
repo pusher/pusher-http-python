@@ -307,7 +307,7 @@ pusher_client.trigger('private-encrypted-my-channel', 'my-event', {
   'message': 'hello world'
 })
 ```
-3. Channels where you wish to use end to end encryption should be prefixed with `private-encrypted-`.
+3. Channels where you wish to use end to end encryption must be prefixed with `private-encrypted-`.
 
 4. Subscribe to these channels in your client, and you're done! You can verify it is working by checking out the debug console on the https://dashboard.pusher.com/ and seeing the scrambled ciphertext.
 
