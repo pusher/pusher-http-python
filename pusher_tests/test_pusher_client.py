@@ -162,6 +162,8 @@ class TestPusherClient(unittest.TestCase):
         )
 
         # simulate the same encryption process and check equality
+        encryp_master_key = ensure_binary(encryp_master_key,"encryp_master_key")
+        chan_2 = ensure_binary(chan_2,"chan_2")
         shared_secret = generate_shared_secret(chan_2, encryp_master_key)
 
         box = nacl.secret.SecretBox(shared_secret)
@@ -232,6 +234,9 @@ class TestPusherClient(unittest.TestCase):
         request = pc.trigger.make_request(chan, event_name, payload)
 
         # simulate the same encryption process and check equality
+
+        encryp_master_key = ensure_binary(encryp_master_key,"encryp_master_key")
+        chan = ensure_binary(chan,"chan")
         shared_secret = generate_shared_secret(chan, encryp_master_key)
 
         box = nacl.secret.SecretBox(shared_secret)

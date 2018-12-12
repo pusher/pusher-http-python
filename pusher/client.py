@@ -8,7 +8,7 @@ from __future__ import (
 
 import six
 
-from pusher.util import ensure_text, app_id_re
+from pusher.util import ensure_text, ensure_binary, app_id_re
 
 
 class Client(object):
@@ -43,6 +43,10 @@ class Client(object):
         self._timeout = timeout
         self._json_encoder = json_encoder
         self._json_decoder = json_decoder
+
+
+        if encryption_master_key is not None:
+            encryption_master_key = ensure_binary(encryption_master_key, "encryption_master_key")
 
         self._encryption_master_key = encryption_master_key
 

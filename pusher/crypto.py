@@ -32,8 +32,9 @@ def is_encrypted_channel(channel):
 def is_encryption_master_key_valid(encryption_master_key):
     """
     is_encryption_master_key_valid() checks if the provided encryption_master_key is valid by checking its length
+    the key is assumed to be a six.binary_type (python2 str or python3 bytes)
     """
-    if len(encryption_master_key) == 32:
+    if encryption_master_key is not None and len(encryption_master_key) == 32:
         return True
 
     return False
@@ -44,15 +45,10 @@ def generate_shared_secret(channel, encryption_master_key):
     and returns the sha256 hash in utf8-string format
     """
 
-    if encryption_master_key is not None:
-
-        encryption_master_key = ensure_binary(encryption_master_key, "encryption_master_key")
-        channel = ensure_binary(channel, "channel")
-
-        if is_encryption_master_key_valid(encryption_master_key):
-            # the key has to be 32 bytes long
-            hashable = channel + encryption_master_key
-            return hashlib.sha256(hashable).digest()
+    if is_encryption_master_key_valid(encryption_master_key):
+        # the key has to be 32 bytes long
+        hashable = channel + encryption_master_key
+        return hashlib.sha256(hashable).digest()
 
     raise ValueError("Provided encryption_master_key is not 32 char long")
 
@@ -60,6 +56,7 @@ def encrypt(channel, data, encryption_master_key, nonce=None):
     """
     encrypt() encrypts the provided payload specified in the 'data' parameter
     """
+    channel = ensure_binary(channel,"channel")
     shared_secret = generate_shared_secret(channel, encryption_master_key)
     # the box setup to seal/unseal data payload
     box = nacl.secret.SecretBox(shared_secret)

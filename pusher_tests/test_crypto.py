@@ -5,6 +5,7 @@ import json
 import unittest
 
 from pusher import crypto
+from pusher.util import ensure_binary
 
 class TestCrypto(unittest.TestCase):
 
@@ -62,7 +63,7 @@ class TestCrypto(unittest.TestCase):
         # do the actual testing
         for t in testcases:
           self.assertEqual(
-              crypto.generate_shared_secret( t["input"][0], t["input"][1] ),
+              crypto.generate_shared_secret( ensure_binary(t["input"][0],'t["input"][0]'), ensure_binary(t["input"][1],'t["input"][1]') ),
               t["expected"]
           )
     
@@ -82,7 +83,7 @@ class TestCrypto(unittest.TestCase):
         for t in testcases:
           channel_test_val = t["input"][0]
           payload_test_val = t["input"][1]
-          encr_key_test_val = t["input"][2]
+          encr_key_test_val = ensure_binary(t["input"][2],'t["input"][2]')
           nonce_test_val = t["input"][3]
 
           self.assertEqual(
