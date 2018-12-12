@@ -107,8 +107,23 @@ class PusherClient(Client):
         """
         if not already_encoded:
             for event in batch:
-                event['data'] = data_to_string(event['data'],
-                self._json_encoder)
+
+                if not isinstance(event['channel'], six.string_types):
+                    raise TypeError("Channel name is expected to be a Python2 str or unicode or a Python 3 str")
+
+                validate_channel(event['channel'])
+
+                event_name = ensure_text(event['name'], "event_name")
+                if len(event['name']) > 200:
+                    raise ValueError("event_name too long")
+
+                event['data'] = data_to_string(event['data'], self._json_encoder)
+
+                if len(event['data']) > 10240:
+                    raise ValueError("Too much data")
+
+                if is_encrypted_channel(event['channel']):
+                    event['data'] = json.dumps(encrypt(event['channel'], event['data'], self._encryption_master_key), ensure_ascii=False)
 
         params = {
             'batch': batch}

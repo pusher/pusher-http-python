@@ -110,6 +110,91 @@ class TestPusherClient(unittest.TestCase):
 
             self.assertEqual(request.params, expected_params)
 
+    def test_trigger_batch_success_case_2(self):
+        json_dumped = u'{"message": "something"}'
+
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+            request = self.pusher_client.trigger_batch.make_request(
+                    [{
+                        u'channel': u'my-chan',
+                        u'name': u'my-event',
+                        u'data': {u'message': u'something'}
+                    },{
+                        u'channel': u'my-chan-2',
+                        u'name': u'my-event-2',
+                        u'data': {u'message': u'something-else'}
+                    }])
+
+            expected_params = {
+                u'batch': [{
+                    u'channel': u'my-chan',
+                    u'name': u'my-event',
+                    u'data': json_dumped
+                },
+                {
+                    u'channel': u'my-chan-2',
+                    u'name': u'my-event-2',
+                    u'data': json_dumped
+                }]
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+    def test_trigger_batch_with_mixed_channels_success_case(self):
+        json_dumped = u'{"message": "something"}'
+
+        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        event_name_2 = "my-event-2"
+        chan_2 = "private-encrypted-2"
+        payload = {"message": "hello worlds"}
+
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
+        request = pc.trigger_batch.make_request(
+                [{
+                    u'channel': u'my-chan',
+                    u'name': u'my-event',
+                    u'data': {u'message': u'something'}
+                },{
+                    u'channel': chan_2,
+                    u'name': event_name_2,
+                    u'data': payload
+                }]
+        )
+
+        # simulate the same encryption process and check equality
+        shared_secret = generate_shared_secret(chan_2, encryp_master_key)
+
+        box = nacl.secret.SecretBox(shared_secret)
+
+        nonce_b64 = json.loads(request.params["batch"][1]["data"])["nonce"].encode("utf-8")
+        nonce = base64.b64decode(nonce_b64)
+
+        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf'-8"), nonce)
+
+        # obtain the ciphertext
+        cipher_text = encrypted.ciphertext
+
+        # encode cipertext to base64
+        cipher_text_b64 = base64.b64encode(cipher_text)
+
+        # format expected output
+        json_dumped_2 = json.dumps({ "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") } , ensure_ascii=False)
+
+        expected_params = {
+            u'batch': [{
+                u'channel': u'my-chan',
+                u'name': u'my-event',
+                u'data': json_dumped
+            },
+            {
+                u'channel': u'private-encrypted-2',
+                u'name': event_name_2,
+                u'data': json_dumped_2
+            }]
+        }
+
+        self.assertEqual(request.params, expected_params)
+
     def test_trigger_with_private_encrypted_channel_string_fail_case_no_encryption_master_key_specified(self):
 
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
