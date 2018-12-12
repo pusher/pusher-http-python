@@ -12,6 +12,7 @@ import base64
 
 from pusher.util import (
     ensure_text,
+    ensure_binary,
     data_to_string)
 
 import nacl.secret
@@ -45,39 +46,34 @@ def generate_shared_secret(channel, encryption_master_key):
 
     if encryption_master_key is not None:
 
-        encryption_master_key = ensure_text(encryption_master_key, "encryption_master_key")
-        channel = ensure_text(channel, "channel")
+        encryption_master_key = ensure_binary(encryption_master_key, "encryption_master_key")
+        channel = ensure_binary(channel, "channel")
 
         if is_encryption_master_key_valid(encryption_master_key):
-            # the key has to be 32 bits long
-            return hashlib.sha256((channel + encryption_master_key).encode('utf-8')).hexdigest()[:32]
+            # the key has to be 32 bytes long
+            hashable = channel + encryption_master_key
+            return hashlib.sha256(hashable).digest()
 
     raise ValueError("Provided encryption_master_key is not 32 char long")
 
-def encrypt(channel, data, encryption_master_key, nonce):
+def encrypt(channel, data, encryption_master_key, nonce=None):
     """
     encrypt() encrypts the provided payload specified in the 'data' parameter
     """
     shared_secret = generate_shared_secret(channel, encryption_master_key)
     # the box setup to seal/unseal data payload
-    box = nacl.secret.SecretBox(shared_secret.encode("utf-8"))
+    box = nacl.secret.SecretBox(shared_secret)
 
-    """ this is here for reference the nonce
-        it is currently passed to the function
-        in order to allow testablity
-
-        # generate the nonce with nacl
-        #nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-    """
-
-    nonce = ensure_text(nonce, "nonce")
-    data = ensure_text(data, "data")
+    if nonce is None:
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    else:
+        nonce = ensure_binary(nonce, "nonce")
 
     # convert nonce to base64
-    nonce_b64 = base64.b64encode(nonce.encode("utf-8"))
+    nonce_b64 = base64.b64encode(nonce)
 
     # encrypt the data payload with nacl
-    encrypted = box.encrypt(data.encode("utf-8"), nonce.encode("utf-8"))
+    encrypted = box.encrypt(data.encode("utf-8"), nonce)
 
     # obtain the ciphertext
     cipher_text = encrypted.ciphertext

@@ -141,19 +141,20 @@ class TestPusherClient(unittest.TestCase):
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
 
         # trigger a request to a private-encrypted channel and capture the request to assert equality
-        chan = u'private-encrypted-tst'
-        payload = {u'message': u'hello worlds'}
-        request = pc.trigger.make_request(chan, u'some_event', payload)
+        chan = "private-encrypted-tst"
+        payload = {"message": "hello worlds"}
+        event_name = 'some_event'
+        request = pc.trigger.make_request(chan, event_name, payload)
 
         # simulate the same encryption process and check equality
         shared_secret = generate_shared_secret(chan, encryp_master_key)
 
-        box = nacl.secret.SecretBox(shared_secret.encode("utf-8"))
+        box = nacl.secret.SecretBox(shared_secret)
 
         nonce_b64 = json.loads(request.params["data"])["nonce"].encode("utf-8")
-        nonce = ensure_text(base64.b64decode(nonce_b64),"nonce")
+        nonce = base64.b64decode(nonce_b64)
 
-        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf'-8"), nonce.encode("utf-8"))
+        encrypted = box.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf'-8"), nonce)
 
         # obtain the ciphertext
         cipher_text = encrypted.ciphertext

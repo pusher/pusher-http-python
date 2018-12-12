@@ -23,6 +23,11 @@ else:
     text = 'a string'
 
 
+if sys.version_info < (3,):
+    byte_type = 'a python2 str'
+else:
+    byte_type = 'a python3 bytes' 
+
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):
         return obj
@@ -34,6 +39,20 @@ def ensure_text(obj, name):
       return bytes(obj).decode('utf-8')
 
     raise TypeError("%s should be %s instead it is a %s" % (name, text, type(obj)))
+
+def ensure_binary(obj, name):
+    """
+    ensure_binary() ensures that the value is a
+    python2 str or python3 bytes
+    more on this here: https://pythonhosted.org/six/#six.binary_type
+    """
+    if isinstance(obj, six.binary_type):
+      return obj
+
+    if isinstance(obj, six.text_type) or isinstance(obj, six.string_types):
+       return obj.encode("utf-8")
+
+    raise TypeError("%s should be %s instead it is a %s" % (name, byte_type, type(obj)))
 
 
 def validate_channel(channel):

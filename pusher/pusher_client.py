@@ -79,11 +79,7 @@ class PusherClient(Client):
         data = data_to_string(data, self._json_encoder)
 
         if is_encrypted_channel(channels[0]):
-            # set a random seed
-            random.seed(datetime.now())
-            # generate a 24-bytes random nonce as it is required by the encrypt() function (needed by nacl)
-            nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(24))
-            data = json.dumps(encrypt(channels[0], data, self._encryption_master_key, nonce), ensure_ascii=False)
+            data = json.dumps(encrypt(channels[0], data, self._encryption_master_key), ensure_ascii=False)
 
         if len(data) > 10240:
             raise ValueError("Too much data")
