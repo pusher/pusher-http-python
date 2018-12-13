@@ -11,17 +11,22 @@ import re
 import six
 import sys
 
-
 channel_name_re = re.compile('\A[-a-zA-Z0-9_=@,.;]+\Z')
 app_id_re = re.compile('\A[0-9]+\Z')
 pusher_url_re = re.compile('\A(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)\Z')
 socket_id_re = re.compile('\A\d+\.\d+\Z')
+
 
 if sys.version_info < (3,):
     text = 'a unicode string'
 else:
     text = 'a string'
 
+
+if sys.version_info < (3,):
+    byte_type = 'a python2 str'
+else:
+    byte_type = 'a python3 bytes' 
 
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):
@@ -30,7 +35,24 @@ def ensure_text(obj, name):
     if isinstance(obj, six.string_types):
        return six.text_type(obj)
 
-    raise TypeError("%s should be %s" % (name, text))
+    if isinstance(obj, six.binary_type):
+      return bytes(obj).decode('utf-8')
+
+    raise TypeError("%s should be %s instead it is a %s" % (name, text, type(obj)))
+
+def ensure_binary(obj, name):
+    """
+    ensure_binary() ensures that the value is a
+    python2 str or python3 bytes
+    more on this here: https://pythonhosted.org/six/#six.binary_type
+    """
+    if isinstance(obj, six.binary_type):
+      return obj
+
+    if isinstance(obj, six.text_type) or isinstance(obj, six.string_types):
+       return obj.encode("utf-8")
+
+    raise TypeError("%s should be %s instead it is a %s" % (name, byte_type, type(obj)))
 
 
 def validate_channel(channel):

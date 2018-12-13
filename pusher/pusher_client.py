@@ -12,6 +12,8 @@ import os
 import re
 import six
 import time
+import json
+import string
 
 from pusher.util import (
     ensure_text,
@@ -22,16 +24,23 @@ from pusher.util import (
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
+from pusher.crypto import *
+import random
+from datetime import datetime
 
 
 class PusherClient(Client):
     def __init__(
-            self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, json_encoder=None, json_decoder=None,
+            self, app_id, key, secret, ssl=True,
+            host=None, port=None,
+            timeout=5, cluster=None,
+            encryption_master_key=None,
+            json_encoder=None, json_decoder=None,
             backend=None, **backend_options):
         super(PusherClient, self).__init__(
             app_id, key, secret, ssl, host, port, timeout, cluster,
-            json_encoder, json_decoder, backend, **backend_options)
+            encryption_master_key, json_encoder, json_decoder,
+            backend, **backend_options)
 
         if host:
             self._host = ensure_text(host, "host")
@@ -60,17 +69,23 @@ class PusherClient(Client):
         if len(channels) > 100:
             raise ValueError("Too many channels")
 
-        channels = list(map(validate_channel, channels))
-
         event_name = ensure_text(event_name, "event_name")
-
         if len(event_name) > 200:
             raise ValueError("event_name too long")
 
         data = data_to_string(data, self._json_encoder)
-
         if len(data) > 10240:
             raise ValueError("Too much data")
+
+        channels = list(map(validate_channel, channels))
+
+        if len(channels) > 1:
+            for chan in channels:
+                if is_encrypted_channel(chan):
+                    raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
+
+        if is_encrypted_channel(channels[0]):
+            data = json.dumps(encrypt(channels[0], data, self._encryption_master_key), ensure_ascii=False)
 
         params = {
             'name': event_name,
@@ -83,6 +98,7 @@ class PusherClient(Client):
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
 
+
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
         """Trigger multiple events with a single HTTP call.
@@ -91,8 +107,20 @@ class PusherClient(Client):
         """
         if not already_encoded:
             for event in batch:
-                event['data'] = data_to_string(event['data'],
-                self._json_encoder)
+
+                validate_channel(event['channel'])
+
+                event_name = ensure_text(event['name'], "event_name")
+                if len(event['name']) > 200:
+                    raise ValueError("event_name too long")
+
+                event['data'] = data_to_string(event['data'], self._json_encoder)
+
+                if len(event['data']) > 10240:
+                    raise ValueError("Too much data")
+
+                if is_encrypted_channel(event['channel']):
+                    event['data'] = json.dumps(encrypt(event['channel'], event['data'], self._encryption_master_key), ensure_ascii=False)
 
         params = {
             'batch': batch}
