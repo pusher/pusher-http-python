@@ -400,18 +400,6 @@ Limit event name length to 200 chars     | &#10004;
 
 To run the tests run `python setup.py test`
 
-## Making a release
-
-* Update the CHANGELOG.md file. `git changelog` from the
-  [git-extras](https://github.com/tj/git-extras/blob/master/Commands.md#git-changelog) package can be useful to pull commits from the release.
-* Update the version in version.py
-* `git tag v$VERSION`
-* `git push && git push --tags`
-* `make` - publishes to pypi
-
-If you get the `error: invalid command 'bdist_wheel'` message on the last step
-`pip install wheel` and re-run `make`.
-
 ## License
 
 Copyright (c) 2015 Pusher Ltd. See LICENSE for details.
