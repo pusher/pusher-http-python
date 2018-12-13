@@ -40,7 +40,8 @@ setup(
         'urllib3',
         'pyopenssl',
         'ndg-httpsclient',
-        'pyasn1'
+        'pyasn1',
+        'pynacl'
     ],
 
     tests_require=['nose', 'mock', 'HTTPretty'],
