@@ -1,3 +1,7 @@
+### 2.1.1 2018-12-13
+
+* Add pynacl as a dependency
+
 ### 2.1.0 2018-12-13
 
 * Added End-to-end Encryption
