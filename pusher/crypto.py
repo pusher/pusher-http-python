@@ -55,7 +55,7 @@ def encrypt(channel, data, encryption_master_key, nonce=None):
     """
     encrypt() encrypts the provided payload specified in the 'data' parameter
     """
-    channel = ensure_binary(channel,"channel")
+    channel = ensure_binary(channel, "channel")
     shared_secret = generate_shared_secret(channel, encryption_master_key)
     # the box setup to seal/unseal data payload
     box = nacl.secret.SecretBox(shared_secret)
