@@ -41,10 +41,9 @@ def is_encryption_master_key_valid(encryption_master_key):
 
 def generate_shared_secret(channel, encryption_master_key):
     """
-    generate_shared_secret() takes a utf8-string
-    and returns the sha256 hash in utf8-string format
+    generate_shared_secret() takes a six.binary_type (python2 str or python3 bytes) channel name and encryption_master_key
+    and returns the sha256 hash in six.binary_type format
     """
-
     if is_encryption_master_key_valid(encryption_master_key):
         # the key has to be 32 bytes long
         hashable = channel + encryption_master_key
