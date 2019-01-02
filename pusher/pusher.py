@@ -58,7 +58,7 @@ class Pusher(object):
 
         self._notification_client = NotificationClient(
             app_id, key, secret, notification_ssl, notification_host, port,
-            timeout, cluster, json_encoder, json_decoder, backend,
+            timeout, cluster, encryption_master_key, json_encoder, json_decoder, backend,
             **backend_options)
 
 
