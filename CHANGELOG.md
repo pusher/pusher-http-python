@@ -1,3 +1,7 @@
+### 2.1.2 2019-01-02
+
+* Fixes issue where encryption_master_key wasn't passed to NotificationClient to initialise the parent class.
+
 ### 2.1.1 2018-12-13
 
 * Add pynacl as a dependency
