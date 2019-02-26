@@ -6,7 +6,12 @@ from __future__ import (
     absolute_import,
     division)
 
-import collections
+import sys
+# Abstract Base Classes were moved into collections.abc in Python 3.3
+if sys.version_info >= (3,3):
+    import collections.abc as collections
+else:
+    import collections
 import hashlib
 import os
 import re
