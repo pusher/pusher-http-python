@@ -1,3 +1,7 @@
+### 2.1.3 2019-02-26
+
+* Import Abstract Base Classes from collections.abc in Python versions >= 3.3
+
 ### 2.1.2 2019-01-02
 
 * Fixes issue where encryption_master_key wasn't passed to NotificationClient to initialise the parent class.
