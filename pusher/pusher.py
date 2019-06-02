@@ -47,10 +47,11 @@ class Pusher(object):
     def __init__(
             self, app_id, key, secret, ssl=True, host=None, port=None,
             timeout=5, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
-            backend=None, notification_host=None, notification_ssl=True, **backend_options):
+            backend=None, notification_host=None, notification_ssl=True, max_num_channels=None, 
+            max_len_event_name=None, max_len_data=None, **backend_options):
         self._pusher_client = PusherClient(
             app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
-            json_encoder, json_decoder, backend, **backend_options)
+            json_encoder, json_decoder, backend, max_num_channels, max_len_event_name, max_len_data, **backend_options)
 
         self._authentication_client = AuthenticationClient(
             app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
