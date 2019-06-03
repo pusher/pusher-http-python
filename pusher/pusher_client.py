@@ -41,8 +41,8 @@ class PusherClient(Client):
             timeout=5, cluster=None,
             encryption_master_key=None,
             json_encoder=None, json_decoder=None,
-            backend=None, max_num_channels = None,
-            max_len_event_name = None, max_len_data = None, **backend_options):
+            backend=None, max_num_channels=None,
+            max_len_event_name=None, max_len_data=None, **backend_options):
         super(PusherClient, self).__init__(
             app_id, key, secret, ssl, host, port, timeout, cluster,
             encryption_master_key, json_encoder, json_decoder,
