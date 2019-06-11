@@ -41,11 +41,16 @@ class PusherClient(Client):
             timeout=5, cluster=None,
             encryption_master_key=None,
             json_encoder=None, json_decoder=None,
-            backend=None, **backend_options):
+            backend=None, max_num_channels=None,
+            max_len_event_name=None, max_len_data=None, **backend_options):
         super(PusherClient, self).__init__(
             app_id, key, secret, ssl, host, port, timeout, cluster,
             encryption_master_key, json_encoder, json_decoder,
             backend, **backend_options)
+
+        self.max_num_channels = max_num_channels if max_num_channels is not None else 100
+        self.max_len_event_name = max_len_event_name if max_len_event_name is not None else 200
+        self.max_len_data = max_len_data if max_len_data is not None else 10240
 
         if host:
             self._host = ensure_text(host, "host")
@@ -71,15 +76,15 @@ class PusherClient(Client):
                 channels, (collections.Sized, collections.Iterable)):
             raise TypeError("Expected a single or a list of channels")
 
-        if len(channels) > 100:
+        if len(channels) > self.max_num_channels:
             raise ValueError("Too many channels")
 
         event_name = ensure_text(event_name, "event_name")
-        if len(event_name) > 200:
+        if len(event_name) > self.max_len_event_name:
             raise ValueError("event_name too long")
 
         data = data_to_string(data, self._json_encoder)
-        if len(data) > 10240:
+        if len(data) > self.max_len_data:
             raise ValueError("Too much data")
 
         channels = list(map(validate_channel, channels))
@@ -116,12 +121,12 @@ class PusherClient(Client):
                 validate_channel(event['channel'])
 
                 event_name = ensure_text(event['name'], "event_name")
-                if len(event['name']) > 200:
+                if len(event['name']) > self.max_len_event_name:
                     raise ValueError("event_name too long")
 
                 event['data'] = data_to_string(event['data'], self._json_encoder)
 
-                if len(event['data']) > 10240:
+                if len(event['data']) > self.max_len_data:
                     raise ValueError("Too much data")
 
                 if is_encrypted_channel(event['channel']):
