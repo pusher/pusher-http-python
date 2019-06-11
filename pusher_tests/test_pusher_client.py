@@ -89,6 +89,60 @@ class TestPusherClient(unittest.TestCase):
 
             self.assertEqual(request.params, expected_params)
 
+    def test_trigger_fails_when_len_event_name_greater_than_default_and_max_not_specified(self):
+        self.assertRaises(ValueError, lambda: self.pusher_client.trigger.make_request(u'some_channel', u'some_event'*100, {u'message': u'hello worlds'}))
+
+    def test_trigger_success_when_len_event_name_not_greater_than_max_specified(self):
+        json_dumped = u'{"message": "hello worlds"}'
+        pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost', max_len_event_name = 5000)
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = pusher_client.trigger.make_request(u'some_channel', u'some_event'*100, {u'message': u'hello worlds'})
+
+            expected_params = {
+                u'channels': [u'some_channel'],
+                u'data': json_dumped,
+                u'name': u'some_event'*100
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+    def test_trigger_fails_when_num_channels_greater_than_default_and_max_not_specified(self):
+        self.assertRaises(ValueError, lambda: self.pusher_client.trigger.make_request([u'some_channel']*500, u'some_event', {u'message': u'hello worlds'}))
+
+    def test_trigger_success_when_num_channels_not_greater_than_max_specified(self):
+        json_dumped = u'{"message": "hello worlds"}'
+        pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost', max_num_channels = 1000)
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = pusher_client.trigger.make_request([u'some_channel']*500, u'some_event', {u'message': u'hello worlds'})
+
+            expected_params = {
+                u'channels': [u'some_channel']*500,
+                u'data': json_dumped,
+                u'name': u'some_event'
+            }
+
+            self.assertEqual(request.params, expected_params)
+
+    def test_trigger_fails_when_len_data_greater_than_default_and_max_not_specified(self):
+        self.assertRaises(ValueError, lambda: self.pusher_client.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello worlds'*20000}))
+
+    def test_trigger_success_when_len_data_not_greater_than_max_specified(self):
+        json_dumped = u'{"message": "' + u'hello worlds'*20000 + '"}'
+        pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost', max_len_data = 250000)
+        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
+
+            request = pusher_client.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello worlds'*20000})
+
+            expected_params = {
+                u'channels': [u'some_channel'],
+                u'data': json_dumped,
+                u'name': u'some_event'
+            }
+
+            self.assertEqual(request.params, expected_params)
+
     def test_trigger_batch_success_case(self):
         json_dumped = u'{"message": "something"}'
 
