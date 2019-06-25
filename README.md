@@ -76,9 +76,9 @@ pusher_client = pusher.Pusher(app_id, key, secret, cluster=u'cluster')
 
 |Argument   |Description   |
 |:-:|:-:|
-|app_id `String`  |**Required** <br> The Pusher application ID |
-|key `String`     |**Required** <br> The Pusher application key |
-|secret `String`  |**Required** <br> The Pusher application secret token |
+|app_id `String`  |**Required** <br> The Pusher Channels application ID |
+|key `String`     |**Required** <br> The Pusher Channels application key |
+|secret `String`  |**Required** <br> The Pusher Channels application secret token |
 |cluster `String` | **Default:`mt1`** <br> The pusher application cluster. Will be overwritten if `host` is set |
 |host `String`    | **Default:`None`** <br> The host to connect to |
 |port `int`       | **Default:`None`** <br>Which port to connect to |
@@ -357,7 +357,7 @@ Users can configure the library to use different backends to send calls to our A
 * [AsyncIO](http://asyncio.org/) (`pusher.aiohttp.AsyncIOBackend`).
 * [Google App Engine](https://cloud.google.com/appengine/docs/python/urlfetch/) (`pusher.gae.GAEBackend`).
 
-Upon initializing a Pusher instance, pass in any of these options to the `backend` keyword argument.
+Upon initializing a `Pusher` instance, pass in any of these options to the `backend` keyword argument.
 
 ### Google App Engine
 
@@ -387,7 +387,7 @@ HTTP KeepAlive                             | *&#10008;*
 
 #### Helper Functionality
 
-These are helpers that have been implemented to to ensure interactions with the HTTP API only occur if they will not be rejected e.g. [channel naming conventions](https://pusher.com/docs/client_api_guide/client_channels#naming-channels).
+These are helpers that have been implemented to to ensure interactions with the HTTP API only occur if they will not be rejected e.g. [channel naming conventions](https://pusher.com/docs/channels/using_channels/channels#channel-naming-conventions).
 
 Helper Functionality                     | Supported
 -----------------------------------------| :-------:
