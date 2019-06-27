@@ -14,7 +14,7 @@ if not VERSION:
 setup(
     name='pusher',
     version=VERSION,
-    description='A Python library to interract with the Pusher API',
+    description='A Python library to interract with the Pusher Channels Channels API',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
     author_email='support@pusher.com',
