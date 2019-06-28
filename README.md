@@ -51,7 +51,7 @@ $ sudo apt-get install build-essential libssl-dev libffi-dev
 
 ## Getting started
 
-The minimum configuration required to use the Pusher object are the three
+ The minimum configuration required to use the `Pusher` object are the three
 constructor arguments which identify your Pusher Channels app. You can find them by
 going to "API Keys" on your app at <https://app.pusher.com>.
 
