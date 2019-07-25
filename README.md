@@ -6,9 +6,12 @@ This package lets you trigger events to your client and query the state of your 
 
 In order to use this library, you need to have a free account on <http://pusher.com>. After registering, you will need the application credentials for your app.
 
+## Supported Platforms
+
+* Python - supports versions of Python that have `bugfix`/`security` support in https://devguide.python.org/#status-of-python-branches.
+
 ## Features
 
-* Python 2.7, 3.4, 3.5, 3.6 and 3.7 support
 * Adapters for various http libraries like requests, urlfetch, aiohttp (requires Python >= 3.5.3) and tornado.
 * WebHook validation
 * Signature generation for socket subscriptions
