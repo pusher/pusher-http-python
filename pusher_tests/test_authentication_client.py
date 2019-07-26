@@ -13,6 +13,7 @@ from decimal import Decimal
 
 from pusher.authentication_client import AuthenticationClient
 from pusher.signature import sign, verify
+from pusher.util import ensure_binary
 
 try:
     import unittest.mock as mock
@@ -21,6 +22,7 @@ except ImportError:
 
 
 class TestAuthenticationClient(unittest.TestCase):
+
     def test_authenticate_for_private_channels(self):
         authenticationClient = AuthenticationClient(
             key=u'foo', secret=u'bar', host=u'host', app_id=u'4', ssl=True)
@@ -31,6 +33,17 @@ class TestAuthenticationClient(unittest.TestCase):
 
         self.assertEqual(authenticationClient.authenticate(u'private-channel', u'345.23'), expected)
 
+    def test_authenticate_for_private_encrypted_channels(self):
+        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        authenticationClient = AuthenticationClient(
+            key=u'foo', secret=u'bar', host=u'host', app_id=u'4', encryption_master_key=encryp_master_key, ssl=True)
+
+        expected = {
+            u'auth': u'foo:fff0503dfe4929f5162efe4d1dacbce524b0d8e7e1331117a8651c0e74d369e3',
+            u'shared_secret': b'VmIsNZtCSteh8kazd2toc+ofhohBtUouQRSDtRvuyVI='
+        }
+
+        self.assertEqual(authenticationClient.authenticate(u'private-encrypted-channel', u'345.23'), expected)
 
     def test_authenticate_types(self):
         authenticationClient = AuthenticationClient(
