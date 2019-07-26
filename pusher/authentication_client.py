@@ -17,6 +17,7 @@ import base64
 
 from pusher.util import (
     ensure_text,
+    ensure_binary,
     validate_channel,
     validate_socket_id,
     channel_name_re
@@ -76,7 +77,8 @@ class AuthenticationClient(Client):
         response_payload = { "auth": auth }
 
         if is_encrypted_channel(channel):
-            shared_secret = generate_shared_secret(channel, self._encryption_master_key)
+            shared_secret = generate_shared_secret(
+                ensure_binary(channel, "channel"), self._encryption_master_key)
             shared_secret_b64 = base64.b64encode(shared_secret)
             response_payload["shared_secret"] = shared_secret_b64
 
