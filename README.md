@@ -8,7 +8,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 
 ## Supported Platforms
 
-* Python - supports versions of Python that have `bugfix`/`security` support in https://devguide.python.org/#status-of-python-branches.
+* Python - supports Python versions 2.7, 3.5, 3.6 and 3.7
 
 ## Features
 
