@@ -1,3 +1,10 @@
+### 2.1.4 2019-08-09
+
+* [FIXED] TypeError in AuthenticationClient when using encrypted channels
+* [FIXED] RequestsDependencyWarning by updating `requests`
+* [FIXED] Suppress httpretty warnings
+* [ADDED] Tests for AuthenticationClient with encrypted channels
+
 ### 2.1.3 2019-02-26
 
 * Import Abstract Base Classes from collections.abc in Python versions >= 3.3
