@@ -89,7 +89,10 @@ pusher_client = pusher.Pusher(app_id, key, secret, cluster=u'cluster')
 |encryption_master_key `String`       | **Default:`None`** <br> The encryption master key for End-to-end Encryption |
 |backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
-|json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
+|json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder. |
+|max_num_channels `int`   | **Default: `100`**<br> Maximum number of channels that can be triggered at a given time.|
+|max_len_event_name `int` | **Default: `200`**<br> Maximum length of event names.|
+|max_len_data `int`       | **Default: `10240`**<br> Maximum length of data (post JSON serialisation) that can be sent at once.|
 
 The constructor will throw a `TypeError` if it is called with parameters that don’t match the types listed above.
 
@@ -117,7 +120,7 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 |:-:|:-:|
 |buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
 
-`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 100 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
+`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than `max_num_channels` channels, with an event name longer than `max_len_event_name` characters, or with more than `max_len_data` characters of data (post JSON serialisation). See [Configuration](#configuration) on how to control these constraints and the respective default values.
 
 ##### Example
 
