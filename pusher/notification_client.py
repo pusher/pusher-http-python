@@ -42,7 +42,7 @@ class NotificationClient(Client):
         if not isinstance(interests, list) and not isinstance(interests, set):
             raise TypeError("Interests must be a list or a set")
 
-        if len(interests) is 0:
+        if len(interests) == 0:
             raise ValueError("Interests must not be empty")
 
         if not isinstance(notification, dict):
