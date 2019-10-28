@@ -13,11 +13,9 @@ class TestRequestsBackend(unittest.TestCase):
 
     # temporary ignoring warnings until these are sorted:
     # https://github.com/gabrielfalcao/HTTPretty/issues/368
-    # https://github.com/gabrielfalcao/HTTPretty/pull/377
     if sys.version_info[0] >= 3:
         import warnings
         warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed file <_io.BufferedRandom name*")
-        warnings.filterwarnings("ignore", category=PendingDeprecationWarning, message="isAlive*")
 
     self.pusher = Pusher.from_url(u'http://key:secret@api.pusherapp.com/apps/4')
 
