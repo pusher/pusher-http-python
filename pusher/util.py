@@ -26,7 +26,7 @@ else:
 if sys.version_info < (3,):
     byte_type = 'a python2 str'
 else:
-    byte_type = 'a python3 bytes' 
+    byte_type = 'a python3 bytes'
 
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):

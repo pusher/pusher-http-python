@@ -9,7 +9,6 @@ from pusher.util import ensure_binary
 
 class TestCrypto(unittest.TestCase):
 
-
     def test_is_encrypted_channel(self):
         # testcases matrix with inputs and expected returning values
         testcases = [
@@ -32,9 +31,8 @@ class TestCrypto(unittest.TestCase):
               crypto.is_encrypted_channel( t["input"] ),
               t["expected"]
           )
-    
-    def test_is_encryption_master_key_valid(self):
 
+    def test_is_encryption_master_key_valid(self):
         testcases = [
           { "input":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "expected":True },
           { "input":"                                ", "expected":True },
@@ -49,9 +47,8 @@ class TestCrypto(unittest.TestCase):
               crypto.is_encryption_master_key_valid( t["input"] ),
               t["expected"]
           )
-    
+
     def test_generate_shared_secret(self):
-        
         testcases = [
           {
             "input": ["pvUPIk0YG6MnxCEMIUUVFrbDmQwbhICXUcy",
@@ -66,7 +63,7 @@ class TestCrypto(unittest.TestCase):
               crypto.generate_shared_secret( ensure_binary(t["input"][0],'t["input"][0]'), ensure_binary(t["input"][1],'t["input"][1]') ),
               t["expected"]
           )
-    
+
     def test_encrypt(self):
         testcases = [
           {
@@ -95,6 +92,6 @@ class TestCrypto(unittest.TestCase):
               ),
               t["expected"]
           )
-    
+
     def test_decrypt(self):
         self.assertEqual(True, True)

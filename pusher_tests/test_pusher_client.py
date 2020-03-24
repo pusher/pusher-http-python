@@ -162,7 +162,7 @@ class TestPusherClient(unittest.TestCase):
         )
 
         # simulate the same encryption process and check equality
-        encryp_master_key = ensure_binary(encryp_master_key,"encryp_master_key")
+        encryp_master_key = ensure_binary(encryp_master_key, "encryp_master_key")
         chan_2 = ensure_binary(chan_2,"chan_2")
         shared_secret = generate_shared_secret(chan_2, encryp_master_key)
 
@@ -180,7 +180,7 @@ class TestPusherClient(unittest.TestCase):
         cipher_text_b64 = base64.b64encode(cipher_text)
 
         # format expected output
-        json_dumped_2 = json.dumps({ "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") } , ensure_ascii=False)
+        json_dumped_2 = json.dumps({ "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") }, ensure_ascii=False)
 
         expected_params = {
             u'batch': [{
@@ -198,7 +198,6 @@ class TestPusherClient(unittest.TestCase):
         self.assertEqual(request.params, expected_params)
 
     def test_trigger_with_private_encrypted_channel_string_fail_case_no_encryption_master_key_specified(self):
-
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
 
         with self.assertRaises(ValueError):
@@ -222,7 +221,6 @@ class TestPusherClient(unittest.TestCase):
             self.assertEqual(request.params, expected_params)
 
     def test_trigger_with_private_encrypted_channel_success(self):
-
         # instantiate a new client configured with the master encryption key
         encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', encryption_master_key=encryp_master_key, ssl=True)
