@@ -25,28 +25,40 @@ class TestCrypto(unittest.TestCase):
           { "input":"--djsah private-encrypted-ajkshdak", "expected":False }
         ]
 
-        # do the actual testing
         for t in testcases:
           self.assertEqual(
               crypto.is_encrypted_channel( t["input"] ),
-              t["expected"]
+              t["expected"],
           )
 
-    def test_is_encryption_master_key_valid(self):
+    def test_parse_master_key_successes(self):
         testcases = [
-          { "input":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "expected":True },
-          { "input":"                                ", "expected":True },
-          { "input":"private--encrypted--djsahajksha-", "expected":True },
-          { "input":"dadasda;enc   ted--djsahajkshdak", "expected":True },
-          { "input":"--====9.djsahajkshdak", "expected":False }
-        ]
+                { "deprecated": "this is 32 bytes 123456789012345", "base64": None, "expected": b"this is 32 bytes 123456789012345" },
+                { "deprecated": "this key has nonprintable char \x00", "base64": None, "expected": b"this key has nonprintable char \x00"},
+                { "deprecated": None, "base64": "dGhpcyBpcyAzMiBieXRlcyAxMjM0NTY3ODkwMTIzNDU=", "expected": b"this is 32 bytes 123456789012345" },
+                { "deprecated": None, "base64": "dGhpcyBrZXkgaGFzIG5vbnByaW50YWJsZSBjaGFyIAA=", "expected": b"this key has nonprintable char \x00" },
+            ]
 
-        # do the actual testing
         for t in testcases:
-          self.assertEqual(
-              crypto.is_encryption_master_key_valid( t["input"] ),
-              t["expected"]
-          )
+            self.assertEqual(
+                    crypto.parse_master_key(t["deprecated"], t["base64"]),
+                    t["expected"]
+                )
+
+    def test_parse_master_key_rejections(self):
+        testcases = [
+                { "deprecated": "some bytes", "base64": "also some bytes", "expected": "both" },
+                { "deprecated": "this is 31 bytes 12345678901234", "base64": None, "expected": "32 bytes"},
+                { "deprecated": "this is 33 bytes 1234567890123456", "base64": None, "expected": "32 bytes"},
+                { "deprecated": None, "base64": "dGhpcyBpcyAzMSBieXRlcyAxMjM0NTY3ODkwMTIzNA==", "expected": "decodes to 32 bytes" },
+                { "deprecated": None, "base64": "dGhpcyBpcyAzMyBieXRlcyAxMjM0NTY3ODkwMTIzNDU2", "expected": "decodes to 32 bytes" },
+                { "deprecated": None, "base64": "dGhpcyBpcyAzMSBieXRlcyAxMjM0NTY3ODkwMTIzNA=", "expected": "valid base64" },
+                { "deprecated": None, "base64": "dGhpcyBpcyA!MiBieXRlcyAxMjM0NTY3OD#wMTIzNDU=", "expected": "valid base64" },
+            ]
+
+        for t in testcases:
+            with self.assertRaisesRegex(ValueError, t["expected"]):
+                crypto.parse_master_key(t["deprecated"], t["base64"])
 
     def test_generate_shared_secret(self):
         testcases = [

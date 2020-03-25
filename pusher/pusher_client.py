@@ -125,7 +125,6 @@ class PusherClient(Client):
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
 
-
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
         """Trigger multiple events with a single HTTP call.

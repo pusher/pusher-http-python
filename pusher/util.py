@@ -10,6 +10,7 @@ import json
 import re
 import six
 import sys
+import base64
 
 channel_name_re = re.compile('\A[-a-zA-Z0-9_=@,.;]+\Z')
 app_id_re = re.compile('\A[0-9]+\Z')

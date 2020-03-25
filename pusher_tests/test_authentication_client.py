@@ -34,9 +34,16 @@ class TestAuthenticationClient(unittest.TestCase):
         self.assertEqual(authenticationClient.authenticate(u'private-channel', u'345.23'), expected)
 
     def test_authenticate_for_private_encrypted_channels(self):
-        encryp_master_key=u'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        # The authentication client receives the decoded bytes of the key
+        # not the base64 representation
+        master_key=b'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
         authenticationClient = AuthenticationClient(
-            key=u'foo', secret=u'bar', host=u'host', app_id=u'4', encryption_master_key=encryp_master_key, ssl=True)
+                key=u'foo',
+                secret=u'bar',
+                host=u'host',
+                app_id=u'4',
+                encryption_master_key=master_key,
+                ssl=True)
 
         expected = {
             u'auth': u'foo:fff0503dfe4929f5162efe4d1dacbce524b0d8e7e1331117a8651c0e74d369e3',
