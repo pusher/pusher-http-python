@@ -56,6 +56,17 @@ def ensure_binary(obj, name):
     raise TypeError("%s should be %s instead it is a %s" % (name, byte_type, type(obj)))
 
 
+def is_base64(s):
+    """
+    is_base64 tests whether a string is valid base64 by testing that it round-trips accurately.
+    This is required because python 2.7 does not have a Validate option to the decoder.
+    """
+    try:
+        s = six.ensure_binary(s, "utf-8")
+        return base64.b64encode(base64.b64decode(s)) == s
+    except Exception as e:
+        return False
+
 def validate_channel(channel):
     channel = ensure_text(channel, "channel")
 

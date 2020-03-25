@@ -14,7 +14,8 @@ import binascii
 from pusher.util import (
     ensure_text,
     ensure_binary,
-    data_to_string)
+    data_to_string,
+    is_base64)
 
 import nacl.secret
 import nacl.utils
@@ -47,14 +48,14 @@ def parse_master_key(encryption_master_key, encryption_master_key_base64):
             raise ValueError("encryption_master_key must be 32 bytes long. It is also deprecated, please use encryption_master_key_base64")
 
     if encryption_master_key_base64 is not None:
-        try:
-            decoded = base64.b64decode(encryption_master_key_base64, validate=True)
+        if is_base64(encryption_master_key_base64):
+            decoded = base64.b64decode(encryption_master_key_base64)
 
             if len(decoded) == 32:
                 return decoded
             else:
                 raise ValueError("encryption_master_key_base64 must be a base64 string which decodes to 32 bytes")
-        except binascii.Error:
+        else:
             raise ValueError("encryption_master_key_base64 must be valid base64")
 
     return None

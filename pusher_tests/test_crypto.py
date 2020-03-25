@@ -2,6 +2,7 @@
 from __future__ import print_function, absolute_import
 
 import json
+import six
 import unittest
 
 from pusher import crypto
@@ -57,8 +58,7 @@ class TestCrypto(unittest.TestCase):
             ]
 
         for t in testcases:
-            with self.assertRaisesRegex(ValueError, t["expected"]):
-                crypto.parse_master_key(t["deprecated"], t["base64"])
+            six.assertRaisesRegex(self, ValueError, t["expected"], lambda: crypto.parse_master_key(t["deprecated"], t["base64"]))
 
     def test_generate_shared_secret(self):
         testcases = [
