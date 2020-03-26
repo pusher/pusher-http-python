@@ -1,3 +1,8 @@
+### next
+
+* [ADDED] option `encryption_master_key_base64`
+* [DEPRECATED] option `encryption_master_key`
+
 ### 2.1.4 2019-08-09
 
 * [FIXED] TypeError in AuthenticationClient when using encrypted channels
