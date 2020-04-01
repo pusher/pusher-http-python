@@ -10,6 +10,7 @@ import hashlib
 import nacl
 import base64
 import binascii
+import warnings
 
 from pusher.util import (
     ensure_text,
@@ -42,10 +43,11 @@ def parse_master_key(encryption_master_key, encryption_master_key_base64):
                 "encryption_master_key is deprecated, provide only encryption_master_key_base64")
 
     if encryption_master_key is not None:
+        warnings.warn("`encryption_master_key` is deprecated, please use `encryption_master_key_base64`")
         if len(encryption_master_key) == 32:
             return ensure_binary(encryption_master_key, "encryption_master_key")
         else:
-            raise ValueError("encryption_master_key must be 32 bytes long. It is also deprecated, please use encryption_master_key_base64")
+            raise ValueError("encryption_master_key must be 32 bytes long")
 
     if encryption_master_key_base64 is not None:
         if is_base64(encryption_master_key_base64):
