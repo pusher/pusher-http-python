@@ -19,7 +19,6 @@ from pusher.util import (
     doc_string)
 
 from pusher.pusher_client import PusherClient
-from pusher.notification_client import NotificationClient
 from pusher.authentication_client import AuthenticationClient
 
 
@@ -60,8 +59,6 @@ class Pusher(object):
             json_encoder=None,
             json_decoder=None,
             backend=None,
-            notification_host=None,
-            notification_ssl=True,
             **backend_options):
 
         self._pusher_client = PusherClient(
@@ -91,20 +88,6 @@ class Pusher(object):
             cluster,
             encryption_master_key,
             encryption_master_key_base64,
-            json_encoder,
-            json_decoder,
-            backend,
-            **backend_options)
-
-        self._notification_client = NotificationClient(
-            app_id,
-            key,
-            secret,
-            notification_ssl,
-            notification_host,
-            port,
-            timeout,
-            cluster,
             json_encoder,
             json_decoder,
             backend,
@@ -197,8 +180,3 @@ class Pusher(object):
     def validate_webhook(self, key, signature, body):
         return self._authentication_client.validate_webhook(
             key, signature, body)
-
-
-    @doc_string(NotificationClient.notify.__doc__)
-    def notify(self, interest, notification):
-        return self._notification_client.notify(interest, notification)
