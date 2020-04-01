@@ -52,8 +52,6 @@ class PusherClient(Client):
             backend=None,
             **backend_options):
 
-        parsed_master_key = parse_master_key(encryption_master_key, encryption_master_key_base64)
-
         super(PusherClient, self).__init__(
                 app_id,
                 key,
@@ -63,21 +61,12 @@ class PusherClient(Client):
                 port,
                 timeout,
                 cluster,
-                parsed_master_key,
+                encryption_master_key,
+                encryption_master_key_base64,
                 json_encoder,
                 json_decoder,
                 backend,
                 **backend_options)
-
-        if host:
-            self._host = ensure_text(host, "host")
-
-        elif cluster:
-            self._host = (
-                six.text_type("api-%s.pusher.com") %
-                ensure_text(cluster, "cluster"))
-        else:
-            self._host = six.text_type("api.pusherapp.com")
 
 
     @request_method

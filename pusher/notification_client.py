@@ -19,16 +19,38 @@ GCM_TTL = 241920
 
 class NotificationClient(Client):
     def __init__(
-            self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=30, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
-            backend=None, **backend_options):
+            self,
+            app_id,
+            key,
+            secret,
+            ssl=True,
+            host=None,
+            port=None,
+            timeout=30,
+            cluster=None,
+            json_encoder=None,
+            json_decoder=None,
+            backend=None,
+            **backend_options):
+
         super(NotificationClient, self).__init__(
-            app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
-            json_encoder, json_decoder, backend, **backend_options)
+            app_id,
+            key,
+            secret,
+            ssl,
+            host,
+            port,
+            timeout,
+            cluster,
+            None, # encryption_master_key
+            None, # encryption_master_key_base64
+            json_encoder,
+            json_decoder,
+            backend,
+            **backend_options)
 
         if host:
             self._host = ensure_text(host, "host")
-
         else:
             self._host = DEFAULT_HOST
 

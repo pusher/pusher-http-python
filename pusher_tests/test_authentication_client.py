@@ -23,6 +23,29 @@ except ImportError:
 
 class TestAuthenticationClient(unittest.TestCase):
 
+    def test_host_should_be_text(self):
+        AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=u'foo')
+
+        self.assertRaises(TypeError, lambda: AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=4))
+
+    def test_cluster_should_be_text(self):
+        AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
+
+        self.assertRaises(TypeError, lambda: AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=4))
+
+    def test_host_behaviour(self):
+        conf = AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+        self.assertEqual(conf.host, u'api.pusherapp.com', u'default host should be correct')
+
+        conf = AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu')
+        self.assertEqual(conf.host, u'api-eu.pusher.com', u'host should be overriden by cluster setting')
+
+        conf = AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, host=u'foo')
+        self.assertEqual(conf.host, u'foo', u'host should be overriden by host setting')
+
+        conf = AuthenticationClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True, cluster=u'eu', host=u'plah')
+        self.assertEqual(conf.host, u'plah', u'host should be used in preference to cluster')
+
     def test_authenticate_for_private_channels(self):
         authenticationClient = AuthenticationClient(
             key=u'foo', secret=u'bar', host=u'host', app_id=u'4', ssl=True)
@@ -36,13 +59,13 @@ class TestAuthenticationClient(unittest.TestCase):
     def test_authenticate_for_private_encrypted_channels(self):
         # The authentication client receives the decoded bytes of the key
         # not the base64 representation
-        master_key=b'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
+        master_key=u'OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk='
         authenticationClient = AuthenticationClient(
                 key=u'foo',
                 secret=u'bar',
                 host=u'host',
                 app_id=u'4',
-                encryption_master_key=master_key,
+                encryption_master_key_base64=master_key,
                 ssl=True)
 
         expected = {

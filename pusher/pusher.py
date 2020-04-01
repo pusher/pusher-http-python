@@ -36,29 +36,77 @@ class Pusher(object):
     :param host:    Used for custom host destination
     :param port:    Used for custom port destination
     :param timeout: Request timeout (in seconds)
-    :param encryption_master_key: Used to derive a shared secret between
-      server and the clients for payload encryption/decryption
-    :param cluster: Convention for other clusters than the main Pusher-one.
+    :param encryption_master_key: deprecated, use encryption_master_key_base64
+    :param encryption_master_key_base64: Used to derive a shared secret
+      between server and the clients for payload encryption/decryption
+    :param cluster: Convention for clusters other than the original Pusher cluster.
       Eg: 'eu' will resolve to the api-eu.pusherapp.com host
     :param backend: an http adapter class (AsyncIOBackend, RequestsBackend,
       SynchronousBackend, TornadoBackend)
     :param backend_options: additional backend
     """
     def __init__(
-            self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
-            backend=None, notification_host=None, notification_ssl=True, **backend_options):
+            self,
+            app_id,
+            key,
+            secret,
+            ssl=True,
+            host=None,
+            port=None,
+            timeout=5,
+            cluster=None,
+            encryption_master_key=None,
+            encryption_master_key_base64=None,
+            json_encoder=None,
+            json_decoder=None,
+            backend=None,
+            notification_host=None,
+            notification_ssl=True,
+            **backend_options):
+
         self._pusher_client = PusherClient(
-            app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
-            json_encoder, json_decoder, backend, **backend_options)
+            app_id,
+            key,
+            secret,
+            ssl,
+            host,
+            port,
+            timeout, cluster,
+            encryption_master_key,
+            encryption_master_key_base64,
+            json_encoder,
+            json_decoder,
+            backend,
+            **backend_options)
 
         self._authentication_client = AuthenticationClient(
-            app_id, key, secret, ssl, host, port, timeout, cluster, encryption_master_key,
-            json_encoder, json_decoder, backend, **backend_options)
+            app_id,
+            key,
+            secret,
+            ssl,
+            host,
+            port,
+            timeout,
+            cluster,
+            encryption_master_key,
+            encryption_master_key_base64,
+            json_encoder,
+            json_decoder,
+            backend,
+            **backend_options)
 
         self._notification_client = NotificationClient(
-            app_id, key, secret, notification_ssl, notification_host, port,
-            timeout, cluster, encryption_master_key, json_encoder, json_decoder, backend,
+            app_id,
+            key,
+            secret,
+            notification_ssl,
+            notification_host,
+            port,
+            timeout,
+            cluster,
+            json_encoder,
+            json_decoder,
+            backend,
             **backend_options)
 
 
