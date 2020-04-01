@@ -9,11 +9,14 @@ from __future__ import (
 import hashlib
 import nacl
 import base64
+import binascii
+import warnings
 
 from pusher.util import (
     ensure_text,
     ensure_binary,
-    data_to_string)
+    data_to_string,
+    is_base64)
 
 import nacl.secret
 import nacl.utils
@@ -29,27 +32,46 @@ def is_encrypted_channel(channel):
         return True
     return False
 
-def is_encryption_master_key_valid(encryption_master_key):
+def parse_master_key(encryption_master_key, encryption_master_key_base64):
     """
-    is_encryption_master_key_valid() checks if the provided encryption_master_key is valid by checking its length
-    the key is assumed to be a six.binary_type (python2 str or python3 bytes)
+    parse_master_key validates, parses and returns the bytes of the encryption master key
+    from the constructor arguments.
+    At present there is a deprecated "raw" key and a suggested base64 encoding.
     """
-    if encryption_master_key is not None and len(encryption_master_key) == 32:
-        return True
+    if encryption_master_key is not None and encryption_master_key_base64 is not None:
+        raise ValueError("Do not provide both encryption_master_key and encryption_master_key_base64. " +
+                "encryption_master_key is deprecated, provide only encryption_master_key_base64")
 
-    return False
+    if encryption_master_key is not None:
+        warnings.warn("`encryption_master_key` is deprecated, please use `encryption_master_key_base64`")
+        if len(encryption_master_key) == 32:
+            return ensure_binary(encryption_master_key, "encryption_master_key")
+        else:
+            raise ValueError("encryption_master_key must be 32 bytes long")
+
+    if encryption_master_key_base64 is not None:
+        if is_base64(encryption_master_key_base64):
+            decoded = base64.b64decode(encryption_master_key_base64)
+
+            if len(decoded) == 32:
+                return decoded
+            else:
+                raise ValueError("encryption_master_key_base64 must be a base64 string which decodes to 32 bytes")
+        else:
+            raise ValueError("encryption_master_key_base64 must be valid base64")
+
+    return None
 
 def generate_shared_secret(channel, encryption_master_key):
     """
     generate_shared_secret() takes a six.binary_type (python2 str or python3 bytes) channel name and encryption_master_key
     and returns the sha256 hash in six.binary_type format
     """
-    if is_encryption_master_key_valid(encryption_master_key):
-        # the key has to be 32 bytes long
-        hashable = channel + encryption_master_key
-        return hashlib.sha256(hashable).digest()
+    if encryption_master_key is None:
+        raise ValueError("No master key was provided for use with encrypted channels. Please provide encryption_master_key_base64 as an argument to the Pusher SDK")
 
-    raise ValueError("Provided encryption_master_key is not 32 char long")
+    hashable = channel + encryption_master_key
+    return hashlib.sha256(hashable).digest()
 
 def encrypt(channel, data, encryption_master_key, nonce=None):
     """

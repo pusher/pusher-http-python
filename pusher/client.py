@@ -9,13 +9,27 @@ from __future__ import (
 import six
 
 from pusher.util import ensure_text, ensure_binary, app_id_re
+from pusher.crypto import parse_master_key
 
 
 class Client(object):
     def __init__(
-            self, app_id, key, secret, ssl=True, host=None, port=None,
-            timeout=5, cluster=None, encryption_master_key=None, json_encoder=None, json_decoder=None,
-            backend=None, **backend_options):
+            self,
+            app_id,
+            key,
+            secret,
+            ssl=True,
+            host=None,
+            port=None,
+            timeout=5,
+            cluster=None,
+            encryption_master_key=None,
+            encryption_master_key_base64=None,
+            json_encoder=None,
+            json_decoder=None,
+            backend=None,
+            **backend_options):
+
         if backend is None:
               from .requests import RequestsBackend
               backend = RequestsBackend
@@ -32,6 +46,15 @@ class Client(object):
 
         self._ssl = ssl
 
+        if host:
+            self._host = ensure_text(host, "host")
+        elif cluster:
+            self._host = (
+                six.text_type("api-%s.pusher.com") %
+                ensure_text(cluster, "cluster"))
+        else:
+            self._host = six.text_type("api.pusherapp.com")
+
         if port and not isinstance(port, six.integer_types):
               raise TypeError("port should be an integer")
 
@@ -44,13 +67,10 @@ class Client(object):
         self._json_encoder = json_encoder
         self._json_decoder = json_decoder
 
-
-        if encryption_master_key is not None:
-            encryption_master_key = ensure_binary(encryption_master_key, "encryption_master_key")
-
-        self._encryption_master_key = encryption_master_key
+        self._encryption_master_key = parse_master_key(encryption_master_key, encryption_master_key_base64)
 
         self.http = backend(self, **backend_options)
+
 
     @property
     def app_id(self):

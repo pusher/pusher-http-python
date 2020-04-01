@@ -1,3 +1,10 @@
+### next (major)
+
+* [ADDED] option `encryption_master_key_base64`
+* [DEPRECATED] option `encryption_master_key`
+
+* [REMOVED] old support for Push Notifications, see https://github.com/pusher/push-notifications-python
+
 ### 2.1.4 2019-08-09
 
 * [FIXED] TypeError in AuthenticationClient when using encrypted channels

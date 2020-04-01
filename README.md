@@ -86,7 +86,8 @@ pusher_client = pusher.Pusher(app_id, key, secret, cluster=u'cluster')
 |host `String`    | **Default:`None`** <br> The host to connect to |
 |port `int`       | **Default:`None`** <br>Which port to connect to |
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
-|encryption_master_key `String`       | **Default:`None`** <br> The encryption master key for End-to-end Encryption |
+|~~encryption_master_key~~ `String` | **Default:`None`** <br> *Deprecated*, see `encryption_master_key_base64` |
+|encryption_master_key_base64 `String` | **Default:`None`** <br> The encryption master key for End-to-end Encryption |
 |backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
 |json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
@@ -287,32 +288,51 @@ auth = pusher_client.authenticate(
 
 ## End to End Encryption (Beta)
 
-This library supports end to end encryption of your private channels. This means that only you and your connected clients will be able to read your messages. Pusher cannot decrypt them. You can enable this feature by following these steps:
+This library supports end to end encryption of your private channels. This
+means that only you and your connected clients will be able to read your
+messages. Pusher cannot decrypt them. You can enable this feature by following
+these steps:
 
-1. You should first set up Private channels. This involves [creating an authentication endpoint on your server](https://pusher.com/docs/authenticating_users).
+1. You should first set up Private channels. This involves [creating an
+   authentication endpoint on your
+   server](https://pusher.com/docs/authenticating_users).
 
-2. Next, Specify your 32 character `encryption_master_key`. This is secret and you should never share this with anyone. Not even Pusher.
+2. Next, generate a 32 byte master encryption key, base64 encode it and store
+   it securely.
 
-```python
+   This is secret and you should never share this with anyone. Not even Pusher.
 
-import pusher
+   To generate a suitable key from a secure random source, you could use:
 
-pusher_client = pusher.Pusher(
-  app_id='yourappid',
-  key='yourkey',
-  secret='yoursecret',
-  encryption_master_key='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-  cluster='yourclustername',
-  ssl=True
-)
+   ```bash
+   openssl rand -base64 32
+   ```
 
-pusher_client.trigger('private-encrypted-my-channel', 'my-event', {
-  'message': 'hello world'
-})
-```
-3. Channels where you wish to use end to end encryption must be prefixed with `private-encrypted-`.
+3. Pass your master key to the SDK constructor
 
-4. Subscribe to these channels in your client, and you're done! You can verify it is working by checking out the debug console on the https://dashboard.pusher.com/ and seeing the scrambled ciphertext.
+   ```python
+   import pusher
+
+   pusher_client = pusher.Pusher(
+     app_id='yourappid',
+     key='yourkey',
+     secret='yoursecret',
+     encryption_master_key_base64='<output from command above>',
+     cluster='yourclustername',
+     ssl=True
+   )
+
+   pusher_client.trigger('private-encrypted-my-channel', 'my-event', {
+     'message': 'hello world'
+   })
+   ```
+
+4. Channels where you wish to use end to end encryption must be prefixed with
+   `private-encrypted-`.
+
+5. Subscribe to these channels in your client, and you're done! You can verify
+   it is working by checking out the debug console on the
+   https://dashboard.pusher.com/ and seeing the scrambled ciphertext.
 
 **Important note: This will not encrypt messages on channels that are not prefixed by private-encrypted-.**
 

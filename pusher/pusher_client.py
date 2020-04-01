@@ -36,26 +36,37 @@ from datetime import datetime
 
 class PusherClient(Client):
     def __init__(
-            self, app_id, key, secret, ssl=True,
-            host=None, port=None,
-            timeout=5, cluster=None,
+            self,
+            app_id,
+            key,
+            secret,
+            ssl=True,
+            host=None,
+            port=None,
+            timeout=5,
+            cluster=None,
             encryption_master_key=None,
-            json_encoder=None, json_decoder=None,
-            backend=None, **backend_options):
+            encryption_master_key_base64=None,
+            json_encoder=None,
+            json_decoder=None,
+            backend=None,
+            **backend_options):
+
         super(PusherClient, self).__init__(
-            app_id, key, secret, ssl, host, port, timeout, cluster,
-            encryption_master_key, json_encoder, json_decoder,
-            backend, **backend_options)
-
-        if host:
-            self._host = ensure_text(host, "host")
-
-        elif cluster:
-            self._host = (
-                six.text_type("api-%s.pusher.com") %
-                ensure_text(cluster, "cluster"))
-        else:
-            self._host = six.text_type("api.pusherapp.com")
+                app_id,
+                key,
+                secret,
+                ssl,
+                host,
+                port,
+                timeout,
+                cluster,
+                encryption_master_key,
+                encryption_master_key_base64,
+                json_encoder,
+                json_decoder,
+                backend,
+                **backend_options)
 
 
     @request_method
@@ -103,7 +114,6 @@ class PusherClient(Client):
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
 
-
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
         """Trigger multiple events with a single HTTP call.
@@ -112,7 +122,6 @@ class PusherClient(Client):
         """
         if not already_encoded:
             for event in batch:
-
                 validate_channel(event['channel'])
 
                 event_name = ensure_text(event['name'], "event_name")
