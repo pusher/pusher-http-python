@@ -86,7 +86,8 @@ pusher_client = pusher.Pusher(app_id, key, secret, cluster=u'cluster')
 |host `String`    | **Default:`None`** <br> The host to connect to |
 |port `int`       | **Default:`None`** <br>Which port to connect to |
 |ssl `bool`       | **Default:`True`** <br> Use HTTPS |
-|encryption_master_key_base64 `String` | **Default:`None`** *deprecated* <br> The encryption master key for End-to-end Encryption |
+|~~encryption_master_key~~ `String` | **Default:`None`** <br> *Deprecated*, see `encryption_master_key_base64` |
+|encryption_master_key_base64 `String` | **Default:`None`** <br> The encryption master key for End-to-end Encryption |
 |backend `Object` | an object that responds to the `send_request(request)` method. If none is provided, a `pusher.requests.RequestsBackend` instance is created. |
 |json_encoder `Object` | **Default: `None`**<br> Custom JSON encoder. |
 |json_decoder `Object` | **Default: `None`**<br> Custom JSON decoder.
