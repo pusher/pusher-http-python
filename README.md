@@ -27,7 +27,7 @@ In order to use this library, you need to have a free account on <http://pusher.
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
   - [Getting User Information For A Presence Channel](#getting-user-information-for-a-presence-channel)
 - [Authenticating Channel Subscription](#authenticating-channel-subscription)
-- [End-to-end Encryption (Beta)](#end-to-end-encryption-beta)
+- [End-to-end Encryption](#end-to-end-encryption)
 - [Receiving Webhooks](#receiving-webhooks)
 - [Request Library Configuration](#request-library-configuration)
   - [Google App Engine](#google-app-engine)
@@ -286,7 +286,7 @@ auth = pusher_client.authenticate(
 # return `auth` as a response
 ```
 
-## End to End Encryption (Beta)
+## End to End Encryption
 
 This library supports end to end encryption of your private channels. This
 means that only you and your connected clients will be able to read your
