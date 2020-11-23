@@ -375,9 +375,9 @@ print webhook["events"]
 
 Users can configure the library to use different backends to send calls to our API. The HTTP libraries we support are:
 
-* [Requests](http://docs.python-requests.org/en/latest/) (`pusher.requests.RequestsBackend`). This is used by default.
+* [Requests](https://requests.readthedocs.io/en/master/) (`pusher.requests.RequestsBackend`). This is used by default.
 * [Tornado](http://www.tornadoweb.org/en/stable/) (`pusher.tornado.TornadoBackend`).
-* [AsyncIO](http://asyncio.org/) (`pusher.aiohttp.AsyncIOBackend`).
+* [AsyncIO](https://docs.python.org/3/library/asyncio.html) (`pusher.aiohttp.AsyncIOBackend`).
 * [Google App Engine](https://cloud.google.com/appengine/docs/python/urlfetch/) (`pusher.gae.GAEBackend`).
 
 Upon initializing a `Pusher` instance, pass in any of these options to the `backend` keyword argument.
