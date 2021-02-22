@@ -8,7 +8,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 
 ## Supported Platforms
 
-* Python - supports Python versions 2.7, 3.5, 3.6, 3.7 and 3.8
+* Python - supports Python versions 2.7, 3.6, 3.7 and 3.8
 
 ## Features
 
