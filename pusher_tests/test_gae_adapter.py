@@ -12,7 +12,7 @@ if (sys.version_info < (2,7)):
 else:
   import unittest
 
-skip_test = (sys.version_info[0:2] != (2,7)) or os.environ.get("TRAVIS_PYTHON_VERSION")
+skip_test = (sys.version_info[0:2] != (2,7)) or os.environ.get("CI")
 
 @unittest.skipIf(skip_test, "skip")
 class TestGAEBackend(unittest.TestCase):
