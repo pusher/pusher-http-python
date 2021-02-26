@@ -16,7 +16,7 @@ pyOpenSSL==19.0.0
 requests==2.22.0
 six==1.12.0
 urllib3==1.25.9
-aiohttp==3.5.4; python_version >= '3.5'
+aiohttp==3.7.4; python_version >= '3.5'
 async-timeout==3.0.1; python_version >= '3.5'
 attrs==19.1.0; python_version >= '3.5'
 idna-ssl==1.1.0; python_version >= '3.5' and python_version < '3.7'
