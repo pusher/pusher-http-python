@@ -12,10 +12,10 @@ import six
 import sys
 import base64
 
-channel_name_re = re.compile('\A[-a-zA-Z0-9_=@,.;]+\Z')
-app_id_re = re.compile('\A[0-9]+\Z')
-pusher_url_re = re.compile('\A(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)\Z')
-socket_id_re = re.compile('\A\d+\.\d+\Z')
+channel_name_re = re.compile(r'\A[-a-zA-Z0-9_=@,.;]+\Z')
+app_id_re = re.compile(r'\A[0-9]+\Z')
+pusher_url_re = re.compile(r'\A(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)\Z')
+socket_id_re = re.compile(r'\A\d+\.\d+\Z')
 
 
 if sys.version_info < (3,):
