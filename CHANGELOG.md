@@ -1,3 +1,7 @@
+### 3.1.0 2021-10-07
+
+* [FIXED] Expired root certificates
+
 ### 3.0.0 2020-04-01
 
 * [ADDED] option `encryption_master_key_base64`
