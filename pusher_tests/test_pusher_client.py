@@ -204,6 +204,26 @@ class TestPusherClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             pc.trigger(u'private-encrypted-tst', u'some_event', {u'message': u'hello worlds'})
 
+    def test_trigger_too_much_data(self):
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+
+        self.assertRaises(ValueError, lambda: pc.trigger(u'private-tst', u'some_event', u'a' * 10241))
+
+    def test_trigger_batch_too_much_data(self):
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+
+        self.assertRaises(ValueError, lambda: pc.trigger_batch(
+            [{u'channel': u'private-tst', u'name': u'some_event', u'data': u'a' * 10241}]))
+
+    def test_trigger_str_shorter_than_10240_but_more_than_10kb_raising(self):
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+
+        self.assertRaises(ValueError, lambda: pc.trigger.make_request(u'private-tst', u'some_event', u'你' * 10000))
+
+    def test_trigger_batch_str_shorter_than_10240_but_more_than_10kb_raising(self):
+        pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
+
+        self.assertRaises(ValueError, lambda: pc.trigger_batch.make_request([{u'channel': u'private-tst', u'name': u'some_event', u'data': u'你' * 10000}]))
 
     def test_trigger_with_public_channel_with_encryption_master_key_specified_success(self):
         json_dumped = u'{"message": "something"}'
