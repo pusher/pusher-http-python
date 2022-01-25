@@ -1,6 +1,7 @@
 # Pusher Channels HTTP Python Library
 
 [![Build Status](https://github.com/pusher/pusher-http-python/workflows/Tests/badge.svg)](https://github.com/pusher/pusher-http-python/actions?query=workflow%3ATests+branch%3Amaster)
+[![PyPI version](https://badge.fury.io/py/pusher.svg)](https://badge.fury.io/py/pusher)
 
 This package lets you trigger events to your client and query the state of your channels. When used with a server, you can validate webhooks and authenticate `private-` or `presence-` channels.
 
