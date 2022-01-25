@@ -1,3 +1,7 @@
+### 3.2.0 2022-01-25
+
+* [FIXED] An issue where payload size wasn't being calculated properly
+
 ### 3.1.0 2021-10-07
 
 * [FIXED] Expired root certificates
