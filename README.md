@@ -9,7 +9,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 
 ## Supported Platforms
 
-* Python - supports Python versions 2.7, 3.6, 3.7 and 3.8
+* Python - supports Python versions 2.7, 3.6 and above
 
 ## Features
 
@@ -196,7 +196,7 @@ channels = pusher_client.channels_info(u"presence-", [u'user_count'])
 |Argument   |Description   |
 |:-:|:-:|
 |channel `String`  |**Required** <br> The name of the channel you wish to query|
-|attributes `Collection` | **Default: `[]`** <br> A collection of attributes to be returned for the channel. <br><br> Available attributes: <br> `"user_count"` : Number of *distinct* users currently subscribed. **Applicable only to presence channels**. <br> `"subscription_count"`: [BETA]: Number of *connections* currently subscribed to the channel. Please [contact us](http://support.pusher.com) to enable this feature.
+|attributes `Collection` | **Default: `[]`** <br> A collection of attributes to be returned for the channel. <br><br> Available attributes: <br> `"user_count"` : Number of *distinct* users currently subscribed. **Applicable only to presence channels**. <br> `"subscription_count"`:  Number of *connections* currently subscribed to the channel. Enable this feature in your Pusher dashboard's App Settings.
 
 |Return Values   |Description   |
 |:-:|:-:|
