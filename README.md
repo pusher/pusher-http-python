@@ -113,7 +113,7 @@ To trigger an event on one or more channels, use the `trigger` method on the `Pu
 |channels `String` or `Collection`   |**Required** <br> The name or list of names of the channel you wish to trigger events on   |
 |event `String`| **Required** <br> The name of the event you wish to trigger. |
 |data `JSONable data` | **Required** <br> The event's payload |
-|socket_id `String` | **Default:`None`** <br> The socket_id of the connection you wish to exclude from receiving the event. You can read more [here](http://pusher.com/docs/duplicates). |
+|socket_id `String` | **Default:`None`** <br> The socket_id of the connection you wish to exclude from receiving the event. You can read more [here](https://pusher.com/docs/channels/server_api/excluding-event-recipients/). |
 
 |Return Values   |Description   |
 |:-:|:-:|
@@ -426,4 +426,4 @@ To run the tests run `python setup.py test`
 
 ## License
 
-Copyright (c) 2015 Pusher Ltd. See LICENSE for details.
+Copyright (c) 2015 Pusher Ltd. See [LICENSE](LICENSE) for details.
