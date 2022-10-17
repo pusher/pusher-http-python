@@ -14,7 +14,7 @@ jobs:
         id: prepare_tag
         continue-on-error: true
         run: |
-          export TAG=v$(awk '/libraryVersion =/ { gsub("\"",""); print $3 }' client.go)
+          export TAG=v$(awk '/VERSION =/ { gsub("'"\'"'",""); print $3 }' pusher/version.py)
           echo "TAG=$TAG" >> $GITHUB_ENV
 
           export CHECK_TAG=$(git tag | grep $TAG)
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Prepare tag
         run: |
-          export TAG=v$(awk '/libraryVersion =/ { gsub("\"",""); print $3 }' client.go)
+          export TAG=v$(awk '/VERSION =/ { gsub("'"\'"'",""); print $3 }' pusher/version.py)
           echo "TAG=$TAG" >> $GITHUB_ENV
       - name: Setup git
         run: |

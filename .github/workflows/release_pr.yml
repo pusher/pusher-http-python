@@ -28,7 +28,7 @@ jobs:
       - name: Push
         shell: bash
         run: |
-          sed -i'' -e 's/${{env.CURRENT_VERSION}}/${{steps.bump.outputs.new_version}}/' pusher/version.py
+          perl -pi -e  's/${{env.CURRENT_VERSION}}/${{steps.bump.outputs.new_version}}/' pusher/version.py
 
           git add pusher/version.py CHANGELOG.md
           git commit -m "Bump to version ${{ steps.bump.outputs.new_version }}"
