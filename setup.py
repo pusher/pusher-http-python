@@ -15,6 +15,8 @@ setup(
     name='pusher',
     version=VERSION,
     description='A Python library to interract with the Pusher Channels API',
+    long_description='A Python library to interract with the Pusher Channels API',
+    long_description_type='text/x-rst',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
     author_email='support@pusher.com',
