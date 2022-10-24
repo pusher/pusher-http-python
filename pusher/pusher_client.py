@@ -24,6 +24,7 @@ from pusher.util import (
     ensure_text,
     validate_channel,
     validate_socket_id,
+    validate_user_id,
     join_attributes,
     data_to_string)
 
@@ -113,7 +114,6 @@ class PusherClient(Client):
 
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
-
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
         """Trigger multiple events with a single HTTP call.
@@ -141,7 +141,6 @@ class PusherClient(Client):
 
         return Request(
             self, POST, "/apps/%s/batch_events" % self.app_id, params)
-
 
     @request_method
     def channels_info(self, prefix_filter=None, attributes=[]):
@@ -187,3 +186,9 @@ class PusherClient(Client):
 
         return Request(
             self, GET, "/apps/%s/channels/%s/users" % (self.app_id, channel))
+
+    @request_method
+    def terminate_user_connections(self, user_id):
+        validate_user_id(user_id)
+        return Request(
+            self, POST, "/users/{}/terminate_connections".format(user_id), {})

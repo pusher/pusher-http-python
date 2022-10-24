@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+
+- [ADDED] terminate_user_connections method
+
 ## 3.2.0 2022-01-25
 
 * [FIXED] An issue where payload size wasn't being calculated properly

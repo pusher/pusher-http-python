@@ -154,7 +154,6 @@ class Pusher(object):
     def trigger_batch(self, batch=[], already_encoded=False):
         return self._pusher_client.trigger_batch(batch, already_encoded)
 
-
     @doc_string(PusherClient.channels_info.__doc__)
     def channels_info(self, prefix_filter=None, attributes=[]):
         return self._pusher_client.channels_info(prefix_filter, attributes)
@@ -164,11 +163,13 @@ class Pusher(object):
     def channel_info(self, channel, attributes=[]):
         return self._pusher_client.channel_info(channel, attributes)
 
-
     @doc_string(PusherClient.users_info.__doc__)
     def users_info(self, channel):
         return self._pusher_client.users_info(channel)
 
+    @doc_string(PusherClient.terminate_user_connections.__doc__)
+    def terminate_user_connections(self, user_id):
+        return self._pusher_client.terminate_user_connections(user_id)
 
     @doc_string(AuthenticationClient.authenticate.__doc__)
     def authenticate(self, channel, socket_id, custom_data=None):

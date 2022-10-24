@@ -15,7 +15,7 @@ import nacl
 import base64
 
 from pusher.pusher_client import PusherClient
-from pusher.http import GET
+from pusher.http import GET, POST
 from pusher.crypto import *
 
 try:
@@ -57,7 +57,7 @@ class TestPusherClient(unittest.TestCase):
             request = self.pusher_client.trigger.make_request([u'some_channel'], u'some_event', {u'message': u'hello world'})
 
             self.assertEqual(request.path, u'/apps/4/events')
-            self.assertEqual(request.method, u'POST')
+            self.assertEqual(request.method, POST)
 
             expected_params = {
                 u'channels': [u'some_channel'],
@@ -365,6 +365,16 @@ class TestPusherClient(unittest.TestCase):
         self.assertEqual(request.method, GET)
         self.assertEqual(request.path, u'/apps/4/channels/presence-channel/users')
         self.assertEqual(request.params, {})
+
+    def test_terminate_user_connection_success_case(self):
+        request = self.pusher_client.terminate_user_connections.make_request('123')
+        self.assertEqual(request.path, u'/users/123/terminate_connections')
+        self.assertEqual(request.method, POST)
+        self.assertEqual(request.params, {})
+
+    def test_terminate_user_connection_fail_case_invalid_user_id(self):
+        with self.assertRaises(ValueError):
+            self.pusher_client.terminate_user_connections("")
 
 
 if __name__ == '__main__':
