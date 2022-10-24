@@ -67,6 +67,21 @@ def is_base64(s):
     except Exception as e:
         return False
 
+def validate_user_id(user_id):
+    user_id = ensure_text(user_id, "user_id")
+
+    length = len(user_id)
+    if length == 0:
+        raise ValueError("User id is empty")
+
+    if length > 200:
+        raise ValueError("User id too long: '{}'".format(user_id))
+
+    if not channel_name_re.match(user_id):
+        raise ValueError("Invalid user id: '{}'".format(user_id))
+
+    return user_id
+
 def validate_channel(channel):
     channel = ensure_text(channel, "channel")
 
