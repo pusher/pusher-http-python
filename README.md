@@ -28,6 +28,7 @@ In order to use this library, you need to have a free account on <http://pusher.
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
   - [Getting User Information For A Presence Channel](#getting-user-information-for-a-presence-channel)
 - [Authenticating Channel Subscription](#authenticating-channel-subscription)
+- [Terminating User Connections](#terminating-user-connections)
 - [End-to-end Encryption](#end-to-end-encryption)
 - [Receiving Webhooks](#receiving-webhooks)
 - [Request Library Configuration](#request-library-configuration)
@@ -287,6 +288,18 @@ auth = pusher_client.authenticate(
 # return `auth` as a response
 ```
 
+## Terminating user connections
+
+TIn order to terminate a user's connections, the user must have been authenticated. Check the [Server user authentication docs](http://pusher.com/docs/authenticating_users) for the information on how to create a user authentication endpoint.
+
+To terminate all connections established by a given user, you can use the `terminate_user_connections` function:
+
+```python
+pusher_client.terminate_user_connections(userId)
+```
+
+Please note, that it only terminates the user's active connections. This means, if nothing else is done, the user will be able to reconnect. For more information see: [Terminating user connections docs](https://pusher.com/docs/channels/server_api/terminating-user-connections/).
+
 ## End to End Encryption
 
 This library supports end to end encryption of your private channels. This
@@ -400,6 +413,7 @@ Get the list of channels in an application | *&#10004;*
 Get the state of a single channel          | *&#10004;*
 Get a list of users in a presence channel  | *&#10004;*
 WebHook validation                         | *&#10004;*
+Terminate user connections                 | *&#10004;*
 Heroku add-on support                      | *&#10004;*
 Debugging & Logging                        | *&#10004;*
 Cluster configuration                      | *&#10004;*
