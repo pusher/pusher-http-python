@@ -60,8 +60,8 @@ class Client(object):
 
         self._port = port or (443 if ssl else 80)
 
-        if not isinstance(timeout, six.integer_types):
-              raise TypeError("timeout should be an integer")
+        if not (isinstance(timeout, six.integer_types) or isinstance(timeout, float)):
+              raise TypeError("timeout should be an integer or a float")
 
         self._timeout = timeout
         self._json_encoder = json_encoder
