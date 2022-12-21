@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.1
+
+* [ADDED] Allow Client to accept float as a timeout
+* [ADDED] Tests for Client to validate timeout is a number
+
 ## 3.3.0
 
 - [ADDED] terminate_user_connections method
