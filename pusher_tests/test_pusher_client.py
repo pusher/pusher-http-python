@@ -213,7 +213,7 @@ class TestPusherClient(unittest.TestCase):
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
 
         self.assertRaises(ValueError, lambda: pc.trigger_batch(
-            [{u'channel': u'private-tst', u'name': u'some_event', u'data': u'a' * 10241}]))
+            [{u'channel': u'private-tst', u'name': u'some_event', u'data': u'a' * 30721}]))
 
     def test_trigger_str_shorter_than_10240_but_more_than_10kb_raising(self):
         pc = PusherClient(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
