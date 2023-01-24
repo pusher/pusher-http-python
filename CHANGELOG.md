@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.1
+
+- [ADDED] Allow Client to accept float as a timeout
+- [CHANGED] the maximum event payload size permitted by this library has been increased. This change affects the library only: the Channels API still maintains a 10kb size limit and will return an error if the payload is too large.
+
 ## 3.3.0
 
 - [ADDED] terminate_user_connections method
