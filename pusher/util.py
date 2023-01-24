@@ -17,12 +17,10 @@ app_id_re = re.compile(r'\A[0-9]+\Z')
 pusher_url_re = re.compile(r'\A(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)\Z')
 socket_id_re = re.compile(r'\A\d+\.\d+\Z')
 
-
 if sys.version_info < (3,):
     text = 'a unicode string'
 else:
     text = 'a string'
-
 
 if sys.version_info < (3,):
     byte_type = 'a python2 str'
