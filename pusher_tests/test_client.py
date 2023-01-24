@@ -55,6 +55,13 @@ class TestClient(unittest.TestCase):
         self.assertRaises(TypeError, lambda: Client(
             app_id=u'4', key=u'key', secret=u'secret', ssl=True, port=u'400'))
 
+    def test_timeout_should_be_number(self):
+        Client(app_id=u'4', key=u'key', secret=u'secret', timeout=1)
+        Client(app_id=u'4', key=u'key', secret=u'secret', timeout=3.14)
+
+        self.assertRaises(TypeError, lambda: Client(
+            app_id=u'4', key=u'key', secret=u'secret', timeout=u'1'))
+
 
     def test_port_behaviour(self):
         conf = Client(app_id=u'4', key=u'key', secret=u'secret', ssl=True)
