@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.2
+
+- [CHANGED] Utilities no longer escape non ascii characters. 
+
 ## 3.3.1
 
 - [ADDED] Allow Client to accept float as a timeout
