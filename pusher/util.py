@@ -110,7 +110,7 @@ def data_to_string(data, json_encoder):
         return ensure_text(data, "data")
 
     else:
-        return json.dumps(data, cls=json_encoder)
+        return json.dumps(data, cls=json_encoder, ensure_ascii=False)
 
 
 def doc_string(doc):
