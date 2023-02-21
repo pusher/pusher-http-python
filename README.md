@@ -441,3 +441,4 @@ To run the tests run `python setup.py test`
 ## License
 
 Copyright (c) 2015 Pusher Ltd. See [LICENSE](LICENSE) for details.
+
