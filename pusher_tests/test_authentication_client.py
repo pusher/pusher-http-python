@@ -59,14 +59,14 @@ class TestAuthenticationClient(unittest.TestCase):
     def test_authenticate_for_private_encrypted_channels(self):
         # The authentication client receives the decoded bytes of the key
         # not the base64 representation
-        master_key=u'OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk='
+        master_key = u'OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk='
         authenticationClient = AuthenticationClient(
-                key=u'foo',
-                secret=u'bar',
-                host=u'host',
-                app_id=u'4',
-                encryption_master_key_base64=master_key,
-                ssl=True)
+            key=u'foo',
+            secret=u'bar',
+            host=u'host',
+            app_id=u'4',
+            encryption_master_key_base64=master_key,
+            ssl=True)
 
         expected = {
             u'auth': u'foo:fff0503dfe4929f5162efe4d1dacbce524b0d8e7e1331117a8651c0e74d369e3',
@@ -82,7 +82,6 @@ class TestAuthenticationClient(unittest.TestCase):
         self.assertRaises(TypeError, lambda: authenticationClient.authenticate(2423, u'34554'))
         self.assertRaises(TypeError, lambda: authenticationClient.authenticate(u'plah', 234234))
         self.assertRaises(ValueError, lambda: authenticationClient.authenticate(u'::', u'345345'))
-
 
     def test_authenticate_for_presence_channels(self):
         authenticationClient = AuthenticationClient(
@@ -106,6 +105,27 @@ class TestAuthenticationClient(unittest.TestCase):
         self.assertEqual(actual, expected)
         dumps_mock.assert_called_once_with(custom_data, cls=None)
 
+    def test_authenticate_for_user(self):
+        authentication_client = AuthenticationClient(
+            key=u'thisisaauthkey',
+            secret=u'thisisasecret',
+            app_id=u'4')
+
+        user_data = {
+            u'id': u'123',
+            u'name': u'John Smith'
+        }
+
+        expected = {
+            'auth': 'thisisaauthkey:0dddb208b53c7649f3fbbb86254a6e1986bc6f8b566423ea690c9ca773497373',
+            "user_data": u"{\"id\":\"123\",\"name\":\"John Smith\"}"
+        }
+
+        with mock.patch('json.dumps', return_value=expected[u'user_data']) as dumps_mock:
+            actual = authentication_client.authenticate_user(u'12345.6789', user_data)
+
+        self.assertEqual(actual, expected)
+        dumps_mock.assert_called_once_with(user_data, cls=None)
 
     def test_validate_webhook_success_case(self):
         authenticationClient = AuthenticationClient(
@@ -134,7 +154,6 @@ class TestAuthenticationClient(unittest.TestCase):
 
         time_mock.assert_not_called()
 
-
     def test_validate_webhook_bad_key(self):
         authenticationClient = AuthenticationClient(
             key=u'foo', secret=u'bar', host=u'host', app_id=u'4', ssl=True)
@@ -146,7 +165,6 @@ class TestAuthenticationClient(unittest.TestCase):
             self.assertEqual(authenticationClient.validate_webhook(u'badkey', signature, body), None)
 
         time_mock.assert_not_called()
-
 
     def test_validate_webhook_bad_signature(self):
         authenticationClient = AuthenticationClient(
@@ -161,7 +179,6 @@ class TestAuthenticationClient(unittest.TestCase):
                     authenticationClient.key, signature, body), None)
 
         time_mock.assert_not_called()
-
 
     def test_validate_webhook_bad_time(self):
         authenticationClient = AuthenticationClient(
@@ -198,7 +215,6 @@ class TestJson(unittest.TestCase):
             "4", "key", "secret", host="somehost", json_encoder=JSONEncoder,
             json_decoder=JSONDecoder)
 
-
     def test_custom_json_decoder(self):
         t = 1000 * time.time()
         body = u'{"nan": NaN, "time_ms": %f}' % t
@@ -206,7 +222,6 @@ class TestJson(unittest.TestCase):
         data = self.authentication_client.validate_webhook(
             self.authentication_client.key, signature, body)
         self.assertEqual({u"nan": 99999, u"time_ms": t}, data)
-
 
     def test_custom_json_encoder(self):
         expected = {

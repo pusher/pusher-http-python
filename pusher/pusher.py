@@ -45,21 +45,21 @@ class Pusher(object):
     :param backend_options: additional backend
     """
     def __init__(
-            self,
-            app_id,
-            key,
-            secret,
-            ssl=True,
-            host=None,
-            port=None,
-            timeout=5,
-            cluster=None,
-            encryption_master_key=None,
-            encryption_master_key_base64=None,
-            json_encoder=None,
-            json_decoder=None,
-            backend=None,
-            **backend_options):
+        self,
+        app_id,
+        key,
+        secret,
+        ssl=True,
+        host=None,
+        port=None,
+        timeout=5,
+        cluster=None,
+        encryption_master_key=None,
+        encryption_master_key_base64=None,
+        json_encoder=None,
+        json_decoder=None,
+        backend=None,
+        **backend_options):
 
         self._pusher_client = PusherClient(
             app_id,
@@ -93,7 +93,6 @@ class Pusher(object):
             backend,
             **backend_options)
 
-
     @classmethod
     def from_url(cls, url, **options):
         """Alternative constructor that extracts the information from a URL.
@@ -123,7 +122,6 @@ class Pusher(object):
 
         return cls(**options_)
 
-
     @classmethod
     def from_env(cls, env='PUSHER_URL', **options):
         """Alternative constructor that extracts the information from an URL
@@ -143,12 +141,14 @@ class Pusher(object):
 
         return cls.from_url(val, **options)
 
-
     @doc_string(PusherClient.trigger.__doc__)
     def trigger(self, channels, event_name, data, socket_id=None):
         return self._pusher_client.trigger(
             channels, event_name, data, socket_id)
 
+    @doc_string(PusherClient.send_to_user.__doc__)
+    def send_to_user(self, user_id, event_name, data):
+        return self._pusher_client.send_to_user(user_id, event_name, data)
 
     @doc_string(PusherClient.trigger_batch.__doc__)
     def trigger_batch(self, batch=[], already_encoded=False):
@@ -157,7 +157,6 @@ class Pusher(object):
     @doc_string(PusherClient.channels_info.__doc__)
     def channels_info(self, prefix_filter=None, attributes=[]):
         return self._pusher_client.channels_info(prefix_filter, attributes)
-
 
     @doc_string(PusherClient.channel_info.__doc__)
     def channel_info(self, channel, attributes=[]):
@@ -176,6 +175,11 @@ class Pusher(object):
         return self._authentication_client.authenticate(
             channel, socket_id, custom_data)
 
+    @doc_string(AuthenticationClient.authenticate_user.__doc__)
+    def authenticate_user(self, socket_id, user_data=None):
+        return self._authentication_client.authenticate_user(
+            socket_id, user_data
+        )
 
     @doc_string(AuthenticationClient.validate_webhook.__doc__)
     def validate_webhook(self, key, signature, body):

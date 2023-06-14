@@ -7,8 +7,9 @@ from __future__ import (
     division)
 
 import sys
+
 # Abstract Base Classes were moved into collections.abc in Python 3.3
-if sys.version_info >= (3,3):
+if sys.version_info >= (3, 3):
     import collections.abc as collections
 else:
     import collections
@@ -37,38 +38,37 @@ from datetime import datetime
 
 class PusherClient(Client):
     def __init__(
-            self,
+        self,
+        app_id,
+        key,
+        secret,
+        ssl=True,
+        host=None,
+        port=None,
+        timeout=5,
+        cluster=None,
+        encryption_master_key=None,
+        encryption_master_key_base64=None,
+        json_encoder=None,
+        json_decoder=None,
+        backend=None,
+        **backend_options):
+
+        super(PusherClient, self).__init__(
             app_id,
             key,
             secret,
-            ssl=True,
-            host=None,
-            port=None,
-            timeout=5,
-            cluster=None,
-            encryption_master_key=None,
-            encryption_master_key_base64=None,
-            json_encoder=None,
-            json_decoder=None,
-            backend=None,
-            **backend_options):
-
-        super(PusherClient, self).__init__(
-                app_id,
-                key,
-                secret,
-                ssl,
-                host,
-                port,
-                timeout,
-                cluster,
-                encryption_master_key,
-                encryption_master_key_base64,
-                json_encoder,
-                json_decoder,
-                backend,
-                **backend_options)
-
+            ssl,
+            host,
+            port,
+            timeout,
+            cluster,
+            encryption_master_key,
+            encryption_master_key_base64,
+            json_encoder,
+            json_decoder,
+            backend,
+            **backend_options)
 
     @request_method
     def trigger(self, channels, event_name, data, socket_id=None):
@@ -80,7 +80,7 @@ class PusherClient(Client):
             channels = [channels]
 
         if isinstance(channels, dict) or not isinstance(
-                channels, (collections.Sized, collections.Iterable)):
+            channels, (collections.Sized, collections.Iterable)):
             raise TypeError("Expected a single or a list of channels")
 
         if len(channels) > 100:
@@ -113,6 +113,13 @@ class PusherClient(Client):
             params['socket_id'] = validate_socket_id(socket_id)
 
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
+
+    def send_to_user(self, user_id, event_name, data):
+        """Send an event to a specific user
+        """
+        validate_user_id(user_id)
+        user_server_string = "#server-to-user-%s" % user_id
+        return self.trigger([user_server_string], event_name, data)
 
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
@@ -159,7 +166,6 @@ class PusherClient(Client):
         return Request(
             self, GET, six.text_type("/apps/%s/channels") % self.app_id, params)
 
-
     @request_method
     def channel_info(self, channel, attributes=[]):
         """Get information on a specific channel, see:
@@ -174,7 +180,6 @@ class PusherClient(Client):
 
         return Request(
             self, GET, "/apps/%s/channels/%s" % (self.app_id, channel), params)
-
 
     @request_method
     def users_info(self, channel):
