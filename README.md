@@ -9,7 +9,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 
 ## Supported Platforms
 
-* Python - supports Python versions 2.7, 3.6 and above
+* Python - supports Python version 3.6 and above
 
 ## Features
 
