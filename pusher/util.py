@@ -13,6 +13,7 @@ import sys
 import base64
 
 channel_name_re = re.compile(r'\A[-a-zA-Z0-9_=@,.;]+\Z')
+server_to_user_channel_re = re.compile(r'\A#server-to-user[-a-zA-Z0-9_=@,.;]+\Z')
 app_id_re = re.compile(r'\A[0-9]+\Z')
 pusher_url_re = re.compile(r'\A(http|https)://(.*):(.*)@(.*)/apps/([0-9]+)\Z')
 socket_id_re = re.compile(r'\A\d+\.\d+\Z')
@@ -27,17 +28,19 @@ if sys.version_info < (3,):
 else:
     byte_type = 'a python3 bytes'
 
+
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):
         return obj
 
     if isinstance(obj, six.string_types):
-       return six.text_type(obj)
+        return six.text_type(obj)
 
     if isinstance(obj, six.binary_type):
-      return bytes(obj).decode('utf-8')
+        return bytes(obj).decode('utf-8')
 
     raise TypeError("%s should be %s instead it is a %s" % (name, text, type(obj)))
+
 
 def ensure_binary(obj, name):
     """
@@ -46,10 +49,10 @@ def ensure_binary(obj, name):
     more on this here: https://pythonhosted.org/six/#six.binary_type
     """
     if isinstance(obj, six.binary_type):
-      return obj
+        return obj
 
     if isinstance(obj, six.text_type) or isinstance(obj, six.string_types):
-       return obj.encode("utf-8")
+        return obj.encode("utf-8")
 
     raise TypeError("%s should be %s instead it is a %s" % (name, byte_type, type(obj)))
 
@@ -64,6 +67,7 @@ def is_base64(s):
         return base64.b64encode(base64.b64decode(s)) == s
     except Exception as e:
         return False
+
 
 def validate_user_id(user_id):
     user_id = ensure_text(user_id, "user_id")
@@ -80,11 +84,17 @@ def validate_user_id(user_id):
 
     return user_id
 
+
 def validate_channel(channel):
     channel = ensure_text(channel, "channel")
 
     if len(channel) > 200:
         raise ValueError("Channel too long: %s" % channel)
+
+    if "server-to-user" in channel:
+        if not server_to_user_channel_re.match(channel):
+            raise ValueError("Invalid server to user Channel: %s" % channel)
+        return channel
 
     if not channel_name_re.match(channel):
         raise ValueError("Invalid Channel: %s" % channel)
@@ -99,6 +109,13 @@ def validate_socket_id(socket_id):
         raise ValueError("Invalid socket ID: %s" % socket_id)
 
     return socket_id
+
+
+def validate_user_data(user_data: dict):
+    if user_data is None:
+        raise ValueError('user_data is null')
+    if user_data.get('id') is None:
+        raise ValueError('user_data has no id field')
 
 
 def join_attributes(attributes):
