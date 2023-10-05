@@ -14,8 +14,8 @@ if not VERSION:
 setup(
     name='pusher',
     version=VERSION,
-    description='A Python library to interract with the Pusher Channels API',
-    long_description='A Python library to interract with the Pusher Channels API',
+    description='A Python library to interact with the Pusher Channels API',
+    long_description='A Python library to interact with the Pusher Channels API',
     long_description_type='text/x-rst',
     url='https://github.com/pusher/pusher-http-python',
     author='Pusher',
