@@ -20,13 +20,11 @@ class AsyncIOBackend:
         """
         self.client = client
 
-
-    @asyncio.coroutine
-    def send_request(self, request):
+    async def send_request(self, request):
         session = response = None
         try:
             session = aiohttp.ClientSession()
-            response = yield from session.request(
+            response = await session.request(
                 request.method,
                 "%s%s" % (request.base_url, request.path),
                 params=request.query_params,
@@ -34,10 +32,10 @@ class AsyncIOBackend:
                 headers=request.headers,
                 timeout=self.client.timeout
             )
-            body = yield from response.text('utf-8')
+            body = await response.text('utf-8')
             return process_response(response.status, body)
         finally:
             if response is not None:
                 response.close()
             if session is not None:
-                yield from session.close()
+                await session.close()
