@@ -91,7 +91,7 @@ class PusherClient(Client):
             raise ValueError("event_name too long")
 
         data = data_to_string(data, self._json_encoder)
-        if sys.getsizeof(data) > 30720:
+        if sys.getsizeof(data) > 10240:
             raise ValueError("Too much data")
 
         channels = list(map(validate_channel, channels))
