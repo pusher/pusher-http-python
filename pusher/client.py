@@ -8,7 +8,7 @@ from __future__ import (
 
 import six
 
-from pusher.util import ensure_text, ensure_binary, app_id_re
+from pusher.util import ensure_text, ensure_binary
 from pusher.crypto import parse_master_key
 
 
@@ -35,9 +35,6 @@ class Client(object):
               backend = RequestsBackend
 
         self._app_id = ensure_text(app_id, "app_id")
-        if not app_id_re.match(self._app_id):
-              raise ValueError("Invalid app id")
-
         self._key = ensure_text(key, "key")
         self._secret = ensure_text(secret, "secret")
 
