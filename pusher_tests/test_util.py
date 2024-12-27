@@ -16,10 +16,9 @@ class TestUtil(unittest.TestCase):
                 pusher.util.validate_user_id(user_id)
 
     def test_validate_channel(self):
-        valid_channels = ["123", "xyz", "xyz123", "xyz_123", "xyz-123", "Channel@123", "channel_xyz", "channel-xyz",
-                          "channel,456", "channel;asd", "-abc_ABC@012.xpto,987;654"]
+        valid_channels = ["123", "xyz", "xyz123", "xyz_123", "xyz-123", "Channel@123", "channel_xyz", "channel-xyz", "channel,456", "channel;asd", "-abc_ABC@012.xpto,987;654"]
 
-        invalid_channels = ["#123", "x" * 201, "abc%&*"]
+        invalid_channels = ["#123", "x" * 201, "abc%&*", "#server-to-user1234", "#server-to-users"]
 
         for channel in valid_channels:
             self.assertEqual(channel, pusher.util.validate_channel(channel))
@@ -29,14 +28,14 @@ class TestUtil(unittest.TestCase):
                 pusher.util.validate_channel(invalid_channel)
 
     def test_validate_server_to_user_channel(self):
+        self.assertEqual("#server-to-user-123", pusher.util.validate_channel("#server-to-user-123"))
+        self.assertEqual("#server-to-user-user123", pusher.util.validate_channel("#server-to-user-user123"))
+        self.assertEqual("#server-to-user-ID-123", pusher.util.validate_channel("#server-to-user-ID-123"))
 
-        valid_server_to_user_channel = "#server-to-user-123"
-
-        invalid_server_to_user_channel = "#server-to-useR-123"
-
-        self.assertEqual(valid_server_to_user_channel, pusher.util.validate_channel(valid_server_to_user_channel))
         with self.assertRaises(ValueError):
-            pusher.util.validate_channel(invalid_server_to_user_channel)
+            pusher.util.validate_channel("#server-to-useR-123")
+            pusher.util.validate_channel("#server-to-user1234")
+            pusher.util.validate_channel("#server-to-users")
 
 
 if __name__ == '__main__':

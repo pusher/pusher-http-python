@@ -329,7 +329,9 @@ To authenticate users on Pusher Channels on your application, you can use the au
 |:-:|:-:|
 |response `Dict`   | A dictionary to send as a response to the authentication request.|
 
-For  more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
+For  more information see:
+* [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/)
+* [auth-signatures](https://pusher.com/docs/channels/library_auth_reference/auth-signatures/)
 
 ##### Example
 

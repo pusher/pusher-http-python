@@ -360,28 +360,6 @@ class TestPusherClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.pusher_client.terminate_user_connections("")
 
-    def test_send_to_user_success_case(self):
-        json_dumped = u'{"message": "hello worlds"}'
-        request_params = [u'#server-to-user-123'], u'some_event', {u'message': u'hello worlds'}
-
-        with mock.patch('json.dumps', return_value=json_dumped):
-            with mock.patch(
-                'pusher.pusher_client.PusherClient.trigger',
-                return_value=self.pusher_client.trigger.make_request(*request_params)
-            ) as mock_trigger:
-                request = self.pusher_client.send_to_user(
-                    u'123', u'some_event', {u'message': u'hello worlds'}
-                )
-
-                expected_params = {
-                    u'channels': [u'#server-to-user-123'],
-                    u'data': json_dumped,
-                    u'name': u'some_event'
-                }
-
-                self.assertEqual(request.params, expected_params)
-            mock_trigger.assert_called_with(*request_params)
-
 
 if __name__ == '__main__':
     unittest.main()

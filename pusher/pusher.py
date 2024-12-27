@@ -16,7 +16,7 @@ import time
 from pusher.util import (
     ensure_text,
     pusher_url_re,
-    doc_string)
+    doc_string, validate_user_id)
 
 from pusher.pusher_client import PusherClient
 from pusher.authentication_client import AuthenticationClient
@@ -146,9 +146,11 @@ class Pusher(object):
         return self._pusher_client.trigger(
             channels, event_name, data, socket_id)
 
-    @doc_string(PusherClient.send_to_user.__doc__)
+    @doc_string(PusherClient.trigger.__doc__)
     def send_to_user(self, user_id, event_name, data):
-        return self._pusher_client.send_to_user(user_id, event_name, data)
+        validate_user_id(user_id)
+        user_server_string = "#server-to-user-%s" % user_id
+        return self._pusher_client.trigger([user_server_string], event_name, data)
 
     @doc_string(PusherClient.trigger_batch.__doc__)
     def trigger_batch(self, batch=[], already_encoded=False):

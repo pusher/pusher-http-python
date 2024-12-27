@@ -114,13 +114,6 @@ class PusherClient(Client):
 
         return Request(self, POST, "/apps/%s/events" % self.app_id, params)
 
-    def send_to_user(self, user_id, event_name, data):
-        """Send an event to a specific user
-        """
-        validate_user_id(user_id)
-        user_server_string = "#server-to-user-%s" % user_id
-        return self.trigger([user_server_string], event_name, data)
-
     @request_method
     def trigger_batch(self, batch=[], already_encoded=False):
         """Trigger multiple events with a single HTTP call.
