@@ -130,7 +130,7 @@ class PusherClient(Client):
 
                 event['data'] = data_to_string(event['data'], self._json_encoder)
 
-                if sys.getsizeof(event['data']) > 10240:
+                if len(event['data'].encode('utf-8')) > 10240:
                     raise ValueError("Too much data")
 
                 if is_encrypted_channel(event['channel']):
