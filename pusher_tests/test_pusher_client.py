@@ -23,6 +23,7 @@ try:
 except ImportError:
     import mock
 
+
 class TestPusherClient(unittest.TestCase):
     def setUp(self):
         self.pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost')
@@ -68,7 +69,7 @@ class TestPusherClient(unittest.TestCase):
             self.assertEqual(request.params, expected_params)
 
         # FIXME: broken
-        #json_dumps_mock.assert_called_once_with({u'message': u'hello world'})
+        # json_dumps_mock.assert_called_once_with({u'message': u'hello world'})
 
     def test_trigger_with_channel_string_success_case(self):
         json_dumped = u'{"message": "hello worlds"}'
@@ -89,7 +90,6 @@ class TestPusherClient(unittest.TestCase):
         json_dumped = u'{"message": "something"}'
 
         with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
-
             request = self.pusher_client.trigger_batch.make_request([{
                         u'channel': u'my-chan',
                         u'name': u'my-event',
@@ -229,14 +229,13 @@ class TestPusherClient(unittest.TestCase):
         json_dumped = u'{"message": "something"}'
 
         pc = PusherClient(
-                app_id=u'4',
-                key=u'key',
-                secret=u'secret',
-                encryption_master_key_base64=u'OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk=',
-                ssl=True)
+            app_id=u'4',
+            key=u'key',
+            secret=u'secret',
+            encryption_master_key_base64=u'OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk=',
+            ssl=True)
 
         with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
-
             request = pc.trigger.make_request(u'donuts', u'some_event', {u'message': u'hello worlds'})
             expected_params = {
                 u'channels': [u'donuts'],
@@ -251,11 +250,11 @@ class TestPusherClient(unittest.TestCase):
         master_key = b'8tW5FQLniQ1sBQFwrw7t6TVEsJZd10yY'
         master_key_base64 = base64.b64encode(master_key)
         pc = PusherClient(
-                app_id=u'4',
-                key=u'key',
-                secret=u'secret',
-                encryption_master_key_base64=master_key_base64,
-                ssl=True)
+            app_id=u'4',
+            key=u'key',
+            secret=u'secret',
+            encryption_master_key_base64=master_key_base64,
+            ssl=True)
 
         # trigger a request to a private-encrypted channel and capture the request to assert equality
         chan = "private-encrypted-tst"
@@ -281,7 +280,7 @@ class TestPusherClient(unittest.TestCase):
         cipher_text_b64 = base64.b64encode(cipher_text)
 
         # format expected output
-        json_dumped = json.dumps({ "nonce" : nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8") })
+        json_dumped = json.dumps({"nonce": nonce_b64.decode("utf-8"), "ciphertext": cipher_text_b64.decode("utf-8")})
 
         expected_params = {
             u'channels': [u'private-encrypted-tst'],
@@ -290,28 +289,13 @@ class TestPusherClient(unittest.TestCase):
         }
         self.assertEqual(request.params, expected_params)
 
-    def test_trigger_with_channel_string_success_case(self):
-        json_dumped = u'{"message": "hello worlds"}'
-
-        with mock.patch('json.dumps', return_value=json_dumped) as json_dumps_mock:
-
-            request = self.pusher_client.trigger.make_request(u'some_channel', u'some_event', {u'message': u'hello worlds'})
-
-            expected_params = {
-                u'channels': [u'some_channel'],
-                u'data': json_dumped,
-                u'name': u'some_event'
-            }
-
-            self.assertEqual(request.params, expected_params)
-
     def test_trigger_disallow_non_string_or_list_channels(self):
         self.assertRaises(TypeError, lambda:
             self.pusher_client.trigger.make_request({u'channels': u'test_channel'}, u'some_event', {u'message': u'hello world'}))
 
     def test_trigger_disallow_invalid_channels(self):
         self.assertRaises(ValueError, lambda:
-            self.pusher_client.trigger.make_request([u'so/me_channel!'], u'some_event', {u'message': u'hello world'}))
+        self.pusher_client.trigger.make_request([u'so/me_channel!'], u'some_event', {u'message': u'hello world'}))
 
     def test_trigger_disallow_private_encrypted_channel_with_multiple_channels(self):
         pc = PusherClient(

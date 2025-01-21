@@ -20,8 +20,9 @@ from pusher.util import (
     ensure_binary,
     validate_channel,
     validate_socket_id,
+    validate_user_data,
     channel_name_re
-    )
+)
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
@@ -31,21 +32,21 @@ from pusher.crypto import *
 
 class AuthenticationClient(Client):
     def __init__(
-            self,
-            app_id,
-            key,
-            secret,
-            ssl=True,
-            host=None,
-            port=None,
-            timeout=5,
-            cluster=None,
-            encryption_master_key=None,
-            encryption_master_key_base64=None,
-            json_encoder=None,
-            json_decoder=None,
-            backend=None,
-            **backend_options):
+        self,
+        app_id,
+        key,
+        secret,
+        ssl=True,
+        host=None,
+        port=None,
+        timeout=5,
+        cluster=None,
+        encryption_master_key=None,
+        encryption_master_key_base64=None,
+        json_encoder=None,
+        json_decoder=None,
+        backend=None,
+        **backend_options):
 
         super(AuthenticationClient, self).__init__(
             app_id,
@@ -62,7 +63,6 @@ class AuthenticationClient(Client):
             json_decoder,
             backend,
             **backend_options)
-
 
     def authenticate(self, channel, socket_id, custom_data=None):
         """Used to generate delegated client subscription token.
@@ -89,7 +89,7 @@ class AuthenticationClient(Client):
         signature = sign(self.secret, string_to_sign)
 
         auth = "%s:%s" % (self.key, signature)
-        response_payload = { "auth": auth }
+        response_payload = {"auth": auth}
 
         if is_encrypted_channel(channel):
             shared_secret = generate_shared_secret(
@@ -102,6 +102,25 @@ class AuthenticationClient(Client):
 
         return response_payload
 
+    def authenticate_user(self, socket_id, user_data=None):
+        """Creates a user authentication signature.
+
+        :param socket_id: id of the socket that requires authorization
+        :param user_data: used to provide user info
+        """
+        validate_user_data(user_data)
+        socket_id = validate_socket_id(socket_id)
+
+        user_data_encoded = json.dumps(user_data, cls=self._json_encoder)
+
+        string_to_sign = "%s::user::%s" % (socket_id, user_data_encoded)
+
+        signature = sign(self.secret, string_to_sign)
+
+        auth_response = "%s:%s" % (self.key, signature)
+        response_payload = {"auth": auth_response, 'user_data': user_data_encoded}
+
+        return response_payload
 
     def validate_webhook(self, key, signature, body):
         """Used to validate incoming webhook messages. When used it guarantees
@@ -131,7 +150,8 @@ class AuthenticationClient(Client):
         if not time_ms:
             return None
 
-        if abs(time.time()*1000 - time_ms) > 300000:
+        if abs(time.time() * 1000 - time_ms) > 300000:
             return None
 
         return body_data
+

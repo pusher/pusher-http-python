@@ -9,7 +9,7 @@ In order to use this library, you need to have a free account on <http://pusher.
 
 ## Supported Platforms
 
-* Python - supports Python versions 2.7, 3.6 and above
+* Python - supports Python version 3.6 and above
 
 ## Features
 
@@ -23,11 +23,13 @@ In order to use this library, you need to have a free account on <http://pusher.
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
 - [Triggering Events](#triggering-events)
+  - [Send a message to a specific user](#send-a-message-to-a-specific-user)
 - [Querying Application State](#querying-application-state)
   - [Getting Information For All Channels](#getting-information-for-all-channels)
   - [Getting Information For A Specific Channel](#getting-information-for-a-specific-channel)
   - [Getting User Information For A Presence Channel](#getting-user-information-for-a-presence-channel)
 - [Authenticating Channel Subscription](#authenticating-channel-subscription)
+- [Authenticating User](#authenticating-user)
 - [Terminating User Connections](#terminating-user-connections)
 - [End-to-end Encryption](#end-to-end-encryption)
 - [Receiving Webhooks](#receiving-webhooks)
@@ -164,6 +166,30 @@ pusher_client.trigger_batch([
 ])
 ```
 
+### Send a message to a specific user
+
+#### `Pusher::send_to_user`
+
+|Argument   |Description   |
+|:-:|:-:|
+|user_id `String` |**Required** <br> The user id |
+|event `String`| **Required** <br> The name of the event you wish to trigger. |
+|data `JSONable data` | **Required** <br> The event's payload |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|buffered_events `Dict`   | A parsed response that includes the event_id for each event published to a channel. See example.   |
+
+`Pusher::trigger` will throw a `TypeError` if called with parameters of the wrong type; or a `ValueError` if called on more than 100 channels, with an event name longer than 200 characters, or with more than 10240 characters of data (post JSON serialisation).
+
+##### Example
+
+This call will send a message to the user with id `'123'`.
+
+```python
+pusher_client.send_to_user( u'123', u'some_event', {u'message': u'hello worlds'})
+```
+
 ## Querying Application State
 
 ### Getting Information For All Channels
@@ -288,6 +314,40 @@ auth = pusher_client.authenticate(
 # return `auth` as a response
 ```
 
+## Authenticating User
+
+#### `Pusher::authenticate_user`
+
+To authenticate users on Pusher Channels on your application, you can use the authenticate_user function:
+
+|Argument   |Description   |
+|:-:|:-:|
+|socket_id `String` | **Required**<br> The channel's socket_id, also sent to you in the POST request |
+|user_data `Dict` |**Required for presence channels** <br> This will be a dictionary containing the data you want associated with a user. An `"id"` key is *required*  |
+
+|Return Values   |Description   |
+|:-:|:-:|
+|response `Dict`   | A dictionary to send as a response to the authentication request.|
+
+For  more information see:
+* [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/)
+* [auth-signatures](https://pusher.com/docs/channels/library_auth_reference/auth-signatures/)
+
+##### Example
+
+###### User Authentication
+
+```python
+auth = pusher_client.authenticate_user(
+  socket_id=u"1234.12",
+  user_data = {
+    u'id': u'123',
+    u'name': u'John Smith'
+  }
+)
+# return `auth` as a response
+```
+
 ## Terminating user connections
 
 TIn order to terminate a user's connections, the user must have been authenticated. Check the [Server user authentication docs](http://pusher.com/docs/authenticating_users) for the information on how to create a user authentication endpoint.
@@ -406,9 +466,11 @@ Feature                                    | Supported
 -------------------------------------------| :-------:
 Trigger event on single channel            | *&#10004;*
 Trigger event on multiple channels         | *&#10004;*
+Trigger event to a specifc user            | *&#10004;*
 Excluding recipients from events           | *&#10004;*
 Authenticating private channels            | *&#10004;*
 Authenticating presence channels           | *&#10004;*
+Authenticating users                       | *&#10004;*
 Get the list of channels in an application | *&#10004;*
 Get the state of a single channel          | *&#10004;*
 Get a list of users in a presence channel  | *&#10004;*
