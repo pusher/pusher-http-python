@@ -9,21 +9,20 @@ from __future__ import (
 import hashlib
 import nacl
 import base64
-import binascii
 import warnings
 
 from pusher.util import (
-    ensure_text,
     ensure_binary,
-    data_to_string,
     is_base64,
-    is_encrypted_channel)
+    is_encrypted_channel as iec,
+    ENCRYPTED_PREFIX as EP)
 
 import nacl.secret
 import nacl.utils
 
-# The prefix any e2e channel must have
-ENCRYPTED_PREFIX = 'private-encrypted-'
+# for backwards compatibility
+ENCRYPTED_PREFIX = EP
+is_encrypted_channel = iec
 
 
 def parse_master_key(encryption_master_key, encryption_master_key_base64):
