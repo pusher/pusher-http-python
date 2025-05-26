@@ -47,9 +47,7 @@ def is_encrypted_channel(channel):
     """
     is_encrypted_channel() checks if the channel is encrypted by verifying the prefix
     """
-    if channel.startswith(ENCRYPTED_PREFIX):
-        return True
-    return False
+    return channel.startswith(ENCRYPTED_PREFIX)
 
 
 def ensure_text(obj, name):
