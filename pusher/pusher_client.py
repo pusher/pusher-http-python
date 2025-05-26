@@ -30,8 +30,7 @@ from pusher.util import (
     validate_event_name,
     validate_socket_id,
     validate_user_id,
-    join_attributes,
-    data_to_string)
+    join_attributes)
 
 from pusher.client import Client
 from pusher.http import GET, POST, Request, request_method
