@@ -16,7 +16,8 @@ from pusher.util import (
     ensure_text,
     ensure_binary,
     data_to_string,
-    is_base64)
+    is_base64,
+    is_encrypted_channel)
 
 import nacl.secret
 import nacl.utils
@@ -24,13 +25,6 @@ import nacl.utils
 # The prefix any e2e channel must have
 ENCRYPTED_PREFIX = 'private-encrypted-'
 
-def is_encrypted_channel(channel):
-    """
-    is_encrypted_channel() checks if the channel is encrypted by verifying the prefix
-    """
-    if channel.startswith(ENCRYPTED_PREFIX):
-        return True
-    return False
 
 def parse_master_key(encryption_master_key, encryption_master_key_base64):
     """

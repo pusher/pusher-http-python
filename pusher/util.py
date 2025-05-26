@@ -30,6 +30,14 @@ else:
     byte_type = 'a python3 bytes'
 
 
+def is_encrypted_channel(channel):
+    """
+    is_encrypted_channel() checks if the channel is encrypted by verifying the prefix
+    """
+    if channel.startswith(ENCRYPTED_PREFIX):
+        return True
+    return False
+
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):
         return obj
@@ -99,6 +107,39 @@ def validate_channel(channel):
         raise ValueError("Invalid Channel: %s" % channel)
 
     return channel
+
+def validate_channels(channels):
+    if len(channels) > 100:
+        raise ValueError("Too many channels")
+
+    channels = [validate_channel(ch) for ch in channels]
+
+    if len(channels) > 1:
+        for chan in channels:
+            if is_encrypted_channel(chan):
+                raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
+    return channels
+
+
+def validate_event_name(self, event_name):
+    """Ensure data is within limits
+
+    https://pusher.com/docs/channels/server_api/http-api/#publishing-events
+    """
+    if len(event_name) > 200:
+        raise ValueError("event_name too long")
+    return event_name
+
+
+def validate_data(self, data):
+    """Ensure data is within limits
+
+    https://pusher.com/docs/channels/server_api/http-api/#publishing-events
+    """
+
+    if len(data) > 10240:
+        raise ValueError("Too much data")
+    return data
 
 
 def validate_socket_id(socket_id):
