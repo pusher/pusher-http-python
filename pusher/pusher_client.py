@@ -23,7 +23,10 @@ import string
 
 from pusher.util import (
     ensure_text,
+    is_encrypted_channel,
     validate_channel,
+    validate_data,
+    validate_event_name,
     validate_socket_id,
     validate_user_id,
     join_attributes,
@@ -83,23 +86,9 @@ class PusherClient(Client):
             channels, (collections.Sized, collections.Iterable)):
             raise TypeError("Expected a single or a list of channels")
 
-        if len(channels) > 100:
-            raise ValueError("Too many channels")
-
-        event_name = ensure_text(event_name, "event_name")
-        if len(event_name) > 200:
-            raise ValueError("event_name too long")
-
-        data = data_to_string(data, self._json_encoder)
-        if sys.getsizeof(data) > 30720:
-            raise ValueError("Too much data")
-
-        channels = list(map(validate_channel, channels))
-
-        if len(channels) > 1:
-            for chan in channels:
-                if is_encrypted_channel(chan):
-                    raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
+        channels = validate_channels(channels)
+        event_name = validate_event_name(ensure_text(event_name, 'event_name'))
+        data = validate_data(data_to_string(data, self._json_encoder))
 
         if is_encrypted_channel(channels[0]):
             data = json.dumps(encrypt(channels[0], data, self._encryption_master_key), ensure_ascii=False)
@@ -124,14 +113,8 @@ class PusherClient(Client):
             for event in batch:
                 validate_channel(event['channel'])
 
-                event_name = ensure_text(event['name'], "event_name")
-                if len(event['name']) > 200:
-                    raise ValueError("event_name too long")
-
-                event['data'] = data_to_string(event['data'], self._json_encoder)
-
-                if sys.getsizeof(event['data']) > 10240:
-                    raise ValueError("Too much data")
+                event['name'] = validate_event_name(ensure_text(event['name'], 'event_name'))
+                event['data'] = validate_data(data_to_string(event['data'], self._json_encoder))
 
                 if is_encrypted_channel(event['channel']):
                     event['data'] = json.dumps(encrypt(event['channel'], event['data'], self._encryption_master_key), ensure_ascii=False)
