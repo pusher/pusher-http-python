@@ -25,6 +25,7 @@ from pusher.util import (
     ensure_text,
     is_encrypted_channel,
     validate_channel,
+    validate_channels,
     validate_data,
     validate_event_name,
     validate_socket_id,
