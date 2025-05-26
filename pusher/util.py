@@ -11,6 +11,9 @@ import re
 import six
 import sys
 import base64
+
+# The prefix any e2e channel must have
+ENCRYPTED_PREFIX = "private-encrypted-"
 SERVER_TO_USER_PREFIX = "#server-to-user-"
 
 channel_name_re = re.compile(r'\A[-a-zA-Z0-9_=@,.;]+\Z')
@@ -37,6 +40,7 @@ def is_encrypted_channel(channel):
     if channel.startswith(ENCRYPTED_PREFIX):
         return True
     return False
+
 
 def ensure_text(obj, name):
     if isinstance(obj, six.text_type):
