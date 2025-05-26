@@ -112,6 +112,7 @@ def validate_channel(channel):
 
     return channel
 
+
 def validate_channels(channels):
     if len(channels) > 100:
         raise ValueError("Too many channels")
@@ -125,22 +126,24 @@ def validate_channels(channels):
     return channels
 
 
-def validate_event_name(self, event_name):
+def validate_event_name(event_name):
     """Ensure data is within limits
 
     https://pusher.com/docs/channels/server_api/http-api/#publishing-events
     """
+    event_name = ensure_text(event_name, "event_name")
     if len(event_name) > 200:
         raise ValueError("event_name too long")
     return event_name
 
 
-def validate_data(self, data):
+def validate_data(data, json_encoder=None):
     """Ensure data is within limits
 
     https://pusher.com/docs/channels/server_api/http-api/#publishing-events
     """
 
+    data = data_to_string(data, json_encoder)
     if len(data) > 10240:
         raise ValueError("Too much data")
     return data

@@ -88,8 +88,8 @@ class PusherClient(Client):
             raise TypeError("Expected a single or a list of channels")
 
         channels = validate_channels(channels)
-        event_name = validate_event_name(ensure_text(event_name, 'event_name'))
-        data = validate_data(data_to_string(data, self._json_encoder))
+        event_name = validate_event_name(event_name)
+        data = validate_data(data, self._json_encoder)
 
         if is_encrypted_channel(channels[0]):
             data = json.dumps(encrypt(channels[0], data, self._encryption_master_key), ensure_ascii=False)
@@ -115,7 +115,7 @@ class PusherClient(Client):
                 validate_channel(event['channel'])
 
                 event['name'] = validate_event_name(ensure_text(event['name'], 'event_name'))
-                event['data'] = validate_data(data_to_string(event['data'], self._json_encoder))
+                event['data'] = validate_data(event['data'], self._json_encoder)
 
                 if is_encrypted_channel(event['channel']):
                     event['data'] = json.dumps(encrypt(event['channel'], event['data'], self._encryption_master_key), ensure_ascii=False)

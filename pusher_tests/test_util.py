@@ -37,6 +37,23 @@ class TestUtil(unittest.TestCase):
             pusher.util.validate_channel("#server-to-user1234")
             pusher.util.validate_channel("#server-to-users")
 
+    def test_validate_event_name(self):
+        valid_events = ["e" * 200, "123", "xyz", "xyz123", "xyz_123", "xyz-123", "Channel@123", "channel_xyz", "channel-xyz", "channel,456", "channel;asd", "-abc_ABC@012.xpto,987;654"]
+        invalid_events = ["e" * 201]
+        invalid_types = [123, None, {}]
+
+        for event in valid_events:
+            self.assertEqual(event, pusher.util.validate_event_name(event))
+
+        for invalid_event in invalid_events:
+            with self.assertRaises(ValueError):
+                pusher.util.validate_event_name(invalid_event)
+
+        for invalid_event in invalid_types:
+            with self.assertRaises(TypeError):
+                pusher.util.validate_event_name(invalid_event)
+
+
 
 if __name__ == '__main__':
     unittest.main()
