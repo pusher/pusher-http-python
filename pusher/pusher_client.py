@@ -8,11 +8,6 @@ from __future__ import (
 
 import sys
 
-# Abstract Base Classes were moved into collections.abc in Python 3.3
-if sys.version_info >= (3, 3):
-    import collections.abc as collections
-else:
-    import collections
 import hashlib
 import os
 import re
@@ -79,13 +74,6 @@ class PusherClient(Client):
 
         http://pusher.com/docs/rest_api#method-post-event
         """
-        if isinstance(channels, six.string_types):
-            channels = [channels]
-
-        if isinstance(channels, dict) or not isinstance(
-            channels, (collections.Sized, collections.Iterable)):
-            raise TypeError("Expected a single or a list of channels")
-
         channels = validate_channels(channels)
         event_name = validate_event_name(event_name)
         data = validate_data(data, self._json_encoder)

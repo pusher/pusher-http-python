@@ -53,6 +53,33 @@ class TestUtil(unittest.TestCase):
             with self.assertRaises(TypeError):
                 pusher.util.validate_event_name(invalid_event)
 
+    def test_validate_channels(self):
+        valid_channels = ["123", "xyz", "xyz123", "xyz_123", "xyz-123", "Channel@123", "channel_xyz", "channel-xyz", "channel,456", "channel;asd", "-abc_ABC@012.xpto,987;654"]
+        invalid_channels = ["#123", "x" * 201, "abc%&*", "#server-to-user1234", "#server-to-users"]
+        self.assertEqual(valid_channels, pusher.util.validate_channels(valid_channels))
+        for invalid_channel in invalid_channels:
+            with self.assertRaises(ValueError):
+               pusher.util.validate_channels(valid_channels + [invalid_channel])
+
+        with self.assertRaises(ValueError):
+            pusher.util.validate_channels(["123"] * 101)
+
+        invalid_types = [101, {"x": 1}]
+        for invalid_channel in invalid_types:
+            with self.assertRaises(TypeError):
+               pusher.util.validate_channels(valid_channels + [invalid_channel])
+
+        with self.assertRaises(ValueError):
+            pusher.util.validate_channels(["123", "private-encrypted-pippo"])
+
+
+    def test_validate_data(self):
+        data_too_long = "1" * 10241
+        with self.assertRaises(ValueError):
+            pusher.util.validate_data(data_too_long)
+
+        valid_data = "1" * 10240
+        self.assertEqual(valid_data, pusher.util.validate_data(valid_data))
 
 
 if __name__ == '__main__':

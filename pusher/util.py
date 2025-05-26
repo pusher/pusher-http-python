@@ -12,6 +12,13 @@ import six
 import sys
 import base64
 
+# Abstract Base Classes were moved into collections.abc in Python 3.3
+if sys.version_info >= (3, 3):
+    import collections.abc as collections
+else:
+    import collections
+
+
 # The prefix any e2e channel must have
 ENCRYPTED_PREFIX = "private-encrypted-"
 SERVER_TO_USER_PREFIX = "#server-to-user-"
@@ -114,15 +121,20 @@ def validate_channel(channel):
 
 
 def validate_channels(channels):
+    if isinstance(channels, six.string_types):
+        channels = [channels]
+
+    if isinstance(channels, dict) or not isinstance(
+        channels, (collections.Sized, collections.Iterable)):
+        raise TypeError("Expected a single or a list of channels")
+
     if len(channels) > 100:
         raise ValueError("Too many channels")
 
     channels = [validate_channel(ch) for ch in channels]
 
-    if len(channels) > 1:
-        for chan in channels:
-            if is_encrypted_channel(chan):
-                raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
+    if len(channels) > 1 and any(is_encrypted_channel(chan) for chan in channels):
+        raise ValueError("You cannot trigger to multiple channels when using encrypted channels")
     return channels
 
 
