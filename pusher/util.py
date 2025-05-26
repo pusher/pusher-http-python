@@ -127,10 +127,6 @@ def validate_channels(channels):
 
 
 def validate_event_name(event_name):
-    """Ensure data is within limits
-
-    https://pusher.com/docs/channels/server_api/http-api/#publishing-events
-    """
     event_name = ensure_text(event_name, "event_name")
     if len(event_name) > 200:
         raise ValueError("event_name too long")
@@ -138,7 +134,7 @@ def validate_event_name(event_name):
 
 
 def validate_data(data, json_encoder=None):
-    """Ensure data is within limits
+    """Ensure data is within 10kB limit
 
     https://pusher.com/docs/channels/server_api/http-api/#publishing-events
     """
