@@ -22,6 +22,9 @@ else:
 # The prefix any e2e channel must have
 ENCRYPTED_PREFIX = "private-encrypted-"
 SERVER_TO_USER_PREFIX = "#server-to-user-"
+MAX_PAYLOAD_SIZE_BYTES = 10240
+MAX_CHANNELS = 100
+MAX_CHANNEL_NAME_SIZE = 200
 
 channel_name_re = re.compile(r'\A[-a-zA-Z0-9_=@,.;]+\Z')
 server_to_user_channel_re = re.compile(rf'\A{SERVER_TO_USER_PREFIX}[-a-zA-Z0-9_=@,.;]+\Z')
@@ -96,7 +99,7 @@ def validate_user_id(user_id):
     if length == 0:
         raise ValueError("User id is empty")
 
-    if length > 200:
+    if length > MAX_CHANNEL_NAME_SIZE:
         raise ValueError("User id too long: '{}'".format(user_id))
 
     if not channel_name_re.match(user_id):
@@ -108,7 +111,7 @@ def validate_user_id(user_id):
 def validate_channel(channel):
     channel = ensure_text(channel, "channel")
 
-    if len(channel) > 200:
+    if len(channel) > MAX_CHANNEL_NAME_SIZE:
         raise ValueError("Channel too long: %s" % channel)
 
     if channel.startswith(SERVER_TO_USER_PREFIX):
@@ -128,7 +131,7 @@ def validate_channels(channels):
         channels, (collections.Sized, collections.Iterable)):
         raise TypeError("Expected a single or a list of channels")
 
-    if len(channels) > 100:
+    if len(channels) > MAX_CHANNELS:
         raise ValueError("Too many channels")
 
     channels = [validate_channel(ch) for ch in channels]
@@ -140,7 +143,7 @@ def validate_channels(channels):
 
 def validate_event_name(event_name):
     event_name = ensure_text(event_name, "event_name")
-    if len(event_name) > 200:
+    if len(event_name) > MAX_CHANNEL_NAME_SIZE:
         raise ValueError("event_name too long")
     return event_name
 
@@ -152,7 +155,7 @@ def validate_data(data, json_encoder=None):
     """
 
     data = data_to_string(data, json_encoder)
-    if len(data) > 10240:
+    if len(data) > MAX_PAYLOAD_SIZE_BYTES:
         raise ValueError("Too much data")
     return data
 
