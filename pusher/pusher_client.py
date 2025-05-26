@@ -101,7 +101,7 @@ class PusherClient(Client):
             for event in batch:
                 validate_channel(event['channel'])
 
-                event['name'] = validate_event_name(ensure_text(event['name'], 'event_name'))
+                event['name'] = validate_event_name(event['name'])
                 event['data'] = validate_data(event['data'], self._json_encoder)
 
                 if is_encrypted_channel(event['channel']):
