@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.4
+
+- [FIXED] Bump Python 3.10+ dependencies to resolve known vulnerabilities: cryptography (41.0.0 → 46.0.5), requests (2.27.1 → 2.32.4), urllib3 (1.26.9 → 2.6.3), aiohttp (3.8.1 → 3.13.3), pynacl (1.5.0 → 1.6.2)
+
 ## 3.3.2
 
 - [CHANGED] Utilities no longer escape non ascii characters. 
