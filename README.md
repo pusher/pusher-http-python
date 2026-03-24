@@ -48,13 +48,7 @@ normally `easy_install` or `pip`. For example:
 pip install pusher
 ```
 
-Users on Python 2.x and older versions of pip may get a warning, due to pip compiling the optional `pusher.aiohttp` module, which uses Python 3 syntax. However, as `pusher.aiohttp` is not used by default, this does not affect the library's functionality. See [our Github issue](https://github.com/pusher/pusher-http-python/issues/52), as well as [this issue from Gunicorn](https://github.com/benoitc/gunicorn/issues/788) for more details.
-
-On Linux, you must ensure that OpenSSL is installed, e.g. on Debian/Ubuntu:
-
-```sh
-$ sudo apt-get install build-essential libssl-dev libffi-dev
-```
+**Note: Python 2 is no longer supported.** Python 2 reached end-of-life on January 1, 2020. This library requires Python 3.6+.
 
 ## Getting started
 
