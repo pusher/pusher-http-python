@@ -26,8 +26,8 @@ setup(
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='pusher rest realtime websockets service',
     license='MIT',
@@ -40,9 +40,6 @@ setup(
         'six',
         'requests>=2.3.0',
         'urllib3',
-        'pyopenssl',
-        'ndg-httpsclient',
-        'pyasn1',
         'pynacl'
     ],
 
