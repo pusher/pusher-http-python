@@ -25,6 +25,21 @@ except ImportError:
 
 
 class TestPusherClient(unittest.TestCase):
+    def test_payload_limit_uses_utf8_bytes(self):
+        for batch, limit in ((False, 30720), (True, 10240)):
+            def make_request(data):
+                if batch:
+                    return self.pusher_client.trigger_batch.make_request([
+                        {'channel': 'test', 'name': 'event', 'data': data}])
+                return self.pusher_client.trigger.make_request('test', 'event', data)
+
+            with self.subTest(batch=batch, case='exact ASCII limit'):
+                request = make_request('a' * limit)
+                self.assertIsNotNone(request)
+            with self.subTest(batch=batch, case='oversized UTF-8'):
+                with self.assertRaises(ValueError):
+                    make_request('\u4f60' * (limit // 3 + 1))
+
     def setUp(self):
         self.pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost')
 
