@@ -121,6 +121,7 @@ class PusherClient(Client):
         http://pusher.com/docs/rest_api#method-post-batch-events
         """
         if not already_encoded:
+            batch = [event.copy() for event in batch]
             for event in batch:
                 validate_channel(event['channel'])
 

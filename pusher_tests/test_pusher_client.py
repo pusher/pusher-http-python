@@ -25,6 +25,30 @@ except ImportError:
 
 
 class TestPusherClient(unittest.TestCase):
+    def test_trigger_batch_preserves_event_data(self):
+        payload = {'message': 'hello'}
+        event = {'channel': 'public-test', 'name': 'test', 'data': payload}
+        self.pusher_client.trigger_batch.make_request([event])
+        self.assertIs(event['data'], payload)
+
+    def test_trigger_batch_can_repeat_encrypted_events(self):
+        channel = 'private-encrypted-test'
+        client = PusherClient(
+            app_id='4', key='key', secret='secret',
+            encryption_master_key_base64='OHRXNUZRTG5pUTFzQlFGd3J3N3Q2VFZFc0paZDEweVk=',
+        )
+        payload = {'message': 'hello'}
+        batch = [{'channel': channel, 'name': 'test', 'data': payload}]
+        box = nacl.secret.SecretBox(generate_shared_secret(
+            channel.encode('utf-8'), client._encryption_master_key))
+        for _ in range(2):
+            request = client.trigger_batch.make_request(batch)
+            encrypted = json.loads(request.params['batch'][0]['data'])
+            decoded = box.decrypt(base64.b64decode(encrypted['ciphertext']),
+                                  base64.b64decode(encrypted['nonce']))
+            self.assertEqual(json.loads(decoded), payload)
+        self.assertIs(batch[0]['data'], payload)
+
     def setUp(self):
         self.pusher_client = PusherClient(app_id=u'4', key=u'key', secret=u'secret', host=u'somehost')
 
