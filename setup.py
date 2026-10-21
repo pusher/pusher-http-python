@@ -38,6 +38,7 @@ setup(
 
     install_requires=[
         'six',
+        'certifi',
         'requests>=2.3.0',
         'urllib3',
         'pynacl'
@@ -48,10 +49,6 @@ setup(
     extras_require={
         'aiohttp': ['aiohttp>=0.20.0'],
         'tornado': ['tornado>=5.0.0']
-    },
-
-    package_data={
-        'pusher': ['cacert.pem']
     },
 
     test_suite='pusher_tests',
