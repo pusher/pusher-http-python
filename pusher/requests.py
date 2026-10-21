@@ -8,11 +8,11 @@ from __future__ import (
 
 from pusher.http import process_response
 
+import certifi
 import requests
-import os
 
 
-CERT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/cacert.pem'
+CERT_PATH = certifi.where()
 
 
 class RequestsBackend(object):
